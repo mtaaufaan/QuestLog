@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#f3f2f2;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}button{font:inherit}@keyframes qlFade{from{opacity:0}to{opacity:1}}@keyframes qlPop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}</style></helmet>
+<div data-screen-label="Popup Scrape Error" style="position:relative;width:100%;height:100%;min-height:844px;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:Lora,serif;color:#201f1d;overflow:hidden">
+  <div onClick="{{ close }}" style="position:absolute;inset:0;background:rgba(20,19,18,.45);animation:qlFade .2s ease-out"></div>
+  <div role="alertdialog" style="position:relative;width:100%;max-width:340px;background:#f3f2f2;border-radius:8px;padding:24px 22px 14px;box-shadow:0 12px 32px rgba(45,43,43,.26);animation:qlPop .22s ease-out">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="width:8px;height:8px;border-radius:4px;background:#9e3b2c"></span>
+      <span style="font:600 10.5px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:#9e3b2c">{{ kicker }}</span>
+    </div>
+    <h2 style="margin:0 0 6px;font:600 24px/1.15 'Cormorant Garamond',serif;text-wrap:pretty">{{ title }}</h2>
+    <p style="margin:0 0 14px;font:400 14px/1.5 Lora,serif;color:#605d5d;text-wrap:pretty">{{ body }}</p>
+    <div style="border-top:1px solid rgba(32,31,29,.16)">
+      <sc-for list="{{ failed }}" as="f" hint-placeholder-count="2">
+        <div style="display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;padding:10px 0;border-bottom:1px solid rgba(32,31,29,.16)">
+          <span style="font:600 12px/1.4 Lora,serif;color:#605d5d;font-variant-numeric:tabular-nums">Hal. {{ f.page }}</span>
+          <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+            <span style="font:400 11.5px/1.4 'JetBrains Mono',monospace;color:#444141;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.url }}</span>
+            <span style="font:400 12.5px/1.4 Lora,serif;color:#9e3b2c">{{ f.reason }}</span>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin:12px 0 0;font:400 12.5px/1.45 Lora,serif;color:#7d7979">Hanya halaman yang gagal yang diunduh ulang.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:16px">
+      <button onClick="{{ del }}" style="height:44px;padding:0 12px;border:none;background:transparent;color:#9e3b2c;font:600 14px Lora,serif;border-radius:4px;cursor:pointer" style-hover="background:#f6e6e2">Hapus</button>
+      <div style="display:flex;gap:6px">
+        <button onClick="{{ close }}" style="height:44px;padding:0 14px;border:none;background:transparent;color:#605d5d;font:600 14px Lora,serif;border-radius:4px;cursor:pointer" style-hover="background:#eae9e9">Tutup</button>
+        <button onClick="{{ retry }}" style="height:44px;padding:0 16px;border:1px solid #b68235;background:transparent;color:#7d5411;font:600 14px Lora,serif;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:8px" style-hover="background:#fff3e4" style-active="background:#ffe3bf">
+          <svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+          Coba Lagi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;article&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Article&quot;},&quot;onRetry&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onDelete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const a = p.article || { title: 'Master & Skill List', pages: [
+      { url: 'https://gamefaqs.gamespot.com/ps/bof3/faqs/master-list', status: 'FAILED', reason: 'HTTP 403 — butuh login' },
+      { url: 'https://gamefaqs.gamespot.com/ps/bof3/faqs/skill-list', status: 'FAILED', reason: 'HTTP 404 — halaman tidak ditemukan' }] };
+    const pages = a.pages || [];
+    const failed = pages.map((x, i) => ({ ...x, page: i + 1 })).filter(x => x.status === 'FAILED');
+    const all = failed.length === pages.length;
+    return {
+      kicker: all ? 'Gagal diunduh' : 'Belum lengkap',
+      title: a.title,
+      body: all ? 'Semua halaman gagal diunduh. Periksa koneksi atau URL sumber, lalu coba lagi.' : failed.length + ' dari ' + pages.length + ' halaman gagal dimuat. Konten lain tetap bisa dibaca.',
+      failed,
+      retry: () => p.onRetry && p.onRetry(),
+      del: () => p.onDelete && p.onDelete(),
+      close: () => p.onClose && p.onClose()
+    };
+  }
+}
+</script>
+</body>
+</html>

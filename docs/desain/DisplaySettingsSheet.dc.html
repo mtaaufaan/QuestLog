@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#f3f2f2;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}button{font:inherit}@keyframes qlFade{from{opacity:0}to{opacity:1}}@keyframes qlSheet{from{transform:translateY(100%)}to{transform:none}}</style></helmet>
+<div data-screen-label="BS1 Display Settings" style="position:relative;width:100%;height:100%;min-height:844px;display:flex;flex-direction:column;justify-content:flex-end;font-family:Lora,serif;overflow:hidden">
+  <div onClick="{{ close }}" style="position:absolute;inset:0;background:rgba(20,19,18,.45);animation:qlFade .2s ease-out"></div>
+  <div style="position:relative;background:{{ bg }};color:{{ fg }};border-radius:12px 12px 0 0;padding:10px 24px 30px;box-shadow:0 -12px 32px rgba(45,43,43,.22);animation:qlSheet .28s cubic-bezier(.2,.8,.2,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:{{ rule }};margin:0 auto 20px"></div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px">
+      <h2 style="margin:0;font:600 26px/1.1 'Cormorant Garamond',serif;letter-spacing:-.01em">Tampilan</h2>
+      <span style="font:600 10.5px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:{{ muted }}">Berlaku di semua artikel</span>
+    </div>
+    <div style="border-top:1px solid {{ rule }};padding:18px 0;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font:600 15px/1.3 Lora,serif">Ukuran Teks</span>
+          <span style="font:400 13px/1.3 Lora,serif;color:{{ muted }};font-variant-numeric:tabular-nums">{{ fontSizeLabel }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button onClick="{{ dec }}" disabled="{{ decDisabled }}" aria-label="Perkecil teks" style="width:44px;height:44px;border:1px solid {{ accent }};background:transparent;color:{{ accent }};border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font:600 20px/1 Lora,serif" style-disabled="opacity:.4;cursor:default">−</button>
+          <button onClick="{{ inc }}" disabled="{{ incDisabled }}" aria-label="Perbesar teks" style="width:44px;height:44px;border:1px solid {{ accent }};background:transparent;color:{{ accent }};border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font:600 20px/1 Lora,serif" style-disabled="opacity:.4;cursor:default">＋</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:flex-end">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="7">
+          <div style="flex:1;height:3px;border-radius:1px;background:{{ s.color }}"></div>
+        </sc-for>
+      </div>
+      <p style="margin:4px 0 0;font-size:{{ previewSize }};line-height:1.6;text-align:justify;hyphens:auto">Masuki gua di utara desa dan ambil jalur kiri untuk menemukan peti berisi Mini Medal.</p>
+    </div>
+    <div style="border-top:1px solid {{ rule }};padding:18px 0 4px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onClick="{{ toggleDark }}">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font:600 15px/1.3 Lora,serif">Mode Gelap</span>
+        <span style="font:400 13px/1.3 Lora,serif;color:{{ muted }}">{{ darkLabel }}</span>
+      </div>
+      <div role="switch" aria-checked="{{ dark }}" style="position:relative;width:48px;height:28px;border-radius:14px;border:1px solid {{ trackBorder }};background:{{ trackBg }};transition:background .2s">
+        <div style="position:absolute;top:3px;left:{{ knobLeft }};width:20px;height:20px;border-radius:10px;background:{{ knobBg }};transition:left .2s"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;fontSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:16,&quot;min&quot;:12,&quot;max&quot;:24,&quot;step&quot;:2,&quot;tsType&quot;:&quot;number&quot;},&quot;darkMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onFontSizeChange&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(n:number)=&gt;void&quot;},&quot;onDarkModeToggle&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(v:boolean)=&gt;void&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { fontSize: 16, dark: false };
+  renderVals() {
+    const p = this.props;
+    const fs = p.fontSize ?? this.state.fontSize;
+    const dark = p.darkMode ?? this.state.dark;
+    const setFs = n => { n = Math.max(12, Math.min(24, n)); p.onFontSizeChange ? p.onFontSizeChange(n) : this.setState({ fontSize: n }); };
+    const accent = dark ? '#e1ad66' : '#7d5411';
+    return {
+      bg: dark ? '#22211f' : '#f3f2f2', fg: dark ? '#e8e3dc' : '#201f1d', muted: dark ? '#a8a29a' : '#605d5d',
+      rule: dark ? 'rgba(255,255,255,.14)' : 'rgba(32,31,29,.16)', accent,
+      fontSizeLabel: fs + ' sp', previewSize: fs + 'px',
+      dec: () => setFs(fs - 2), inc: () => setFs(fs + 2), decDisabled: fs <= 12, incDisabled: fs >= 24,
+      steps: [12, 14, 16, 18, 20, 22, 24].map(s => ({ color: s <= fs ? (dark ? '#e1ad66' : '#b68235') : (dark ? 'rgba(255,255,255,.14)' : '#d7d3d3') })),
+      dark, darkLabel: dark ? 'Aktif' : 'Nonaktif',
+      toggleDark: () => p.onDarkModeToggle ? p.onDarkModeToggle(!dark) : this.setState({ dark: !dark }),
+      knobLeft: dark ? '23px' : '3px', trackBg: dark ? '#b68235' : 'transparent', trackBorder: dark ? '#b68235' : '#9b9797', knobBg: dark ? '#22211f' : '#9b9797',
+      close: () => p.onClose && p.onClose()
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#e6e3de;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}button,input{font:inherit}*{scrollbar-width:none}*::-webkit-scrollbar{display:none}</style></helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:40px;padding:40px 24px;box-sizing:border-box">
+  <sc-if value="{{ showPanel }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:260px;display:flex;flex-direction:column;gap:22px;padding-top:12px">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font:600 10.5px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:#7d5411">Prototype · MVP</span>
+        <h1 style="margin:0;font:500 34px/1.05 'Cormorant Garamond',serif;letter-spacing:-.015em">QuestLog</h1>
+        <p style="margin:4px 0 0;font:400 13px/1.5 Lora,serif;color:#605d5d;text-wrap:pretty">Gabungan semua layar &amp; popup. Setiap bagian diimpor dari file terpisah — ubah file kecil, aplikasi ini ikut berubah.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;border-top:1px solid #201f1d">
+        <span style="padding:10px 0 6px;font:600 10.5px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:#605d5d">Layar</span>
+        <sc-for list="{{ screenLinks }}" as="l" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(32,31,29,.14)">
+            <button onClick="{{ l.go }}" style="flex:1;display:flex;gap:10px;align-items:baseline;padding:9px 0;border:none;background:transparent;color:#201f1d;cursor:pointer;text-align:left" style-hover="color:#7d5411">
+              <span style="width:28px;font:600 11px Lora,serif;color:{{ l.idColor }};font-variant-numeric:tabular-nums">{{ l.id }}</span>
+              <span style="font:400 14px Lora,serif">{{ l.name }}</span>
+            </button>
+            <a href="{{ l.file }}" style="font:400 11px 'JetBrains Mono',monospace;color:#7d7979;text-decoration:none" style-hover="color:#7d5411">buka ↗</a>
+          </div>
+        </sc-for>
+        <span style="padding:16px 0 6px;font:600 10.5px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:#605d5d">Popup</span>
+        <sc-for list="{{ popupLinks }}" as="l" hint-placeholder-count="8">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(32,31,29,.14)">
+            <button onClick="{{ l.go }}" style="flex:1;padding:9px 0;border:none;background:transparent;color:#201f1d;cursor:pointer;text-align:left;font:400 14px Lora,serif" style-hover="color:#7d5411">{{ l.name }}</button>
+            <a href="{{ l.file }}" style="font:400 11px 'JetBrains Mono',monospace;color:#7d7979;text-decoration:none" style-hover="color:#7d5411">buka ↗</a>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin:0;font:italic 400 12.5px/1.5 Lora,serif;color:#7d7979;text-wrap:pretty">Coba: tahan lama artikel untuk aksi · URL berisi “404” akan gagal di-scrape · tier gratis sudah 2/2 game.</p>
+    </aside>
+  </sc-if>
+
+  <div style="flex:none;width:390px;height:844px;padding:10px;background:#1b1a19;border-radius:48px;box-shadow:0 30px 60px rgba(45,43,43,.28)">
+    <div style="position:relative;width:390px;height:844px;margin:-0px;border-radius:38px;overflow:hidden;background:#f3f2f2;transform:translateZ(0)">
+      <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+        <dc-import name="ArticleList" hint-size="100%,100%" style="position:absolute;inset:0" games="{{ games }}" articles="{{ articles }}" is-premium="{{ isPremium }}" query="{{ query }}" filter-game-id="{{ filterGameId }}" snackbar="{{ snackbar }}" on-query="{{ onQuery }}" on-open-filter="{{ openFilter }}" on-article-tap="{{ onArticleTap }}" on-resume="{{ onResume }}" on-open-actions="{{ onOpenActions }}" on-add="{{ openMode }}" on-open-unlock="{{ openUnlock }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ isAdd }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="AddArticle" hint-size="100%,100%" style="position:absolute;inset:0" mode="{{ addMode }}" target-article-id="{{ addTargetId }}" games="{{ games }}" articles="{{ articles }}" is-premium="{{ isPremium }}" on-back="{{ goList }}" on-save="{{ onSave }}" on-open-unlock="{{ openUnlock }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ isReader }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="Reader" hint-size="100%,100%" style="position:absolute;inset:0" article="{{ readerArticle }}" view-state="{{ readerState }}" font-size="{{ fontSize }}" dark-mode="{{ darkMode }}" resume-node-id="{{ resumeNodeId }}" resume-from="{{ resumeFrom }}" snackbar="{{ snackbar }}" on-back="{{ goList }}" on-leave="{{ onLeave }}" on-open-settings="{{ openDisplay }}" on-set-checkpoint="{{ onSetCheckpoint }}" on-mode-change="{{ onModeChange }}" on-retry-failed="{{ onRetryFailedPages }}" on-retry-load="{{ goList }}"></dc-import>
+      </sc-if>
+
+      <sc-if value="{{ hasNotif }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="ScrapeNotification" hint-size="100%,130px" style="position:absolute;top:0;left:0;right:0;z-index:20" kind="{{ notif.kind }}" article-title="{{ notif.title }}" current="{{ notif.current }}" total="{{ notif.total }}" failed-count="{{ notif.failed }}" on-tap="{{ onNotifTap }}"></dc-import>
+      </sc-if>
+
+      <sc-if value="{{ pMode }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="ScrapeModeSheet" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" has-articles="{{ hasReady }}" on-pick="{{ onPickMode }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ pActions }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="ArticleActionsSheet" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" article="{{ popupArticle }}" on-action="{{ onAction }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ pDelete }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="DeleteArticleDialog" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" article-title="{{ popupArticle.title }}" on-confirm="{{ onConfirmDelete }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ pError }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="ScrapeErrorDialog" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" article="{{ popupArticle }}" on-retry="{{ onRetryArticle }}" on-delete="{{ askDelete }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ pUnlock }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="UnlockSheet" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" games-used="{{ gamesUsed }}" on-purchase="{{ onPurchase }}" on-restore="{{ onPurchase }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ pFilter }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="GameFilterSheet" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" games="{{ filterGames }}" selected-id="{{ filterGameId }}" on-select="{{ onSelectFilter }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+      <sc-if value="{{ pDisplay }}" hint-placeholder-val="{{ false }}">
+        <dc-import name="DisplaySettingsSheet" hint-size="100%,100%" style="position:absolute;inset:0;z-index:30" font-size="{{ fontSize }}" dark-mode="{{ darkMode }}" on-font-size-change="{{ onFontSize }}" on-dark-mode-toggle="{{ onDark }}" on-close="{{ closePopup }}"></dc-import>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;isPremium&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Skenario&quot;},&quot;readerState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;success&quot;,&quot;loading&quot;,&quot;not_found&quot;,&quot;empty&quot;,&quot;db_error&quot;],&quot;default&quot;:&quot;success&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Skenario&quot;},&quot;showPanel&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tampilan&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const pg = (base, n, st) => Array.from({ length: n }, (_, i) => ({ url: base + (i + 1), status: typeof st === 'function' ? st(i) : st }));
+    this.state = {
+      games: [{ id: 1, name: 'Dragon Quest VII' }, { id: 2, name: 'Breath Of Fire III' }],
+      articles: [
+        { id: 3, gameId: 1, title: 'Panduan Class & Monster Heart', status: 'SCRAPING', pages: pg('https://dragonquest.fandom.com/wiki/DQVII_Vocations?part=', 6, i => i < 2 ? 'DONE' : 'PENDING') },
+        { id: 1, gameId: 1, title: 'Walkthrough Lengkap — Disc 1', status: 'READY', pages: pg('https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=', 5, 'DONE'), checkpointNodeId: 302, lastNodeId: 204, lastRead: 'dibaca 2 jam lalu' },
+        { id: 2, gameId: 1, title: 'Lokasi Semua Mini Medal', status: 'READY', pages: pg('https://dragonquest.fandom.com/wiki/Mini_Medal_(DQVII)?section=', 4, i => i === 2 ? 'FAILED' : 'DONE').map((x, i) => i === 2 ? { ...x, reason: 'Timeout — server tidak merespons' } : x), lastRead: 'dibaca kemarin' },
+        { id: 4, gameId: 2, title: 'Walkthrough Utama', status: 'READY', pages: pg('https://gamefaqs.gamespot.com/ps/bof3/faqs/main?page=', 5, 'DONE'), checkpointNodeId: 103, lastRead: 'dibaca 3 hari lalu' },
+        { id: 5, gameId: 2, title: 'Master & Skill List', status: 'ERROR', pages: [{ url: 'https://gamefaqs.gamespot.com/ps/bof3/faqs/master-list', status: 'FAILED', reason: 'HTTP 403 — butuh login' }, { url: 'https://gamefaqs.gamespot.com/ps/bof3/faqs/skill-list', status: 'FAILED', reason: 'HTTP 404 — halaman tidak ditemukan' }] }
+      ],
+      route: { name: 'list' }, popup: null, popupId: null,
+      query: '', filterGameId: null, premium: null, fontSize: 16, dark: false,
+      snackbar: null, notif: null, nextId: 10
+    };
+  }
+  componentDidMount() { this.tick = setInterval(() => this.step(), 1300); }
+  componentWillUnmount() { clearInterval(this.tick); clearTimeout(this.st); clearTimeout(this.nt); }
+  toast(t) { clearTimeout(this.st); this.setState({ snackbar: t }); this.st = setTimeout(() => this.setState({ snackbar: null }), 2600); }
+  notify(n, ms) { clearTimeout(this.nt); this.setState({ notif: n }); if (ms) this.nt = setTimeout(() => this.setState({ notif: null }), ms); }
+  step() {
+    const arts = this.state.articles;
+    const idx = arts.findIndex(a => a.status === 'SCRAPING');
+    if (idx < 0) return;
+    const a = arts[idx];
+    const pages = a.pages.slice();
+    const pi = pages.findIndex(x => x.status === 'PENDING');
+    if (pi >= 0) {
+      const bad = !a.retry && /404|fail|login/i.test(pages[pi].url);
+      pages[pi] = { ...pages[pi], status: bad ? 'FAILED' : 'DONE', reason: bad ? 'HTTP 404 — halaman tidak ditemukan' : undefined };
+    }
+    const pending = pages.filter(x => x.status === 'PENDING').length;
+    const failed = pages.filter(x => x.status === 'FAILED').length;
+    let na = { ...a, pages };
+    if (!pending) na = { ...na, status: failed === pages.length ? 'ERROR' : 'READY', retry: false };
+    const next = arts.slice(); next[idx] = na;
+    this.setState({ articles: next });
+    const handled = pages.length - pending;
+    this.seen = this.seen || {};
+    if (pending) { if (!this.seen[a.id]) { this.seen[a.id] = 1; this.notify({ kind: 'progress', title: a.title, current: handled, total: pages.length, failed, id: a.id }, 2600); } else if (S_notifId(this) === a.id) this.setState({ notif: { ...this.state.notif, current: handled } }); }
+    function S_notifId(c) { return c.state.notif && c.state.notif.kind === 'progress' ? c.state.notif.id : null; }
+    if (!pending) { delete this.seen[a.id]; this.notify({ kind: failed === pages.length ? 'error' : failed ? 'partial' : 'done', title: a.title, current: handled, total: pages.length, failed, id: a.id }, 3800); }
+  }
+  upd(id, fn) { this.setState(s => ({ articles: s.articles.map(a => a.id === id ? fn(a) : a) })); }
+  renderVals() {
+    const S = this.state, p = this.props;
+    const isPremium = S.premium ?? (p.isPremium ?? false);
+    const gname = id => (S.games.find(g => g.id === id) || {}).name || '';
+    const withName = a => a && { ...a, gameName: gname(a.gameId) };
+    const find = id => S.articles.find(a => a.id === id);
+    const r = S.route;
+    const readerArticle = r.name === 'reader' ? withName(find(r.articleId)) : null;
+    const pop = k => S.popup === k;
+    const openPopup = (k, id) => this.setState({ popup: k, popupId: id ?? S.popupId });
+    const closePopup = () => this.setState({ popup: null });
+    const openReader = (a, from) => this.setState({ route: { name: 'reader', articleId: a.id, resumeNodeId: from === 'checkpoint' ? a.checkpointNodeId : a.lastNodeId, resumeFrom: from }, popup: null });
+    const goList = () => this.setState({ route: { name: 'list' }, popup: null });
+    const firstBy = st => S.articles.find(a => a.status === st) || S.articles[0];
+    const screenLinks = [
+      { id: 'S1', name: 'Article List', file: 'ArticleList.dc.html', go: goList },
+      { id: 'S2', name: 'Add Article', file: 'AddArticle.dc.html', go: () => this.setState({ route: { name: 'add', mode: 'new' }, popup: null }) },
+      { id: 'S3', name: 'Reader', file: 'Reader.dc.html', go: () => { const a = firstBy('READY'); a && openReader(a, 'last'); } }
+    ].map(l => ({ ...l, idColor: (l.id === 'S1' && r.name === 'list') || (l.id === 'S2' && r.name === 'add') || (l.id === 'S3' && r.name === 'reader') ? '#b68235' : '#9b9797' }));
+    const popupLinks = [
+      { name: 'Display Settings (BS1)', file: 'DisplaySettingsSheet.dc.html', go: () => { const a = firstBy('READY'); if (r.name !== 'reader' && a) openReader(a, 'last'); setTimeout(() => openPopup('display'), 30); } },
+      { name: 'Pilih Mode Scraping', file: 'ScrapeModeSheet.dc.html', go: () => { goList(); setTimeout(() => openPopup('mode'), 30); } },
+      { name: 'Aksi Artikel', file: 'ArticleActionsSheet.dc.html', go: () => { goList(); setTimeout(() => openPopup('actions', firstBy('READY').id), 30); } },
+      { name: 'Hapus Artikel', file: 'DeleteArticleDialog.dc.html', go: () => { goList(); setTimeout(() => openPopup('delete', S.articles[0] && S.articles[0].id), 30); } },
+      { name: 'Error / Retry Scraping', file: 'ScrapeErrorDialog.dc.html', go: () => { goList(); const a = S.articles.find(a => a.pages.some(x => x.status === 'FAILED')); a && setTimeout(() => openPopup('error', a.id), 30); } },
+      { name: 'Unlock Unlimited', file: 'UnlockSheet.dc.html', go: () => openPopup('unlock') },
+      { name: 'Filter Game', file: 'GameFilterSheet.dc.html', go: () => { goList(); setTimeout(() => openPopup('filter'), 30); } },
+      { name: 'Notifikasi Scraping', file: 'ScrapeNotification.dc.html', go: () => this.notify({ kind: 'progress', title: 'Panduan Class & Monster Heart', current: 3, total: 6, failed: 0 }, 3500) }
+    ];
+    return {
+      showPanel: p.showPanel ?? true, screenLinks, popupLinks,
+      games: S.games, articles: S.articles.map(withName), isPremium, gamesUsed: S.games.length,
+      query: S.query, filterGameId: S.filterGameId, snackbar: S.snackbar,
+      isList: r.name === 'list', isAdd: r.name === 'add', isReader: r.name === 'reader',
+      addMode: r.mode || 'new', addTargetId: r.targetId ?? null,
+      readerArticle, readerState: p.readerState ?? 'success', resumeNodeId: r.resumeNodeId, resumeFrom: r.resumeFrom,
+      fontSize: S.fontSize, darkMode: S.dark,
+      hasNotif: !!S.notif, notif: S.notif || {},
+      onNotifTap: () => { const n = S.notif; this.setState({ notif: null }); const a = n && find(n.id); if (a && a.status === 'READY') openReader(a, 'last'); else if (a && a.status === 'ERROR') { goList(); openPopup('error', a.id); } },
+      pMode: pop('mode'), pActions: pop('actions'), pDelete: pop('delete'), pError: pop('error'), pUnlock: pop('unlock'), pFilter: pop('filter'), pDisplay: pop('display'),
+      popupArticle: withName(find(S.popupId)) || { title: '', pages: [] },
+      hasReady: S.articles.some(a => a.status === 'READY'),
+      filterGames: S.games.map(g => ({ id: g.id, name: g.name, count: S.articles.filter(a => a.gameId === g.id).length })),
+      closePopup, goList,
+      onQuery: v => this.setState({ query: v }),
+      openFilter: () => openPopup('filter'),
+      onSelectFilter: id => this.setState({ filterGameId: id, popup: null }),
+      openMode: () => openPopup('mode'),
+      openUnlock: () => openPopup('unlock'),
+      openDisplay: () => openPopup('display'),
+      onArticleTap: a => {
+        if (a.status === 'READY') openReader(a, 'last');
+        else if (a.status === 'ERROR') openPopup('error', a.id);
+        else this.toast('Artikel masih diproses, harap tunggu');
+      },
+      onResume: a => openReader(a, 'checkpoint'),
+      onOpenActions: a => openPopup('actions', a.id),
+      onAction: k => {
+        const a = find(S.popupId); if (!a) return closePopup();
+        if (k === 'resume') openReader(a, 'checkpoint');
+        else if (k === 'open') openReader(a, 'last');
+        else if (k === 'append') this.setState({ route: { name: 'add', mode: 'append', targetId: a.id }, popup: null });
+        else if (k === 'delete') openPopup('delete', a.id);
+      },
+      askDelete: () => openPopup('delete'),
+      onConfirmDelete: () => { this.setState(s => ({ articles: s.articles.filter(a => a.id !== s.popupId), popup: null })); this.toast('Artikel dihapus'); },
+      onRetryArticle: () => { this.upd(S.popupId, a => ({ ...a, status: 'SCRAPING', retry: true, pages: a.pages.map(x => x.status === 'FAILED' ? { ...x, status: 'PENDING', reason: undefined } : x) })); closePopup(); this.toast('Mengulang halaman yang gagal…'); },
+      onPickMode: m => this.setState({ route: { name: 'add', mode: m }, popup: null }),
+      onSave: pl => {
+        let games = S.games, gameId = pl.gameId, nid = S.nextId;
+        if (pl.mode === 'new' && pl.newGameName) { gameId = nid++; games = [...games, { id: gameId, name: pl.newGameName }]; }
+        const newPages = pl.urls.map(u => ({ url: u, status: 'PENDING' }));
+        if (pl.mode === 'new') {
+          const art = { id: nid++, gameId, title: pl.title, status: 'SCRAPING', pages: newPages };
+          this.setState({ games, articles: [art, ...S.articles], nextId: nid, route: { name: 'list' }, filterGameId: null, query: '' });
+          this.toast('Disimpan. Mengunduh ' + newPages.length + ' halaman di latar belakang…');
+        } else {
+          this.upd(pl.targetArticleId, a => ({ ...a, status: 'SCRAPING', pages: [...a.pages, ...newPages] }));
+          this.setState({ route: { name: 'list' } });
+          this.toast(newPages.length + ' halaman ditambahkan ke akhir artikel');
+        }
+      },
+      onLeave: id => r.articleId && this.upd(r.articleId, a => ({ ...a, lastNodeId: id, lastRead: 'dibaca baru saja' })),
+      onSetCheckpoint: id => this.upd(r.articleId, a => ({ ...a, checkpointNodeId: id })),
+      onModeChange: m => this.upd(r.articleId, a => ({ ...a, readMode: m })),
+      onRetryFailedPages: () => { this.upd(r.articleId, a => ({ ...a, pages: a.pages.map(x => x.status === 'FAILED' ? { ...x, status: 'DONE', reason: undefined } : x) })); this.toast('Halaman yang gagal berhasil dimuat'); },
+      onPurchase: () => this.setState({ premium: true }),
+      onFontSize: n => this.setState({ fontSize: n }),
+      onDark: v => this.setState({ dark: v })
+    };
+  }
+}
+</script>
+</body>
+</html>

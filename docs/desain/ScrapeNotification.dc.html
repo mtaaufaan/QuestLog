@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#f3f2f2;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}@keyframes qlDrop{from{transform:translateY(-130%)}to{transform:none}}</style></helmet>
+<div data-screen-label="Popup Scrape Notification" style="width:100%;padding:34px 10px 0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;pointer-events:none">
+  <div onClick="{{ tap }}" style="pointer-events:auto;background:#2d2b2b;color:#f3f2f2;border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 12px 32px rgba(45,43,43,.3);animation:qlDrop .35s cubic-bezier(.2,.8,.2,1);cursor:pointer">
+    <div style="flex:none;width:32px;height:32px;border-radius:16px;border:1px solid #e1ad66;display:flex;align-items:center;justify-content:center;font:600 15px/1 'Cormorant Garamond',serif;color:#e1ad66">Q</div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;justify-content:space-between;gap:8px;font:500 11.5px/1.2 system-ui,sans-serif;color:#bab6b6"><span>QuestLog</span><span>sekarang</span></div>
+      <span style="font:600 14px/1.3 system-ui,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ title }}</span>
+      <span style="font:400 13px/1.3 system-ui,sans-serif;color:#d7d3d3;font-variant-numeric:tabular-nums">{{ text }}</span>
+      <sc-if value="{{ showBar }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:6px;height:3px;border-radius:2px;background:rgba(255,255,255,.15);overflow:hidden"><div style="height:100%;width:{{ pct }};background:#e1ad66;transition:width .4s"></div></div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:180},&quot;kind&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;progress&quot;,&quot;done&quot;,&quot;partial&quot;,&quot;error&quot;],&quot;default&quot;:&quot;progress&quot;,&quot;tsType&quot;:&quot;'progress'|'done'|'partial'|'error'&quot;},&quot;articleTitle&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Panduan Class &amp; Monster Heart&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;current&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;tsType&quot;:&quot;number&quot;},&quot;total&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:6,&quot;tsType&quot;:&quot;number&quot;},&quot;failedCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;},&quot;onTap&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const kind = p.kind ?? 'progress';
+    const cur = p.current ?? 2, tot = p.total ?? 6;
+    const t = p.articleTitle ?? 'Panduan Class & Monster Heart';
+    const map = {
+      progress: { title: t, text: 'Mengunduh… halaman ' + cur + ' dari ' + tot },
+      done: { title: t + ' siap dibaca', text: 'Semua halaman tersimpan offline.' },
+      partial: { title: t + ' belum lengkap', text: (p.failedCount ?? 1) + ' halaman gagal dimuat. Tap untuk retry.' },
+      error: { title: 'Gagal mengunduh ' + t, text: 'Tap untuk retry.' }
+    };
+    const m = map[kind] || map.progress;
+    return { title: m.title, text: m.text, showBar: kind === 'progress', pct: Math.round(cur / tot * 100) + '%', tap: () => p.onTap && p.onTap() };
+  }
+}
+</script>
+</body>
+</html>

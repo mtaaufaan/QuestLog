@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#f3f2f2;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}button{font:inherit}@keyframes qlFade{from{opacity:0}to{opacity:1}}@keyframes qlSheet{from{transform:translateY(100%)}to{transform:none}}@keyframes qlSpin{to{transform:rotate(360deg)}}</style></helmet>
+<div data-screen-label="Popup Unlock Unlimited" style="position:relative;width:100%;height:100%;min-height:844px;display:flex;flex-direction:column;justify-content:flex-end;font-family:Lora,serif;color:#201f1d;overflow:hidden">
+  <div onClick="{{ close }}" style="position:absolute;inset:0;background:rgba(20,19,18,.45);animation:qlFade .2s ease-out"></div>
+  <div style="position:relative;background:#f3f2f2;border-radius:12px 12px 0 0;padding:10px 24px 26px;box-shadow:0 -12px 32px rgba(45,43,43,.22);animation:qlSheet .28s cubic-bezier(.2,.8,.2,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#bab6b6;margin:0 auto 22px"></div>
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:18px 0 8px">
+        <div style="width:56px;height:56px;border-radius:28px;border:1px solid #b68235;display:flex;align-items:center;justify-content:center">
+          <svg width="26" height="26" viewBox="0 0 24 24" style="fill:none;stroke:#a06f24;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg>
+        </div>
+        <h2 style="margin:6px 0 0;font:600 28px/1.15 'Cormorant Garamond',serif">Unlimited aktif</h2>
+        <p style="margin:0;font:400 14px/1.5 Lora,serif;color:#605d5d;max-width:280px;text-wrap:pretty">Batas game dan artikel sudah dibuka. Terima kasih sudah mendukung QuestLog.</p>
+        <button onClick="{{ close }}" style="margin-top:14px;width:100%;height:48px;border:1px solid #b68235;background:transparent;color:#7d5411;font:600 15px Lora,serif;border-radius:4px;cursor:pointer" style-hover="background:#fff3e4">Lanjutkan</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ notDone }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px">
+        <span style="font:600 10.5px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:#7d5411">QuestLog Unlimited</span>
+        <h2 style="margin:0;font:500 30px/1.1 'Cormorant Garamond',serif;letter-spacing:-.01em">Sekali bayar,<br>tanpa batas.</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 88px;border-top:1px solid #201f1d;font-variant-numeric:tabular-nums">
+        <span style="padding:9px 0;font:600 11px/1.2 Lora,serif;letter-spacing:.08em;text-transform:uppercase;color:#605d5d;border-bottom:1px solid rgba(32,31,29,.16)"></span>
+        <span style="padding:9px 0;font:600 11px/1.2 Lora,serif;letter-spacing:.08em;text-transform:uppercase;color:#605d5d;border-bottom:1px solid rgba(32,31,29,.16);text-align:center">Gratis</span>
+        <span style="padding:9px 0;font:600 11px/1.2 Lora,serif;letter-spacing:.08em;text-transform:uppercase;color:#7d5411;border-bottom:1px solid rgba(32,31,29,.16);text-align:center">Unlimited</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16)">Game</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16);text-align:center">{{ gameUsage }}</span>
+        <span style="padding:11px 0;font:600 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16);text-align:center;color:#7d5411">∞</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16)">Artikel per game</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16);text-align:center">5</span>
+        <span style="padding:11px 0;font:600 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16);text-align:center;color:#7d5411">∞</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16)">Baca offline &amp; checkpoint</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16);text-align:center">✓</span>
+        <span style="padding:11px 0;font:400 14px/1.3 Lora,serif;border-bottom:1px solid rgba(32,31,29,.16);text-align:center;color:#7d5411">✓</span>
+      </div>
+      <p style="margin:12px 0 18px;font:400 12.5px/1.5 Lora,serif;color:#7d7979;text-wrap:pretty">Bukan langganan. Pembayaran diproses Google Play; status diverifikasi di perangkat setiap aplikasi dibuka.</p>
+      <button onClick="{{ purchase }}" disabled="{{ busy }}" style="width:100%;height:50px;border:1px solid #b68235;background:transparent;color:#7d5411;font:600 15px Lora,serif;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-hover="background:#fff3e4" style-active="background:#ffe3bf" style-disabled="cursor:default;opacity:.7">
+        <sc-if value="{{ isProcessing }}" hint-placeholder-val="{{ false }}"><span style="width:14px;height:14px;border:1.5px solid #b68235;border-top-color:transparent;border-radius:8px;animation:qlSpin .8s linear infinite"></span></sc-if>
+        {{ purchaseLabel }}
+      </button>
+      <button onClick="{{ restore }}" disabled="{{ busy }}" style="margin-top:6px;width:100%;height:46px;border:none;background:transparent;color:#605d5d;font:600 14px Lora,serif;border-radius:4px;cursor:pointer" style-hover="background:#eae9e9">{{ restoreLabel }}</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;gamesUsed&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:0,&quot;max&quot;:2,&quot;tsType&quot;:&quot;number&quot;},&quot;isPremium&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onPurchase&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onRestore&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { phase: 'idle' };
+  run(kind) {
+    this.setState({ phase: kind });
+    this.t = setTimeout(() => {
+      const p = this.props;
+      kind === 'restoring' ? p.onRestore && p.onRestore() : p.onPurchase && p.onPurchase();
+      this.setState({ phase: 'done' });
+    }, 1300);
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    const p = this.props, ph = this.state.phase;
+    const done = ph === 'done' || p.isPremium === true;
+    return {
+      isDone: done, notDone: !done,
+      gameUsage: (p.gamesUsed ?? 2) + '/2',
+      busy: ph === 'processing' || ph === 'restoring',
+      isProcessing: ph === 'processing',
+      purchaseLabel: ph === 'processing' ? 'Menghubungi Google Play…' : 'Unlock Unlimited',
+      restoreLabel: ph === 'restoring' ? 'Memeriksa pembelian…' : 'Restore Purchase',
+      purchase: () => this.run('processing'),
+      restore: () => this.run('restoring'),
+      close: () => p.onClose && p.onClose()
+    };
+  }
+}
+</script>
+</body>
+</html>

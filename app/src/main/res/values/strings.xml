@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QuestLog</string>
+
+    <!-- Layar placeholder Sprint 0 -->
+    <string name="placeholder_s1">Layar S1</string>
+    <string name="placeholder_s2">Layar S2</string>
+    <string name="placeholder_s3">Layar S3</string>
+    <string name="placeholder_s1_subtitle">Article List — belum ada fitur</string>
+    <string name="placeholder_s2_subtitle">Add Article — belum ada fitur</string>
+    <string name="placeholder_s3_subtitle">Reader — belum ada fitur</string>
+    <string name="placeholder_go_add_article">Ke Layar S2</string>
+    <string name="placeholder_go_reader">Ke Layar S3</string>
+    <string name="placeholder_back">Kembali</string>
+    <string name="placeholder_open_sheet">Uji bottom sheet</string>
+    <string name="placeholder_open_dialog">Uji dialog</string>
+
+    <!-- Popup placeholder (screen_flow.md §4) -->
+    <string name="popup_close">Tutup</string>
+    <string name="popup_scrape_mode">Scrape Mode Sheet</string>
+    <string name="popup_article_actions">Article Actions Sheet</string>
+    <string name="popup_delete_article">Delete Article Dialog</string>
+    <string name="popup_scrape_error">Scrape Error Dialog</string>
+    <string name="popup_unlock">Unlock Sheet</string>
+    <string name="popup_game_filter">Game Filter Sheet</string>
+    <string name="popup_display_settings">Display Settings Sheet</string>
+</resources>

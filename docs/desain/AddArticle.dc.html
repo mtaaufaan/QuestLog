@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#f3f2f2;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}button,input{font:inherit}*{scrollbar-width:none}*::-webkit-scrollbar{display:none}input::placeholder{color:#9b9797}@keyframes qlUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes qlSpin{to{transform:rotate(360deg)}}@keyframes qlFadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}</style></helmet>
+<div data-screen-label="S2 Add Article" style="position:relative;width:100%;height:100%;min-height:844px;display:flex;flex-direction:column;background:#f3f2f2;color:#201f1d;font-family:Lora,serif;overflow:hidden">
+  <div style="height:34px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:600 13px system-ui,sans-serif">
+    <span>9:41</span>
+    <span style="display:flex;gap:5px;align-items:center"><span style="width:14px;height:9px;border:1px solid #444141;border-radius:2px"></span><span style="width:4px;height:4px;border-radius:2px;background:#444141"></span></span>
+  </div>
+  <header style="flex:none;height:56px;display:flex;align-items:center;gap:4px;padding:0 8px;border-bottom:1px solid rgba(32,31,29,.16)">
+    <button onClick="{{ back }}" aria-label="Kembali" style="width:44px;height:44px;border:none;background:transparent;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#201f1d" style-hover="background:#eae9e9"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg></button>
+    <h1 style="margin:0;font:600 23px/1 'Cormorant Garamond',serif">Simpan Walkthrough</h1>
+  </header>
+  <main style="flex:1;overflow-y:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:22px">
+    <div role="tablist" style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #b68235;border-radius:4px;overflow:hidden">
+      <button role="tab" aria-selected="{{ isNew }}" onClick="{{ setNew }}" style="height:40px;border:none;background:{{ tabNewBg }};color:#7d5411;font:600 13.5px Lora,serif;cursor:pointer">Buat artikel baru</button>
+      <button role="tab" aria-selected="{{ isAppend }}" onClick="{{ setAppend }}" style="height:40px;border:none;border-left:1px solid #b68235;background:{{ tabAppendBg }};color:#7d5411;font:600 13.5px Lora,serif;cursor:pointer">Lengkapi artikel</button>
+    </div>
+
+    <sc-if value="{{ isNew }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:6px;position:relative">
+        <label style="font:600 11px/1 Lora,serif;letter-spacing:.1em;text-transform:uppercase;color:#444141">Game</label>
+        <div style="display:flex;align-items:center;gap:8px;height:48px;padding:0 12px;border:1px solid {{ gameBorder }};border-radius:4px">
+          <input value="{{ gameInput }}" onChange="{{ onGameInput }}" onFocus="{{ openGame }}" onBlur="{{ blurGame }}" placeholder="Ketik judul game…" maxlength="100" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font:400 15px Lora,serif;color:#201f1d">
+          <sc-if value="{{ hasGameSelected }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:#a06f24;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+          <svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#7d7979;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="m6 9 6 6 6-6"></path></svg>
+        </div>
+        <sc-if value="{{ gameOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:78px;left:0;right:0;z-index:5;background:#f3f2f2;border:1px solid rgba(32,31,29,.22);border-radius:4px;box-shadow:0 12px 32px rgba(45,43,43,.18);padding:4px 0;animation:qlFadeIn .15s ease-out">
+            <sc-for list="{{ gameMatches }}" as="g" hint-placeholder-count="2">
+              <button onMouseDown="{{ g.pick }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;min-height:46px;padding:0 14px;border:none;background:transparent;color:#201f1d;cursor:pointer;text-align:left" style-hover="background:#eae9e9">
+                <span style="font:400 15px Lora,serif">{{ g.name }}</span>
+                <span style="font:400 12.5px Lora,serif;color:#7d7979;font-variant-numeric:tabular-nums">{{ g.countLabel }}</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{ showCreate }}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:1px solid rgba(32,31,29,.12);margin-top:4px;padding-top:4px">
+                <button onMouseDown="{{ createGame }}" disabled="{{ createDisabled }}" style="width:100%;display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border:none;background:transparent;color:#7d5411;cursor:pointer;text-align:left" style-hover="background:#fff3e4" style-disabled="opacity:.45;cursor:default">
+                  <svg width="16" height="16" viewBox="0 0 24 24" style="flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                  <span style="font:600 14px Lora,serif">{{ createLabel }}</span>
+                </button>
+                <sc-if value="{{ createDisabled }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:2px 14px 10px 40px;font:400 12.5px/1.4 Lora,serif;color:#605d5d">Limit gratis: maks. 2 game. <a onMouseDown="{{ upgrade }}" style="color:#7d5411;text-decoration:underline;cursor:pointer">Upgrade</a></div>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noGameMatches }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:12px 14px;font:italic 400 13px Lora,serif;color:#7d7979">Ketik untuk mencari atau membuat game.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasGameError }}" hint-placeholder-val="{{ false }}"><span style="font:400 12.5px/1.4 Lora,serif;color:#9e3b2c">{{ gameError }}</span></sc-if>
+        <sc-if value="{{ showGameHint }}" hint-placeholder-val="{{ false }}"><span style="font:400 12.5px/1.4 Lora,serif;color:#605d5d">{{ gameHint }}</span></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font:600 11px/1 Lora,serif;letter-spacing:.1em;text-transform:uppercase;color:#444141">Judul artikel</label>
+        <input value="{{ title }}" onChange="{{ onTitle }}" placeholder="mis. Walkthrough Lengkap — Disc 2" style="height:48px;padding:0 12px;border:1px solid {{ titleBorder }};border-radius:4px;outline:none;background:transparent;font:400 15px Lora,serif;color:#201f1d" style-focus="border-color:#b68235">
+        <sc-if value="{{ hasTitleError }}" hint-placeholder-val="{{ false }}"><span style="font:400 12.5px/1.4 Lora,serif;color:#9e3b2c">{{ titleError }}</span></sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isAppend }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font:600 11px/1 Lora,serif;letter-spacing:.1em;text-transform:uppercase;color:#444141">Pilih artikel</label>
+        <div role="radiogroup" style="border-top:1px solid rgba(32,31,29,.16)">
+          <sc-for list="{{ targets }}" as="t" hint-placeholder-count="3">
+            <button role="radio" aria-checked="{{ t.active }}" onClick="{{ t.pick }}" style="width:100%;display:flex;align-items:center;gap:14px;padding:12px 4px;border:none;border-bottom:1px solid rgba(32,31,29,.16);background:{{ t.bg }};color:#201f1d;cursor:pointer;text-align:left">
+              <span style="flex:none;width:20px;height:20px;border-radius:10px;border:1px solid {{ t.ring }};display:flex;align-items:center;justify-content:center"><span style="width:10px;height:10px;border-radius:5px;background:{{ t.dot }}"></span></span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                <span style="font:600 10px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:#7d5411">{{ t.gameName }}</span>
+                <span style="font:600 18px/1.2 'Cormorant Garamond',serif">{{ t.title }}</span>
+              </span>
+              <span style="font:400 12.5px Lora,serif;color:#7d7979;font-variant-numeric:tabular-nums">{{ t.pagesLabel }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasTargetError }}" hint-placeholder-val="{{ false }}"><span style="font:400 12.5px/1.4 Lora,serif;color:#9e3b2c">Pilih artikel yang akan dilengkapi</span></sc-if>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <label style="font:600 11px/1 Lora,serif;letter-spacing:.1em;text-transform:uppercase;color:#444141">{{ urlSectionLabel }}</label>
+        <span style="font:400 12.5px Lora,serif;color:#7d7979;font-variant-numeric:tabular-nums">{{ urlCount }}</span>
+      </div>
+      <sc-if value="{{ isAppend }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font:400 13px/1.5 Lora,serif;color:#605d5d;text-wrap:pretty">{{ appendNote }}</p>
+      </sc-if>
+      <sc-for list="{{ urlRows }}" as="u" hint-placeholder-count="1">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="flex:none;width:44px;font:600 12px/1 Lora,serif;color:#605d5d;font-variant-numeric:tabular-nums">{{ u.label }}</span>
+            <input value="{{ u.value }}" onChange="{{ u.change }}" placeholder="https://" inputmode="url" style="flex:1;min-width:0;height:44px;padding:0 10px;border:1px solid {{ u.border }};border-radius:4px;outline:none;background:transparent;font:400 12.5px 'JetBrains Mono',monospace;color:#201f1d" style-focus="border-color:#b68235">
+            <div style="flex:none;display:flex;flex-direction:column">
+              <button onClick="{{ u.up }}" disabled="{{ u.upDisabled }}" aria-label="Naikkan" style="width:28px;height:22px;border:none;background:transparent;cursor:pointer;color:#605d5d;display:flex;align-items:center;justify-content:center;border-radius:3px" style-hover="background:#eae9e9" style-disabled="opacity:.25;cursor:default"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m18 15-6-6-6 6"></path></svg></button>
+              <button onClick="{{ u.down }}" disabled="{{ u.downDisabled }}" aria-label="Turunkan" style="width:28px;height:22px;border:none;background:transparent;cursor:pointer;color:#605d5d;display:flex;align-items:center;justify-content:center;border-radius:3px" style-hover="background:#eae9e9" style-disabled="opacity:.25;cursor:default"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </div>
+            <button onClick="{{ u.remove }}" disabled="{{ u.removeDisabled }}" aria-label="Hapus URL" style="flex:none;width:36px;height:44px;border:none;background:transparent;cursor:pointer;color:#605d5d;display:flex;align-items:center;justify-content:center;border-radius:4px" style-hover="background:#eae9e9" style-disabled="opacity:.25;cursor:default"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+          </div>
+          <sc-if value="{{ u.hasError }}" hint-placeholder-val="{{ false }}"><span style="padding-left:52px;font:400 12.5px/1.4 Lora,serif;color:#9e3b2c">{{ u.error }}</span></sc-if>
+        </div>
+      </sc-for>
+      <button onClick="{{ addUrl }}" disabled="{{ addUrlDisabled }}" style="align-self:flex-start;margin-left:44px;height:38px;padding:0 12px;border:1px dashed #b68235;background:transparent;color:#7d5411;border-radius:4px;font:600 13px Lora,serif;cursor:pointer;display:flex;align-items:center;gap:6px" style-hover="background:#fff3e4" style-disabled="opacity:.4;cursor:default">
+        <svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        Tambah URL
+      </button>
+      <span style="padding-left:44px;font:italic 400 12.5px/1.45 Lora,serif;color:#7d7979">Tempel beberapa URL sekaligus — tiap baris jadi satu halaman.</span>
+    </div>
+  </main>
+  <footer style="flex:none;padding:12px 20px 22px;border-top:1px solid rgba(32,31,29,.16);display:flex;flex-direction:column;gap:10px;background:#f3f2f2">
+    <sc-if value="{{ isLimit }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #e1ad66;border-radius:4px;background:#fff3e4">
+        <svg width="16" height="16" viewBox="0 0 24 24" style="flex:none;margin-top:2px;fill:none;stroke:#7d5411;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span style="flex:1;font:400 13px/1.45 Lora,serif;color:#5a3b0a">{{ limitText }} <a onClick="{{ upgrade }}" style="color:#7d5411;font-weight:600;text-decoration:underline;cursor:pointer">Upgrade</a></span>
+      </div>
+    </sc-if>
+    <button onClick="{{ save }}" disabled="{{ saveDisabled }}" style="height:50px;border:1px solid #b68235;background:transparent;color:#7d5411;border-radius:4px;font:600 15px Lora,serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-hover="background:#fff3e4" style-active="background:#ffe3bf" style-disabled="opacity:.45;cursor:default">
+      <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span style="width:14px;height:14px;border:1.5px solid #b68235;border-top-color:transparent;border-radius:8px;animation:qlSpin .8s linear infinite"></span></sc-if>
+      {{ saveLabel }}
+    </button>
+    <span style="text-align:center;font:400 12px/1.4 Lora,serif;color:#7d7979">Diunduh di latar belakang · notifikasi saat siap dibaca</span>
+  </footer>
+  <sc-if value="{{ hasSnack }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:16px;right:16px;bottom:130px;padding:12px 16px;background:#2d2b2b;color:#f3f2f2;border-radius:4px;font:400 13.5px/1.4 Lora,serif;box-shadow:0 3px 10px rgba(45,43,43,.2);animation:qlUp .22s ease-out">{{ snack }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;new&quot;,&quot;append&quot;],&quot;default&quot;:&quot;new&quot;,&quot;tsType&quot;:&quot;'new'|'append'&quot;},&quot;isPremium&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;targetArticleId&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number|null&quot;},&quot;games&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Game[]&quot;},&quot;articles&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Article[]&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onSave&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(payload)=&gt;void&quot;},&quot;onOpenUnlock&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { mode: null, gameInput: '', gameId: null, gameOpen: false, newGame: false, title: '', urls: [''], targetId: null, errors: {}, saving: false, snack: null };
+  static sample() {
+    return {
+      games: [{ id: 1, name: 'Dragon Quest VII' }, { id: 2, name: 'Breath Of Fire III' }],
+      articles: [
+        { id: 1, gameId: 1, title: 'Walkthrough Lengkap — Disc 1', status: 'READY', pages: [1, 2, 3, 4, 5].map(i => ({ url: 'https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=' + i, status: 'DONE' })) },
+        { id: 2, gameId: 1, title: 'Lokasi Semua Mini Medal', status: 'READY', pages: [1, 2, 3, 4].map(i => ({ url: 'https://dragonquest.fandom.com/wiki/Mini_Medal_' + i, status: 'DONE' })) },
+        { id: 4, gameId: 2, title: 'Walkthrough Utama', status: 'READY', pages: [1, 2, 3, 4, 5].map(i => ({ url: 'https://gamefaqs.gamespot.com/ps/bof3/faqs/main?page=' + i, status: 'DONE' })) }
+      ]
+    };
+  }
+  componentWillUnmount() { clearTimeout(this.t); clearTimeout(this.bt); clearTimeout(this.st); }
+  norm(s) { return s.trim().replace(/\s+/g, ' ').replace(/(^|\s)(\S)/g, (m, a, c) => a + c.toUpperCase()); }
+  toast(t) { clearTimeout(this.st); this.setState({ snack: t }); this.st = setTimeout(() => this.setState({ snack: null }), 2600); }
+  setErr(k, v) { this.setState(s => ({ errors: { ...s.errors, [k]: v } })); }
+  renderVals() {
+    const p = this.props, S = this.state, smp = Component.sample();
+    const games = p.games || smp.games, articles = p.articles || smp.articles;
+    const isPremium = p.isPremium ?? false;
+    const mode = S.mode || p.mode || 'new';
+    const isNew = mode === 'new';
+    const targetId = S.targetId ?? p.targetArticleId ?? null;
+    const target = articles.find(a => a.id === targetId);
+    const countFor = gid => articles.filter(a => a.gameId === gid).length;
+    const canAddGame = isPremium || games.length < 2;
+    const q = S.gameInput.trim().toLowerCase();
+    const matches = games.filter(g => !q || g.name.toLowerCase().includes(q) || q.split(' ')[0] && g.name.toLowerCase().startsWith(q.split(' ')[0]));
+    const exact = games.find(g => g.name.toLowerCase() === this.norm(S.gameInput).toLowerCase());
+    const selGame = games.find(g => g.id === S.gameId);
+    const articleLimit = isNew && !isPremium && selGame && countFor(selGame.id) >= 5;
+    const gameLimit = isNew && S.newGame && !canAddGame;
+    const existingUrls = target ? target.pages.map(x => x.url) : [];
+    const offset = !isNew && target ? target.pages.length : 0;
+    const E = S.errors;
+    const urls = S.urls;
+    const setUrls = u => this.setState({ urls: u, errors: { ...E, urls: {} } });
+    const urlRows = urls.map((v, i) => {
+      const err = (E.urls || {})[i];
+      return {
+        label: 'Hal. ' + (offset + i + 1), value: v, hasError: !!err, error: err || '',
+        border: err ? '#9e3b2c' : 'rgba(32,31,29,.22)',
+        change: e => {
+          const val = e.target.value;
+          const parts = val.split(/[\s,]+/).filter(Boolean);
+          if (parts.length > 1 && /https?:\/\//.test(val)) {
+            const next = [...urls.slice(0, i), ...parts, ...urls.slice(i + 1)].slice(0, 10);
+            setUrls(next);
+          } else { const n = [...urls]; n[i] = val; this.setState({ urls: n, errors: { ...E, urls: { ...(E.urls || {}), [i]: null } } }); }
+        },
+        up: () => { if (i === 0) return; const n = [...urls]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; setUrls(n); },
+        down: () => { if (i === urls.length - 1) return; const n = [...urls]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; setUrls(n); },
+        remove: () => setUrls(urls.length > 1 ? urls.filter((_, j) => j !== i) : ['']),
+        upDisabled: i === 0, downDisabled: i === urls.length - 1, removeDisabled: urls.length === 1 && !v
+      };
+    });
+    const validate = () => {
+      const e = { urls: {} };
+      if (isNew) {
+        if (!S.gameId && !S.newGame) e.game = S.gameInput.trim() ? 'Pilih game dari daftar atau buat game baru' : 'Nama game tidak boleh kosong';
+        if (S.gameInput.length > 100) e.game = 'Nama game maksimal 100 karakter';
+        if (!S.title.trim()) e.title = 'Judul artikel tidak boleh kosong';
+      } else if (!target) e.target = true;
+      const filled = urls.map(u => u.trim());
+      if (!filled.some(Boolean)) e.urls[0] = 'Tambahkan minimal 1 URL';
+      filled.forEach((u, i) => {
+        if (!u) { if (filled.some(Boolean)) e.urls[i] = 'URL tidak boleh kosong'; return; }
+        if (!/^https:\/\/\S+\.\S+/.test(u)) { e.urls[i] = 'URL tidak valid — harus diawali https://'; return; }
+        const j = filled.indexOf(u);
+        if (j < i) e.urls[i] = 'URL duplikat — sama dengan Hal. ' + (offset + j + 1);
+        else if (existingUrls.includes(u)) e.urls[i] = 'URL sudah ada di artikel ini (Hal. ' + (existingUrls.indexOf(u) + 1) + ')';
+      });
+      if (filled.length > 10) e.urls[filled.length - 1] = 'Maksimal 10 URL per artikel';
+      const ok = !e.game && !e.title && !e.target && !Object.keys(e.urls).length;
+      this.setState({ errors: e });
+      return ok;
+    };
+    const save = () => {
+      if (!validate()) return;
+      this.setState({ saving: true });
+      this.t = setTimeout(() => {
+        const payload = { mode, gameId: S.gameId, newGameName: S.newGame ? this.norm(S.gameInput) : null, title: S.title.trim(), urls: urls.map(u => u.trim()), targetArticleId: target ? target.id : null };
+        this.setState({ saving: false });
+        if (p.onSave) p.onSave(payload); else this.toast('Tersimpan — scraping dimulai di latar belakang');
+      }, 650);
+    };
+    const upgrade = e => { e && e.preventDefault && e.preventDefault(); p.onOpenUnlock ? p.onOpenUnlock() : this.toast('Membuka Unlock Unlimited'); };
+    const bg = on => on ? '#fff3e4' : 'transparent';
+    return {
+      back: () => p.onBack ? p.onBack() : this.toast('Kembali ke daftar artikel'),
+      isNew, isAppend: !isNew, tabNewBg: bg(isNew), tabAppendBg: bg(!isNew),
+      setNew: () => this.setState({ mode: 'new', errors: {} }),
+      setAppend: () => this.setState({ mode: 'append', errors: {} }),
+      gameInput: S.gameInput,
+      onGameInput: e => this.setState({ gameInput: e.target.value, gameId: null, newGame: false, gameOpen: true, errors: { ...E, game: null } }),
+      openGame: () => { clearTimeout(this.bt); this.setState({ gameOpen: true }); },
+      blurGame: () => { this.bt = setTimeout(() => this.setState({ gameOpen: false }), 120); },
+      gameOpen: S.gameOpen,
+      gameMatches: matches.map(g => ({ name: g.name, countLabel: countFor(g.id) + (isPremium ? '' : '/5') + ' artikel', pick: e => { e.preventDefault(); this.setState({ gameId: g.id, gameInput: g.name, newGame: false, gameOpen: false, errors: { ...E, game: null } }); } })),
+      showCreate: !!q && !exact && !S.newGame,
+      createLabel: 'Buat Game baru: “' + this.norm(S.gameInput) + '”',
+      createDisabled: !canAddGame,
+      createGame: e => { e.preventDefault(); if (!canAddGame) return; this.setState({ newGame: true, gameInput: this.norm(S.gameInput), gameOpen: false, errors: { ...E, game: null } }); },
+      noGameMatches: !matches.length && !q,
+      hasGameSelected: !!selGame || S.newGame,
+      gameBorder: E.game ? '#9e3b2c' : (S.gameOpen ? '#b68235' : 'rgba(32,31,29,.22)'),
+      hasGameError: !!E.game, gameError: E.game || '',
+      showGameHint: !E.game && (S.newGame || !!selGame),
+      gameHint: S.newGame ? 'Game baru akan dibuat saat disimpan.' : (selGame ? countFor(selGame.id) + ' artikel tersimpan untuk game ini' : ''),
+      title: S.title, onTitle: e => this.setState({ title: e.target.value, errors: { ...E, title: null } }),
+      titleBorder: E.title ? '#9e3b2c' : 'rgba(32,31,29,.22)', hasTitleError: !!E.title, titleError: E.title || '',
+      targets: articles.filter(a => a.status === 'READY').map(a => ({
+        title: a.title, gameName: (games.find(g => g.id === a.gameId) || {}).name, pagesLabel: a.pages.length + ' hal.',
+        active: target && target.id === a.id, bg: target && target.id === a.id ? '#fff3e4' : 'transparent',
+        ring: target && target.id === a.id ? '#b68235' : '#9b9797', dot: target && target.id === a.id ? '#b68235' : 'transparent',
+        pick: () => this.setState({ targetId: a.id, errors: { ...E, target: null } })
+      })),
+      hasTargetError: !!E.target,
+      appendNote: target ? 'Halaman baru ditambahkan setelah Hal. ' + target.pages.length + ' (append-only). Checkpoint yang ada tetap valid.' : 'Pilih artikel dulu. Halaman baru selalu ditaruh di akhir.',
+      urlSectionLabel: isNew ? 'URL halaman' : 'URL tambahan',
+      urlCount: urls.filter(u => u.trim()).length + '/10',
+      urlRows,
+      addUrl: () => urls.length < 10 && this.setState({ urls: [...urls, ''] }),
+      addUrlDisabled: urls.length >= 10,
+      isLimit: !!(articleLimit || gameLimit),
+      limitText: articleLimit ? 'Limit gratis tercapai (maks. 5 artikel per game).' : 'Limit gratis tercapai (maks. 2 game).',
+      upgrade,
+      saving: S.saving, saveLabel: S.saving ? 'Menyimpan…' : (isNew ? 'Simpan & Mulai Unduh' : 'Tambahkan Halaman'),
+      saveDisabled: S.saving || !!articleLimit || !!gameLimit,
+      save,
+      hasSnack: !!S.snack, snack: S.snack
+    };
+  }
+}
+</script>
+</body>
+</html>

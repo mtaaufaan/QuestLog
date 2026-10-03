@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono&display=swap"><style>body{margin:0;background:#f3f2f2;color:#201f1d;font-family:Lora,serif}a{color:#7d5411}a:hover{color:#5a3b0a}button{font:inherit}*{scrollbar-width:none}*::-webkit-scrollbar{display:none}@keyframes qlUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes qlSpin{to{transform:rotate(360deg)}}@keyframes qlMark{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}</style></helmet>
+<div data-screen-label="S3 Reader" lang="id" style="position:relative;width:100%;height:100%;min-height:844px;display:flex;flex-direction:column;background:{{ bg }};color:{{ fg }};font-family:Lora,serif;overflow:hidden;transition:background .25s,color .25s">
+  <div style="height:34px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:600 13px system-ui,sans-serif">
+    <span>9:41</span>
+    <span style="display:flex;gap:5px;align-items:center"><span style="width:14px;height:9px;border:1px solid {{ muted }};border-radius:2px"></span><span style="width:4px;height:4px;border-radius:2px;background:{{ muted }}"></span></span>
+  </div>
+  <header style="flex:none;height:56px;display:flex;align-items:center;gap:2px;padding:0 6px 0 8px">
+    <button onClick="{{ back }}" aria-label="Kembali" style="flex:none;width:44px;height:44px;border:none;background:transparent;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{ fg }}" style-hover="background:rgba(128,120,110,.14)"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg></button>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding:0 4px">
+      <span style="font:600 10px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:{{ accent }}">{{ gameName }}</span>
+      <span style="font:600 18px/1.1 'Cormorant Garamond',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</span>
+    </div>
+    <button onClick="{{ setCheckpoint }}" aria-label="Tandai checkpoint" disabled="{{ notSuccess }}" style="flex:none;width:44px;height:44px;border:none;background:transparent;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:rgba(128,120,110,.14)" style-disabled="opacity:.3;cursor:default"><svg width="21" height="21" viewBox="0 0 24 24" style="fill:{{ bookmarkFill }};stroke:{{ accentStroke }};stroke-width:1.6;stroke-linejoin:round;transition:fill .2s"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg></button>
+    <button onClick="{{ openSettings }}" aria-label="Pengaturan tampilan" style="flex:none;width:44px;height:44px;border:none;background:transparent;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{ fg }}" style-hover="background:rgba(128,120,110,.14)"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round"><line x1="21" x2="14" y1="4" y2="4"></line><line x1="10" x2="3" y1="4" y2="4"></line><line x1="21" x2="12" y1="12" y2="12"></line><line x1="8" x2="3" y1="12" y2="12"></line><line x1="21" x2="16" y1="20" y2="20"></line><line x1="12" x2="3" y1="20" y2="20"></line><line x1="14" x2="14" y1="2" y2="6"></line><line x1="8" x2="8" y1="10" y2="14"></line><line x1="16" x2="16" y1="18" y2="22"></line></svg></button>
+  </header>
+  <div style="flex:none;height:2px;background:{{ rule }}"><div style="height:100%;width:{{ progressPct }};background:{{ accentStroke }};transition:width .15s"></div></div>
+
+  <sc-if value="{{ isSuccess }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;border-bottom:1px solid {{ rule }}">
+      <div role="tablist" style="display:flex;border:1px solid {{ accentStroke }};border-radius:4px;overflow:hidden">
+        <button role="tab" onClick="{{ setSeamless }}" style="height:30px;padding:0 12px;border:none;background:{{ seamlessBg }};color:{{ accent }};font:600 12px Lora,serif;cursor:pointer">Seamless</button>
+        <button role="tab" onClick="{{ setPaged }}" style="height:30px;padding:0 12px;border:none;border-left:1px solid {{ accentStroke }};background:{{ pagedBg }};color:{{ accent }};font:600 12px Lora,serif;cursor:pointer">Per Halaman</button>
+      </div>
+      <span style="font:400 12.5px Lora,serif;color:{{ muted }};font-variant-numeric:tabular-nums">{{ positionLabel }}</span>
+    </div>
+    <sc-if value="{{ isPartial }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid {{ rule }};background:{{ warnBg }}">
+        <span style="flex:none;width:7px;height:7px;border-radius:4px;background:{{ danger }}"></span>
+        <span style="flex:1;font:400 13px/1.4 Lora,serif;color:{{ fg }}">{{ partialText }}</span>
+        <button onClick="{{ retryFailed }}" disabled="{{ retrying }}" style="flex:none;height:32px;padding:0 10px;border:1px solid {{ accentStroke }};background:transparent;color:{{ accent }};border-radius:4px;font:600 12.5px Lora,serif;cursor:pointer;display:flex;align-items:center;gap:6px" style-disabled="opacity:.6;cursor:default">
+          <sc-if value="{{ retrying }}" hint-placeholder-val="{{ false }}"><span style="width:11px;height:11px;border:1.5px solid {{ accentStroke }};border-top-color:transparent;border-radius:6px;animation:qlSpin .8s linear infinite"></span></sc-if>
+          {{ retryLabel }}
+        </button>
+      </div>
+    </sc-if>
+    <main ref="{{ scrollRef }}" onScroll="{{ onScroll }}" style="position:relative;flex:1;overflow-y:auto;padding:20px 24px 48px">
+      <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="6">
+        <div data-node-id="{{ n.domId }}" style="position:relative">
+          <sc-if value="{{ n.isCheckpoint }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0 8px;animation:qlMark .3s ease-out">
+              <svg width="12" height="12" viewBox="0 0 24 24" style="fill:{{ accentStroke }};stroke:{{ accentStroke }};stroke-width:1.6;stroke-linejoin:round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+              <span style="font:600 10px/1 Lora,serif;letter-spacing:.14em;text-transform:uppercase;color:{{ accent }}">Checkpoint</span>
+              <span style="flex:1;height:1px;background:{{ accentStroke }};opacity:.6"></span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ n.isH1 }}" hint-placeholder-val="{{ false }}"><h1 style="margin:4px 0 16px;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:{{ h1Size }};line-height:1.08;letter-spacing:-.015em;text-wrap:pretty">{{ n.text }}</h1></sc-if>
+          <sc-if value="{{ n.isH2 }}" hint-placeholder-val="{{ false }}"><h2 style="margin:26px 0 10px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:{{ h2Size }};line-height:1.15;letter-spacing:-.01em">{{ n.text }}</h2></sc-if>
+          <sc-if value="{{ n.isH3 }}" hint-placeholder-val="{{ false }}"><h3 style="margin:18px 0 6px;font-family:Lora,serif;font-weight:600;font-size:{{ h3Size }};line-height:1.3">{{ n.text }}</h3></sc-if>
+          <sc-if value="{{ n.isP }}" hint-placeholder-val="{{ true }}"><p style="margin:0 0 14px;font-size:{{ fontSize }};line-height:1.68;text-align:justify;hyphens:auto">{{ n.text }}</p></sc-if>
+          <sc-if value="{{ n.isLi }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:12px;margin:0 0 8px;font-size:{{ fontSize }};line-height:1.6"><span style="flex:none;color:{{ accentStroke }}">—</span><span style="flex:1">{{ n.text }}</span></div></sc-if>
+          <sc-if value="{{ n.isPre }}" hint-placeholder-val="{{ false }}"><pre style="margin:6px 0 18px;padding:14px 12px;border:1px solid {{ rule }};background:{{ surface }};border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:{{ preSize }};line-height:1.45;overflow-x:auto;color:{{ fg }}">{{ n.text }}</pre></sc-if>
+          <sc-if value="{{ n.isImg }}" hint-placeholder-val="{{ false }}">
+            <figure style="margin:8px 0 18px">
+              <div style="aspect-ratio:4/3;border:6px solid {{ surface }};outline:1px solid {{ rule }};background:repeating-linear-gradient(135deg,{{ stripeA }} 0 8px,{{ stripeB }} 8px 16px);display:flex;align-items:center;justify-content:center"><span style="font:400 11px 'JetBrains Mono',monospace;color:{{ muted }};background:{{ bg }};padding:4px 8px">gambar tersimpan · webp</span></div>
+              <figcaption style="margin-top:8px;font:italic 400 13px/1.4 Lora,serif;color:{{ muted }}">{{ n.text }}</figcaption>
+            </figure>
+          </sc-if>
+          <sc-if value="{{ n.isTable }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:6px 0 18px;overflow-x:auto">
+              <div style="display:grid;grid-template-columns:1.1fr 1.2fr 1fr;border-top:1px solid {{ fg }};font-size:{{ tableSize }};line-height:1.4">
+                <sc-for list="{{ n.head }}" as="h" hint-placeholder-count="3"><span style="padding:8px 8px 8px 0;font-weight:600;border-bottom:1px solid {{ rule }}">{{ h }}</span></sc-for>
+                <sc-for list="{{ n.cells }}" as="c" hint-placeholder-count="6"><span style="padding:8px 8px 8px 0;border-bottom:1px solid {{ rule }}">{{ c }}</span></sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ n.isBreak }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;margin:30px 0 12px">
+              <span style="flex:1;height:1px;background:{{ rule }}"></span>
+              <span style="font:600 10px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:{{ muted }};font-variant-numeric:tabular-nums">{{ n.text }}</span>
+              <span style="flex:1;height:1px;background:{{ rule }}"></span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ n.isMissing }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:30px 0 12px;padding:14px;border:1px dashed {{ danger }};border-radius:4px;display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+              <span style="font:600 10px/1 Lora,serif;letter-spacing:.12em;text-transform:uppercase;color:{{ danger }};font-variant-numeric:tabular-nums">{{ n.text }}</span>
+              <span style="font:400 13px/1.45 Lora,serif;color:{{ muted }}">Konten halaman ini belum tersimpan. Gunakan “Coba Lagi” di atas.</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{ showEnd }}" hint-placeholder-val="{{ false }}">
+        <div style="margin:36px 0 0;text-align:center;font:italic 400 13px Lora,serif;color:{{ muted }}">— Akhir artikel —</div>
+      </sc-if>
+    </main>
+    <sc-if value="{{ isPaged }}" hint-placeholder-val="{{ false }}">
+      <footer style="flex:none;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-top:1px solid {{ rule }}">
+        <button onClick="{{ prevPage }}" disabled="{{ prevDisabled }}" style="height:44px;padding:0 12px;border:none;background:transparent;color:{{ accent }};font:600 13.5px Lora,serif;cursor:pointer;display:flex;align-items:center;gap:4px;border-radius:4px" style-hover="background:rgba(128,120,110,.14)" style-disabled="opacity:.3;cursor:default"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Sebelumnya</button>
+        <span style="font:400 13px Lora,serif;color:{{ muted }};font-variant-numeric:tabular-nums">{{ pageIndicator }}</span>
+        <button onClick="{{ nextPage }}" disabled="{{ nextDisabled }}" style="height:44px;padding:0 12px;border:none;background:transparent;color:{{ accent }};font:600 13.5px Lora,serif;cursor:pointer;display:flex;align-items:center;gap:4px;border-radius:4px" style-hover="background:rgba(128,120,110,.14)" style-disabled="opacity:.3;cursor:default">Berikutnya<svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </footer>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center"><span style="width:22px;height:22px;border:1.5px solid {{ accentStroke }};border-top-color:transparent;border-radius:12px;animation:qlSpin .8s linear infinite"></span></div>
+  </sc-if>
+  <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:0 40px 80px">
+      <div style="width:64px;height:64px;border-radius:32px;border:1px solid {{ rule }};display:flex;align-items:center;justify-content:center;margin-bottom:6px">
+        <sc-if value="{{ errNotFound }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" style="fill:none;stroke:{{ muted }};stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="m14.5 12.5-5 5"></path><path d="m9.5 12.5 5 5"></path></svg></sc-if>
+        <sc-if value="{{ errEmpty }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" style="fill:none;stroke:{{ muted }};stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg></sc-if>
+        <sc-if value="{{ errDb }}" hint-placeholder-val="{{ false }}"><svg width="28" height="28" viewBox="0 0 24 24" style="fill:none;stroke:{{ danger }};stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if>
+      </div>
+      <h2 style="margin:0;font:500 26px/1.15 'Cormorant Garamond',serif">{{ errTitle }}</h2>
+      <p style="margin:0;font:400 14px/1.55 Lora,serif;color:{{ muted }};text-wrap:pretty">{{ errBody }}</p>
+      <button onClick="{{ errAction }}" style="margin-top:14px;height:46px;padding:0 22px;border:1px solid {{ accentStroke }};background:transparent;color:{{ accent }};border-radius:4px;font:600 14px Lora,serif;cursor:pointer" style-hover="background:rgba(182,130,53,.1)">{{ errActionLabel }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasSnack }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:16px;right:16px;bottom:{{ snackBottom }};padding:12px 16px;background:{{ snackBg }};color:{{ snackFg }};border-radius:4px;font:400 13.5px/1.4 Lora,serif;box-shadow:0 3px 10px rgba(0,0,0,.25);animation:qlUp .22s ease-out">{{ snack }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;success&quot;,&quot;loading&quot;,&quot;not_found&quot;,&quot;empty&quot;,&quot;db_error&quot;],&quot;default&quot;:&quot;success&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;fontSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:16,&quot;min&quot;:12,&quot;max&quot;:24,&quot;step&quot;:2,&quot;tsType&quot;:&quot;number&quot;},&quot;darkMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;article&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Article&quot;},&quot;resumeNodeId&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;},&quot;resumeFrom&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;'last'|'checkpoint'&quot;},&quot;snackbar&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string|null&quot;},&quot;onBack&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(nodeId)=&gt;void&quot;},&quot;onLeave&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(nodeId)=&gt;void&quot;},&quot;onOpenSettings&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onSetCheckpoint&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(nodeId)=&gt;void&quot;},&quot;onModeChange&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(m)=&gt;void&quot;},&quot;onRetryFailed&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onRetryLoad&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { mode: null, page: 0, checkpoint: undefined, pct: 0, snack: null, fontSize: 16, dark: false, retrying: false };
+  scrollRef = React.createRef();
+  static content() {
+    const P = (id, t) => ({ id, type: 'p', text: t }), L = (id, t) => ({ id, type: 'li', text: t }), H = (id, t, type = 'h2') => ({ id, type, text: t });
+    return [
+      [{ id: 101, type: 'h1', text: '' },
+        P(102, 'Panduan ini mengikuti urutan cerita Disc 1, dari Pulau Estard hingga fragmen batu keempat. Setiap bagian mencantumkan peti, Mini Medal, dan sidequest yang mudah terlewat.'),
+        H(103, 'Sebelum Mulai'),
+        L(104, 'Simpan di gereja setiap kali masuk desa baru — game ini tidak punya autosave.'),
+        L(105, 'Bicaralah dengan semua NPC dua kali; beberapa memberi petunjuk lokasi fragmen.'),
+        L(106, 'Lemari, tong, dan guci bisa diperiksa. Banyak Mini Medal tersembunyi di sana.'),
+        H(107, 'Kastil Estard'),
+        P(108, 'Mulai dari kamar pangeran di lantai tiga. Turun ke dapur dan periksa tong di pojok kiri untuk mendapat Herb pertama. Di halaman belakang ada sumur tua; masuk ke dalamnya untuk menemukan 50 Gold dan jalan pintas ke luar kastil.')],
+      [H(201, 'Reruntuhan Barat'),
+        P(202, 'Reruntuhan ini adalah dungeon pertama. Musuhnya lemah, tetapi jalurnya berputar. Ikuti peta di bawah dan ambil jalur kiri pada percabangan pertama.'),
+        { id: 203, type: 'pre', text: '+-------+     +-------+\n| Peti  |-----| Altar |\n+---+---+     +---+---+\n    |             |\n+---+---+     +---+---+\n| Masuk |     |Tangga |\n+-------+     +-------+' },
+        P(204, 'Di altar, letakkan fragmen biru untuk membuka pintu batu. Jika pintu tidak bergerak, pastikan semua anggota party berdiri di atas lingkaran.'),
+        L(205, 'Peti A — Leather Hat'), L(206, 'Peti B — Mini Medal #1'), L(207, 'Guci dekat tangga — Seed of Wisdom')],
+      [H(301, 'Desa Fishbel'),
+        P(302, 'Setelah melewati portal, Anda tiba di desa nelayan yang diselimuti kabut. Warga tidak mau bicara sampai Anda menemui kepala desa di rumah paling timur.'),
+        { id: 303, type: 'img', text: 'Peta Desa Fishbel — lokasi peti dan Mini Medal' },
+        P(304, 'Kapal di dermaga baru bisa dipakai setelah event malam hari. Tidur di penginapan untuk memicu event tersebut.'),
+        { id: 305, type: 'table', head: ['Item', 'Lokasi', 'Catatan'], rows: [['Mini Medal', 'Sumur timur', 'Periksa dua kali'], ['Seed of Life', 'Lemari kepala desa', '—'], ['Fishing Rod', 'Dermaga', 'Setelah event']] }],
+      [H(401, 'Menara Angin'),
+        P(402, 'Menara lima lantai dengan lantai yang bisa runtuh. Hindari ubin retak di lantai tiga, atau Anda akan jatuh kembali ke lantai dua.'),
+        L(403, 'Lantai 2 — Peti: Bronze Knife'), L(404, 'Lantai 4 — Peti: Mini Medal #2'),
+        P(405, 'Di puncak, bicaralah pada roh angin untuk mendapatkan fragmen hijau.')],
+      [H(501, 'Boss: Golem Pasir'),
+        P(502, 'HP sekitar 480. Golem menyerang dua kali per giliran saat HP-nya di bawah 50%. Disarankan level party minimal 9.'),
+        H(503, 'Strategi', 'h3'),
+        L(504, 'Giliran 1: naikkan pertahanan dengan Upper, lalu serang biasa.'),
+        L(505, 'Sembuhkan saat HP anggota di bawah 20 — serangan gandanya bisa mencapai 18.'),
+        L(506, 'Jangan pakai sihir api; Golem tahan api.'),
+        P(507, 'Setelah menang, kembali ke Estard dan letakkan fragmen di altar untuk membuka pulau berikutnya.')]
+    ];
+  }
+  article() {
+    return this.props.article || { id: 1, title: 'Walkthrough Lengkap — Disc 1', gameName: 'Dragon Quest VII', checkpointNodeId: 302, lastNodeId: 204,
+      pages: [1, 2, 3, 4, 5].map(i => ({ url: 'https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=' + i, status: i === 4 ? 'FAILED' : 'DONE' })) };
+  }
+  model() {
+    const a = this.article(), C = Component.content();
+    const pages = (a.pages || []).slice(0, 5).map((pg, i) => ({ index: i, num: i + 1, ok: pg.status === 'DONE', url: pg.url, nodes: C[i] || [] }));
+    return { a, pages, okPages: pages.filter(p => p.ok) };
+  }
+  mode() { return this.state.mode || (this.article().readMode) || 'seamless'; }
+  toast(t) { clearTimeout(this.st); this.setState({ snack: t }); this.st = setTimeout(() => this.setState({ snack: null }), 2400); }
+  visibleNodes() {
+    const el = this.scrollRef.current; if (!el) return [];
+    return Array.from(el.querySelectorAll('[data-node-id]')).filter(n => n.getAttribute('data-node-id'));
+  }
+  firstVisible() {
+    const el = this.scrollRef.current; if (!el) return null;
+    const top = el.scrollTop + 6;
+    const n = this.visibleNodes().find(n => n.offsetTop + n.offsetHeight > top);
+    return n ? Number(n.getAttribute('data-node-id')) : null;
+  }
+  resolve(id) {
+    const { okPages } = this.model();
+    const all = okPages.flatMap(p => p.nodes.map(n => ({ id: n.id, page: p.index })));
+    return all.find(n => n.id === id) || all.find(n => n.id >= id) || all[all.length - 1];
+  }
+  jumpTo(id, msg) {
+    const hit = this.resolve(id); if (!hit) return;
+    const go = () => requestAnimationFrame(() => {
+      const el = this.scrollRef.current; if (!el) return;
+      const node = el.querySelector('[data-node-id="' + hit.id + '"]');
+      if (node) el.scrollTop = Math.max(0, node.offsetTop - 16);
+      this.onScroll();
+      if (msg) this.toast(hit.id !== id ? msg + ' (elemen terdekat)' : msg);
+    });
+    if (this.mode() === 'paged') { const { okPages } = this.model(); this.setState({ page: Math.max(0, okPages.findIndex(p => p.index === hit.page)) }, go); } else go();
+  }
+  componentDidMount() {
+    const p = this.props, a = this.article();
+    if ((p.viewState ?? 'success') !== 'success') return;
+    const target = p.resumeNodeId ?? a.lastNodeId;
+    if (target) setTimeout(() => this.jumpTo(target, p.resumeFrom === 'checkpoint' ? 'Lanjut dari checkpoint' : 'Melanjutkan dari posisi terakhir'), 60);
+  }
+  componentWillUnmount() {
+    clearTimeout(this.st); clearTimeout(this.rt);
+    if (this.last && this.props.onLeave) this.props.onLeave(this.last);
+  }
+  onScroll = () => {
+    const el = this.scrollRef.current; if (!el) return;
+    const max = el.scrollHeight - el.clientHeight;
+    const pct = max > 0 ? Math.min(100, Math.round(el.scrollTop / max * 100)) : 100;
+    this.last = this.firstVisible() || this.last;
+    if (pct !== this.state.pct) this.setState({ pct });
+  };
+  renderVals() {
+    const p = this.props, S = this.state;
+    const { a, pages, okPages } = this.model();
+    const dark = p.darkMode ?? S.dark;
+    const fs = p.fontSize ?? S.fontSize;
+    const mode = this.mode(), paged = mode === 'paged';
+    const cp = S.checkpoint !== undefined ? S.checkpoint : a.checkpointNodeId;
+    const vs = p.viewState ?? 'success';
+    const failed = pages.filter(x => !x.ok);
+    const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } };
+    const mapNode = n => ({
+      domId: String(n.id), text: n.type === 'h1' ? a.title : n.text,
+      isH1: n.type === 'h1', isH2: n.type === 'h2', isH3: n.type === 'h3', isP: n.type === 'p', isLi: n.type === 'li', isPre: n.type === 'pre', isImg: n.type === 'img', isTable: n.type === 'table',
+      isBreak: false, isMissing: false, head: n.head || [], cells: (n.rows || []).flat(), isCheckpoint: cp === n.id
+    });
+    const blank = { domId: '', head: [], cells: [], isH1: false, isH2: false, isH3: false, isP: false, isLi: false, isPre: false, isImg: false, isTable: false, isCheckpoint: false };
+    let nodes = [];
+    const pageIdx = Math.min(S.page, Math.max(0, okPages.length - 1));
+    if (paged) {
+      const pg = okPages[pageIdx];
+      if (pg) nodes = pg.nodes.map(mapNode);
+    } else {
+      pages.forEach((pg, i) => {
+        if (i > 0) nodes.push({ ...blank, isBreak: pg.ok, isMissing: !pg.ok, text: pg.ok ? 'Halaman ' + pg.num + ' · ' + host(pg.url) : 'Halaman ' + pg.num + ' gagal dimuat' });
+        else if (!pg.ok) nodes.push({ ...blank, isMissing: true, text: 'Halaman 1 gagal dimuat' });
+        if (pg.ok) nodes.push(...pg.nodes.map(mapNode));
+      });
+    }
+    const T = dark
+      ? { bg: '#1d1c1a', fg: '#e8e3dc', muted: '#a8a29a', rule: 'rgba(255,255,255,.13)', accent: '#e1ad66', accentStroke: '#e1ad66', surface: '#282624', danger: '#e38a78', warnBg: 'rgba(227,138,120,.08)', stripeA: '#282624', stripeB: '#23211f', tint: 'rgba(225,173,102,.14)', snackBg: '#e8e3dc', snackFg: '#1d1c1a' }
+      : { bg: '#f3f2f2', fg: '#201f1d', muted: '#605d5d', rule: 'rgba(32,31,29,.16)', accent: '#7d5411', accentStroke: '#b68235', surface: '#eae9e9', danger: '#9e3b2c', warnBg: '#f8ecea', stripeA: '#eae9e9', stripeB: '#e2dfdf', tint: '#fff3e4', snackBg: '#2d2b2b', snackFg: '#f3f2f2' };
+    const setMode = m => () => {
+      const keep = this.last;
+      if (p.onModeChange) p.onModeChange(m);
+      this.setState({ mode: m }, () => keep && this.jumpTo(keep));
+    };
+    const goPage = d => () => { this.setState({ page: Math.max(0, Math.min(okPages.length - 1, pageIdx + d)) }, () => { const el = this.scrollRef.current; if (el) el.scrollTop = 0; this.onScroll(); }); };
+    const errs = {
+      not_found: { t: 'Artikel tidak ditemukan', b: 'Artikel ini mungkin sudah dihapus dari perangkat.', l: 'Kembali' },
+      empty: { t: 'Konten tidak tersedia', b: 'Coba scraping ulang dari daftar artikel.', l: 'Kembali' },
+      db_error: { t: 'Gagal membaca data', b: 'Terjadi kesalahan saat membuka artikel. Coba lagi.', l: 'Coba Lagi' }
+    };
+    const er = errs[vs] || errs.not_found;
+    const back = () => { const id = this.firstVisible(); if (id) this.last = id; p.onBack ? p.onBack(id) : this.toast('Kembali ke daftar — posisi disimpan'); };
+    return {
+      ...T, fontSize: fs + 'px', h1Size: Math.round(fs * 1.95) + 'px', h2Size: Math.round(fs * 1.45) + 'px', h3Size: Math.round(fs * 1.08) + 'px', preSize: Math.max(10, Math.round(fs * .72)) + 'px', tableSize: Math.round(fs * .86) + 'px',
+      gameName: a.gameName, title: a.title,
+      isSuccess: vs === 'success', notSuccess: vs !== 'success', isLoading: vs === 'loading', isError: ['not_found', 'empty', 'db_error'].includes(vs),
+      errNotFound: vs === 'not_found', errEmpty: vs === 'empty', errDb: vs === 'db_error',
+      errTitle: er.t, errBody: er.b, errActionLabel: er.l,
+      errAction: () => vs === 'db_error' ? (p.onRetryLoad ? p.onRetryLoad() : this.toast('Memuat ulang…')) : back(),
+      back,
+      bookmarkFill: cp ? T.accentStroke : 'none',
+      setCheckpoint: () => {
+        const id = this.firstVisible(); if (!id) return;
+        this.setState({ checkpoint: id });
+        p.onSetCheckpoint && p.onSetCheckpoint(id);
+        this.toast(cp ? 'Checkpoint diperbarui ke posisi ini' : 'Checkpoint disimpan');
+      },
+      openSettings: () => p.onOpenSettings ? p.onOpenSettings() : this.setState({ dark: !S.dark }),
+      progressPct: S.pct + '%',
+      seamlessBg: paged ? 'transparent' : T.tint, pagedBg: paged ? T.tint : 'transparent',
+      setSeamless: setMode('seamless'), setPaged: setMode('paged'),
+      positionLabel: paged ? 'Hal. ' + (okPages[pageIdx] ? okPages[pageIdx].num : 1) + ' / ' + pages.length : S.pct + '% dibaca',
+      isPartial: failed.length > 0,
+      partialText: 'Belum lengkap — ' + failed.length + ' halaman gagal dimuat',
+      retrying: S.retrying, retryLabel: S.retrying ? 'Mengunduh…' : 'Coba Lagi',
+      retryFailed: () => { this.setState({ retrying: true }); this.rt = setTimeout(() => { this.setState({ retrying: false }); p.onRetryFailed ? p.onRetryFailed() : this.toast('Halaman yang gagal diunduh ulang (demo)'); }, 1500); },
+      scrollRef: this.scrollRef, onScroll: this.onScroll,
+      nodes, showEnd: !paged || pageIdx === okPages.length - 1,
+      isPaged: paged,
+      prevPage: goPage(-1), nextPage: goPage(1), prevDisabled: pageIdx <= 0, nextDisabled: pageIdx >= okPages.length - 1,
+      pageIndicator: 'Halaman ' + (okPages[pageIdx] ? okPages[pageIdx].num : 1) + ' dari ' + pages.length,
+      hasSnack: !!(p.snackbar || S.snack), snack: p.snackbar || S.snack, snackBottom: paged ? '80px' : '24px'
+    };
+  }
+}
+</script>
+</body>
+</html>
