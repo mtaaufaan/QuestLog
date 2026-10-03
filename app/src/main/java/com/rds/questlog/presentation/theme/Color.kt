@@ -42,22 +42,23 @@ val LightQlColors = QlColors(
     snackbarText = Color(0xFFF3F2F2),
 )
 
-// ponytail: tint/active/tertiary di dark mode adalah estimasi (design.md hanya mendefinisikan 6 token gelap).
+// Sumber: Reader.dc.html (objek T) dan DisplaySettingsSheet.dc.html.
+// ponytail: accentTintActive dan textTertiary tidak ada di desain gelap (estimasi); konfirmasi saat dipakai.
 val DarkQlColors = QlColors(
     accentText = Color(0xFFE1AD66),
-    accentLine = Color(0xFFB68235),
+    accentLine = Color(0xFFE1AD66),
     accentSoft = Color(0xFFE1AD66),
-    accentTint = Color(0xFF3A2F1E),
-    accentTintActive = Color(0xFF4A3A22),
+    accentTint = Color(0xFFE1AD66).copy(alpha = 0.14f),
+    accentTintActive = Color(0xFFE1AD66).copy(alpha = 0.24f),
     danger = Color(0xFFE38A78),
-    dangerTint = Color(0xFF3A2420),
-    divider = Color(0xFFE8E3DC).copy(alpha = 0.16f),
+    dangerTint = Color(0xFFE38A78).copy(alpha = 0.08f),
+    divider = Color.White.copy(alpha = 0.13f),
     scrim = Color(0xFF141312).copy(alpha = 0.45f),
     surface = Color(0xFF282624),
     textSecondary = Color(0xFFA8A29A),
     textTertiary = Color(0xFF7D7770),
-    snackbar = Color(0xFF2D2B2B),
-    snackbarText = Color(0xFFF3F2F2),
+    snackbar = Color(0xFFE8E3DC),
+    snackbarText = Color(0xFF1D1C1A),
 )
 
 val LightColorScheme: ColorScheme = lightColorScheme(

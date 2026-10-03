@@ -45,7 +45,13 @@ private fun QlButton(
             .clip(ButtonShape)
             .background(if (pressed) pressedColor else Color.Transparent)
             .then(if (border != null) Modifier.border(border, ButtonShape) else Modifier)
-            .clickable(interactionSource = source, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
+            .clickable(
+                interactionSource = source,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            )
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
