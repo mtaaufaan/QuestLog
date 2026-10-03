@@ -69,7 +69,12 @@ fun QlTextField(
             },
         )
         if (errorText != null) {
-            Text(errorText, color = c.danger, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            Text(
+                errorText,
+                color = c.danger,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
     }
 }

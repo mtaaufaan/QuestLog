@@ -8,6 +8,8 @@ import com.rds.questlog.presentation.components.PlaceholderScreen
 import com.rds.questlog.presentation.components.QlOutlineButton
 import com.rds.questlog.presentation.popup.Popup
 
+// Parameter sesuai kontrak route (screen_flow.md §2); dipakai saat layar nyata dibangun.
+@Suppress("UnusedParameter")
 @Composable
 fun ReaderScreen(articleId: Long, resumeFrom: String, navController: NavController, onShowPopup: (Popup) -> Unit) {
     PlaceholderScreen(stringResource(R.string.placeholder_s3), stringResource(R.string.placeholder_s3_subtitle)) {

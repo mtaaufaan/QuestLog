@@ -5,6 +5,22 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
+}
+
+ksp {
+    // Schema JSON di-commit (git-workflow.md §8.2) untuk verifikasi migrasi.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom("$rootDir/config/detekt/detekt.yml")
+}
+
+ktlint {
+    android.set(true)
 }
 
 android {
@@ -17,6 +33,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Urutan penting: `full` memakai initWith(release), jadi release harus dikonfigurasi lebih dulu.
@@ -86,4 +103,8 @@ dependencies {
 
     // Hanya build release (tech-stack.md §12); belum dipakai kodenya di Sprint 0.
     releaseImplementation(libs.billing.ktx)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }

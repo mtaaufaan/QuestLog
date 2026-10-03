@@ -1,0 +1,35 @@
+# Menimpa default detekt (buildUponDefaultConfig = true). Acuan: docs/coding_convention.md.
+
+style:
+  MagicNumber:
+    active: false # angka dp/sp/alpha di UI dan token warna bukan magic number
+  MaxLineLength:
+    maxLineLength: 120
+  ForbiddenImport:
+    active: true
+    # Domain layer pure Kotlin (tech-stack.md §3): tanpa android.*, androidx.*, okhttp3.*.
+    forbiddenPatterns: '^(android|androidx|okhttp3)\.'
+    includes: ['**/domain/**']
+
+naming:
+  MatchingDeclarationName:
+    excludes: ['**/theme/Color.kt'] # QlColors + token warna dalam satu file
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*' # token warna/tipografi top-level (Color.kt, Type.kt)
+
+complexity:
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    ignoreAnnotated: ['Composable']
+
+comments:
+  # KDoc wajib di UseCase dan Repository interface (coding_convention.md §7).
+  UndocumentedPublicFunction:
+    active: true
+    includes: ['**/domain/usecase/**', '**/domain/repository/**']
