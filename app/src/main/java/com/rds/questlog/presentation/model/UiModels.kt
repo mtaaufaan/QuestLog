@@ -12,6 +12,13 @@ data class GameUiModel(
     val name: String,
 )
 
+/** Opsi di Game Filter Sheet; [count] = jumlah artikel game itu (component-contract.md §10). */
+data class GameFilterOption(
+    val id: Long,
+    val name: String,
+    val count: Int,
+)
+
 data class PageUiModel(
     val url: String,
     val status: PageStatus,
@@ -34,8 +41,12 @@ data class ArticleUiModel(
     val lastRead: String? = null,
     val readMode: ReadMode? = null,
 ) {
+    val totalPageCount: Int get() = pages.size
     val failedPageCount: Int get() = pages.count { it.status == PageStatus.FAILED }
     val donePageCount: Int get() = pages.count { it.status == PageStatus.DONE }
+
+    /** Halaman yang sudah selesai diproses (sukses + gagal); dasar progress "Memproses… n/total". */
+    val handledPageCount: Int get() = pages.count { it.status != PageStatus.PENDING }
 
     /** READY tapi ada halaman gagal: badge "X halaman gagal" dan banner retry di Reader. */
     val isPartial: Boolean get() = status == ArticleStatus.READY && failedPageCount > 0

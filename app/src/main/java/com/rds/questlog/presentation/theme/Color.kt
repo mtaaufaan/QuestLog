@@ -23,6 +23,11 @@ data class QlColors(
     val textTertiary: Color,
     val snackbar: Color,
     val snackbarText: Color,
+    /** Latar baris/tombol saat di-hover dan ditekan, track progress, serta ikon/placeholder redup. */
+    val hover: Color,
+    val pressed: Color,
+    val track: Color,
+    val iconMuted: Color,
 )
 
 val LightQlColors = QlColors(
@@ -40,6 +45,10 @@ val LightQlColors = QlColors(
     textTertiary = Color(0xFF7D7979),
     snackbar = Color(0xFF2D2B2B),
     snackbarText = Color(0xFFF3F2F2),
+    hover = Color(0xFFEAE9E9),
+    pressed = Color(0xFFE2DFDF),
+    track = Color(0xFFD7D3D3),
+    iconMuted = Color(0xFF9B9797),
 )
 
 // Sumber: Reader.dc.html (objek T) dan DisplaySettingsSheet.dc.html.
@@ -59,6 +68,11 @@ val DarkQlColors = QlColors(
     textTertiary = Color(0xFF7D7770),
     snackbar = Color(0xFFE8E3DC),
     snackbarText = Color(0xFF1D1C1A),
+    // ponytail: hover/pressed/iconMuted gelap adalah estimasi (S1 hanya didesain terang); track dari desain.
+    hover = Color.White.copy(alpha = 0.06f),
+    pressed = Color.White.copy(alpha = 0.10f),
+    track = Color.White.copy(alpha = 0.14f),
+    iconMuted = Color(0xFF7D7770),
 )
 
 val LightColorScheme: ColorScheme = lightColorScheme(

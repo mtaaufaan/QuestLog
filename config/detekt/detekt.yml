@@ -5,6 +5,8 @@ style:
     active: false # angka dp/sp/alpha di UI dan token warna bukan magic number
   MaxLineLength:
     maxLineLength: 120
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview'] # fungsi @Preview private tidak dipanggil dari kode
   ForbiddenImport:
     active: true
     # Domain layer pure Kotlin (tech-stack.md §3): tanpa android.*, androidx.*, okhttp3.*.
@@ -26,7 +28,7 @@ complexity:
     ignoreDefaultParameters: true
     ignoreAnnotated: ['Composable']
   TooManyFunctions:
-    ignoreAnnotated: ['Composable']
+    thresholdInFiles: 20 # file UI berisi banyak composable kecil
 
 comments:
   # KDoc wajib di UseCase dan Repository interface (coding_convention.md §7).
