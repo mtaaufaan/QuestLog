@@ -28,12 +28,17 @@ private fun family(name: String, fallback: String, vararg variants: Pair<FontWei
 private val Normal = FontStyle.Normal
 
 val CormorantGaramond = family(
-    "Cormorant Garamond", "serif",
-    FontWeight.Medium to Normal, FontWeight.SemiBold to Normal,
+    "Cormorant Garamond",
+    "serif",
+    FontWeight.Medium to Normal,
+    FontWeight.SemiBold to Normal,
 )
 val Lora = family(
-    "Lora", "serif",
-    FontWeight.Normal to Normal, FontWeight.SemiBold to Normal, FontWeight.Normal to FontStyle.Italic,
+    "Lora",
+    "serif",
+    FontWeight.Normal to Normal,
+    FontWeight.SemiBold to Normal,
+    FontWeight.Normal to FontStyle.Italic,
 )
 val JetBrainsMono = family("JetBrains Mono", "monospace", FontWeight.Normal to Normal)
 

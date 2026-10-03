@@ -14,7 +14,8 @@ private val LocalQlColors = staticCompositionLocalOf { LightQlColors }
 
 object QuestLogTheme {
     val colors: QlColors
-        @Composable @ReadOnlyComposable get() = LocalQlColors.current
+        @Composable @ReadOnlyComposable
+        get() = LocalQlColors.current
 }
 
 @Composable

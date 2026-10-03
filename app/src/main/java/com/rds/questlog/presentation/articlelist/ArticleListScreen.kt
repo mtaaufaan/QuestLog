@@ -14,7 +14,10 @@ import com.rds.questlog.presentation.popup.Popup
 fun ArticleListScreen(navController: NavController, onShowPopup: (Popup) -> Unit) {
     PlaceholderScreen(stringResource(R.string.placeholder_s1), stringResource(R.string.placeholder_s1_subtitle)) {
         QlOutlineButton(stringResource(R.string.placeholder_go_add_article), { navController.navigate(AddArticle()) })
-        QlOutlineButton(stringResource(R.string.placeholder_go_reader), { navController.navigate(Reader(articleId = 1)) })
+        QlOutlineButton(
+            stringResource(R.string.placeholder_go_reader),
+            { navController.navigate(Reader(articleId = 1)) },
+        )
         QlOutlineButton(stringResource(R.string.placeholder_open_sheet), { onShowPopup(Popup.GameFilter) })
         QlOutlineButton(stringResource(R.string.placeholder_open_dialog), { onShowPopup(Popup.DeleteArticle(1)) })
     }
