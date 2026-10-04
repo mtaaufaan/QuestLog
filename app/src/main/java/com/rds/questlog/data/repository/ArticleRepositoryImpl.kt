@@ -3,6 +3,7 @@ package com.rds.questlog.data.repository
 import androidx.room.withTransaction
 import com.rds.questlog.data.local.QuestLogDatabase
 import com.rds.questlog.data.local.dao.ArticleDao
+import com.rds.questlog.data.local.dao.ContentNodeDao
 import com.rds.questlog.data.local.dao.ImageDao
 import com.rds.questlog.data.local.dao.SourcePageDao
 import com.rds.questlog.data.local.entity.ArticleEntity
@@ -11,6 +12,8 @@ import com.rds.questlog.data.local.escapeLike
 import com.rds.questlog.data.mapper.toDomain
 import com.rds.questlog.data.scraper.ImageStore
 import com.rds.questlog.domain.model.Article
+import com.rds.questlog.domain.model.ContentNode
+import com.rds.questlog.domain.model.ReadMode
 import com.rds.questlog.domain.model.ScrapeLimits
 import com.rds.questlog.domain.repository.ArticleRepository
 import javax.inject.Inject
@@ -23,10 +26,19 @@ class ArticleRepositoryImpl @Inject constructor(
     private val pageDao: SourcePageDao,
     private val imageDao: ImageDao,
     private val imageStore: ImageStore,
+    private val nodeDao: ContentNodeDao,
 ) : ArticleRepository {
 
     override fun observeArticles(query: String, gameId: Long?): Flow<List<Article>> =
         articleDao.observeArticles(escapeLike(query), gameId).map { rows -> rows.map { it.toDomain() } }
+
+    override fun observeArticle(articleId: Long): Flow<Article?> =
+        articleDao.observeById(articleId).map { it?.toDomain() }
+
+    override fun observeContent(articleId: Long): Flow<List<ContentNode>> =
+        nodeDao.observeByArticle(articleId).map { rows -> rows.map { it.toDomain() } }
+
+    override suspend fun setReadMode(articleId: Long, mode: ReadMode) = articleDao.setReadMode(articleId, mode.name)
 
     override suspend fun insertArticle(gameId: Long, title: String, urls: List<String>): Long = db.withTransaction {
         val articleId = articleDao.insert(

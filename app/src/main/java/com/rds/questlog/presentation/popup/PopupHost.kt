@@ -24,8 +24,8 @@ import com.rds.questlog.presentation.components.QlGhostButton
 @Composable
 fun PopupHost(popup: Popup?, onDismiss: () -> Unit) {
     when (popup) {
-        null, Popup.GameFilter, Popup.ScrapeMode, is Popup.ArticleActions, is Popup.DeleteArticle,
-        is Popup.ScrapeError,
+        null, Popup.GameFilter, Popup.ScrapeMode, Popup.DisplaySettings, is Popup.ArticleActions,
+        is Popup.DeleteArticle, is Popup.ScrapeError,
         -> Unit
         else -> QlBottomSheet(onDismiss) { PlaceholderBody(popup.nameRes(), onDismiss) }
     }

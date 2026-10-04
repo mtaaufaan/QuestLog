@@ -1,10 +1,12 @@
 package com.rds.questlog.domain
 
 import com.rds.questlog.domain.model.Article
+import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.Game
 import com.rds.questlog.domain.model.PageFailure
 import com.rds.questlog.domain.model.PremiumStatus
 import com.rds.questlog.domain.model.PurchaseResult
+import com.rds.questlog.domain.model.ReadMode
 import com.rds.questlog.domain.model.ScrapedImage
 import com.rds.questlog.domain.model.ScrapedNode
 import com.rds.questlog.domain.model.SourcePage
@@ -60,6 +62,13 @@ class FakeArticleRepository(
         failWith?.let { throw it }
         inserted += Triple(gameId, title, urls)
         return 42L
+    }
+    override fun observeArticle(articleId: Long): Flow<Article?> = emptyFlow()
+    override fun observeContent(articleId: Long): Flow<List<ContentNode>> = emptyFlow()
+    val readModes = mutableMapOf<Long, ReadMode>()
+    override suspend fun setReadMode(articleId: Long, mode: ReadMode) {
+        failWith?.let { throw it }
+        readModes[articleId] = mode
     }
     override suspend fun appendPages(articleId: Long, urls: List<String>) {
         failWith?.let { throw it }

@@ -21,6 +21,15 @@ object QuestLogTheme {
 @Composable
 fun QuestLogTheme(darkTheme: Boolean = false, content: @Composable () -> Unit) {
     SystemBarIcons(darkTheme)
+    QuestLogColors(darkTheme, content)
+}
+
+/**
+ * Hanya token warna + MaterialTheme, tanpa menyentuh ikon system bar. Dipakai di dalam window terpisah
+ * (bottom sheet/dialog) yang konteksnya bukan Activity, mis. Display Settings Sheet yang mengikuti mode gelap Reader.
+ */
+@Composable
+fun QuestLogColors(darkTheme: Boolean, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalQlColors provides if (darkTheme) DarkQlColors else LightQlColors) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,

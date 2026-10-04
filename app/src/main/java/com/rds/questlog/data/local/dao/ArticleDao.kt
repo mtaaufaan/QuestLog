@@ -23,6 +23,13 @@ interface ArticleDao {
     )
     fun observeArticles(query: String, gameId: Long?): Flow<List<ArticleWithDetails>>
 
+    @Transaction
+    @Query("SELECT * FROM articles WHERE id = :articleId")
+    fun observeById(articleId: Long): Flow<ArticleWithDetails?>
+
+    @Query("UPDATE articles SET read_mode = :readMode WHERE id = :articleId")
+    suspend fun setReadMode(articleId: Long, readMode: String)
+
     @Insert
     suspend fun insert(article: ArticleEntity): Long
 

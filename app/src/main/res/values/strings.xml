@@ -157,4 +157,49 @@
     <string name="notification_partial_text">%1$d halaman gagal dimuat. Tap untuk retry.</string>
     <string name="notification_error_title">Gagal mengunduh %1$s</string>
     <string name="notification_error_text">Tap untuk retry.</string>
+
+    <!-- S3 Reader -->
+    <string name="reader_back">Kembali</string>
+    <string name="reader_checkpoint">Tandai checkpoint</string>
+    <string name="reader_settings">Pengaturan tampilan</string>
+    <string name="reader_mode_seamless">Seamless</string>
+    <string name="reader_mode_paged">Per Halaman</string>
+    <string name="reader_position_percent">%1$d%% dibaca</string>
+    <string name="reader_position_page">Hal. %1$d / %2$d</string>
+    <string name="reader_partial_text">Belum lengkap — %1$d halaman gagal dimuat</string>
+    <string name="reader_retry">Coba Lagi</string>
+    <string name="reader_retrying">Mengunduh…</string>
+    <string name="reader_checkpoint_label">Checkpoint</string>
+    <string name="reader_page_break">Halaman %1$d · %2$s</string>
+    <string name="reader_page_missing_label">Halaman %1$d gagal dimuat</string>
+    <string name="reader_page_missing_body">Konten halaman ini belum tersimpan. Gunakan “Coba Lagi” di atas.</string>
+    <string name="reader_image_placeholder">gambar tersimpan · webp</string>
+    <string name="reader_end">— Akhir artikel —</string>
+    <string name="reader_prev">Sebelumnya</string>
+    <string name="reader_next">Berikutnya</string>
+    <string name="reader_page_indicator">Halaman %1$d dari %2$d</string>
+    <string name="reader_not_found_title">Artikel tidak ditemukan</string>
+    <string name="reader_not_found_body">Artikel ini mungkin sudah dihapus dari perangkat.</string>
+    <string name="reader_empty_title">Konten tidak tersedia</string>
+    <string name="reader_empty_body">Coba scraping ulang dari daftar artikel.</string>
+    <string name="reader_db_error_title">Gagal membaca data</string>
+    <string name="reader_db_error_body">Terjadi kesalahan saat membuka artikel. Coba lagi.</string>
+    <string name="reader_snackbar_checkpoint_saved">Checkpoint disimpan</string>
+    <string name="reader_snackbar_checkpoint_updated">Checkpoint diperbarui ke posisi ini</string>
+    <string name="reader_snackbar_resume_last">Melanjutkan dari posisi terakhir</string>
+    <string name="reader_snackbar_resume_checkpoint">Lanjut dari checkpoint</string>
+    <string name="reader_snackbar_save_failed">Gagal menyimpan. Coba lagi.</string>
+    <string name="reader_snackbar_nearest">%1$s (elemen terdekat)</string>
+
+    <!-- Display Settings Sheet -->
+    <string name="display_settings_title">Tampilan</string>
+    <string name="display_settings_scope">Berlaku di semua artikel</string>
+    <string name="display_settings_font_size">Ukuran Teks</string>
+    <string name="display_settings_font_size_value">%1$d sp</string>
+    <string name="display_settings_font_smaller">Perkecil teks</string>
+    <string name="display_settings_font_larger">Perbesar teks</string>
+    <string name="display_settings_preview">Masuki gua di utara desa dan ambil jalur kiri untuk menemukan peti berisi Mini Medal.</string>
+    <string name="display_settings_dark_mode">Mode Gelap</string>
+    <string name="display_settings_dark_on">Aktif</string>
+    <string name="display_settings_dark_off">Nonaktif</string>
 </resources>
