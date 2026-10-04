@@ -23,7 +23,7 @@ class Sprint2UseCasesTest {
         premium: Boolean = false,
         scheduler: FakeScheduler = FakeScheduler(),
     ) = runBlocking {
-        SaveArticleUseCase(games, articles, scheduler, ObservePremiumStatusUseCase(FakeBillingService(premium)))(
+        SaveArticleUseCase(games, articles, scheduler, ObservePremiumStatusUseCase(FakeAppConfigRepository(premium)))(
             game,
             "Judul",
             urls,

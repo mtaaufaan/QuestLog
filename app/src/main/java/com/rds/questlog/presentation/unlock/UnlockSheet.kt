@@ -22,11 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -46,37 +43,29 @@ import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.Lora
 import com.rds.questlog.presentation.theme.QuestLogTheme
-import kotlinx.coroutines.delay
-
-private const val SIMULATED_MS = 1_300L
 
 /**
- * Unlock Sheet (component-contract.md §9). Tahap 1: hasil pembelian/restore disimulasikan (1,3 dtk lalu sukses);
- * [onPurchase] / [onRestore] dipanggil saat proses selesai dan Google Play Billing asli menyusul di Tahap 2.
- * [gamesUsed] (0-2) = jumlah game, bukan artikel. Layar yang sama menampilkan sukses untuk kedua aksi.
+ * Unlock Sheet (component-contract.md §9). Dikendalikan dari luar: [phase] (proses beli/restore) dan [message]
+ * (hasil yang tidak berujung aktif) datang dari pemanggil; [isPremium] true menampilkan layar sukses untuk kedua aksi.
+ * [gamesUsed] (0-2) = jumlah game, bukan artikel.
  */
 @Composable
 fun UnlockSheet(
     gamesUsed: Int,
     isPremium: Boolean,
+    phase: UnlockPhase,
+    message: UnlockMessage?,
     onPurchase: () -> Unit,
     onRestore: () -> Unit,
     onClose: () -> Unit,
 ) {
-    var phase by remember { mutableStateOf(UnlockPhase.IDLE) }
-    LaunchedEffect(phase) {
-        if (phase == UnlockPhase.PROCESSING || phase == UnlockPhase.RESTORING) {
-            delay(SIMULATED_MS)
-            if (phase == UnlockPhase.RESTORING) onRestore() else onPurchase()
-            phase = UnlockPhase.DONE
-        }
-    }
     QlBottomSheet(onDismiss = onClose) {
         UnlockSheetContent(
             phase = if (isPremium) UnlockPhase.DONE else phase,
             gamesUsed = gamesUsed,
-            onPurchase = { phase = UnlockPhase.PROCESSING },
-            onRestore = { phase = UnlockPhase.RESTORING },
+            message = message,
+            onPurchase = onPurchase,
+            onRestore = onRestore,
             onClose = onClose,
         )
     }
@@ -87,6 +76,7 @@ fun UnlockSheet(
 fun UnlockSheetContent(
     phase: UnlockPhase,
     gamesUsed: Int,
+    message: UnlockMessage?,
     onPurchase: () -> Unit,
     onRestore: () -> Unit,
     onClose: () -> Unit,
@@ -100,9 +90,17 @@ fun UnlockSheetContent(
             Text(
                 text = stringResource(R.string.unlock_note),
                 color = QuestLogTheme.colors.textTertiary,
-                modifier = Modifier.padding(top = 12.dp, bottom = 18.dp),
+                modifier = Modifier.padding(top = 12.dp, bottom = if (message == null) 18.dp else 8.dp),
                 style = TextStyle(fontFamily = Lora, fontSize = 12.5.sp, lineHeight = 18.sp),
             )
+            if (message != null) {
+                Text(
+                    text = stringResource(message.text),
+                    color = if (message.isError) QuestLogTheme.colors.danger else QuestLogTheme.colors.accentText,
+                    modifier = Modifier.padding(bottom = 14.dp),
+                    style = TextStyle(fontFamily = Lora, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                )
+            }
             val busy = phase != UnlockPhase.IDLE
             PurchaseButton(
                 label = stringResource(
@@ -338,13 +336,25 @@ private fun UnlockRestoringPreview() = PreviewSheet(UnlockPhase.RESTORING, games
 
 @Preview(showBackground = true, widthDp = 390)
 @Composable
+private fun UnlockNotFoundPreview() = PreviewSheet(UnlockPhase.IDLE, gamesUsed = 2, message = UnlockMessage.NOT_FOUND)
+
+@Preview(showBackground = true, widthDp = 390)
+@Composable
+private fun UnlockUnavailablePreview() = PreviewSheet(
+    UnlockPhase.IDLE,
+    gamesUsed = 2,
+    message = UnlockMessage.UNAVAILABLE,
+)
+
+@Preview(showBackground = true, widthDp = 390)
+@Composable
 private fun UnlockDonePreview() = PreviewSheet(UnlockPhase.DONE, gamesUsed = 2)
 
 @Composable
-private fun PreviewSheet(phase: UnlockPhase, gamesUsed: Int) {
+private fun PreviewSheet(phase: UnlockPhase, gamesUsed: Int, message: UnlockMessage? = null) {
     QuestLogTheme {
         Box(Modifier.background(MaterialTheme.colorScheme.surface)) {
-            UnlockSheetContent(phase, gamesUsed, onPurchase = {}, onRestore = {}, onClose = {})
+            UnlockSheetContent(phase, gamesUsed, message, onPurchase = {}, onRestore = {}, onClose = {})
         }
     }
 }

@@ -25,7 +25,7 @@ class ArticleUseCasesTest {
         games: FakeGameRepository = FakeGameRepository(),
         premium: Boolean = false,
     ) = runBlocking {
-        SaveArticleUseCase(games, articles, scheduler, ObservePremiumStatusUseCase(FakeBillingService(premium)))(
+        SaveArticleUseCase(games, articles, scheduler, ObservePremiumStatusUseCase(FakeAppConfigRepository(premium)))(
             game,
             title,
             urls,

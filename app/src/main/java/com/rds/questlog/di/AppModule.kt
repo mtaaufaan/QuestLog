@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
 import com.rds.questlog.BuildConfig
+import com.rds.questlog.data.billing.CurrentActivityHolder
 import com.rds.questlog.data.billing.FakeBillingService
 import com.rds.questlog.data.billing.FullVersionBillingService
 import com.rds.questlog.data.billing.GooglePlayBillingService
@@ -70,9 +71,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBillingService(prefs: SharedPreferences): BillingService = when {
+    fun provideBillingService(
+        @ApplicationContext context: Context,
+        prefs: SharedPreferences,
+        activities: CurrentActivityHolder,
+    ): BillingService = when {
         BuildConfig.FULL_VERSION -> FullVersionBillingService()
         BuildConfig.DEBUG -> FakeBillingService(prefs)
-        else -> GooglePlayBillingService()
+        else -> GooglePlayBillingService(context, activities)
     }
 }
