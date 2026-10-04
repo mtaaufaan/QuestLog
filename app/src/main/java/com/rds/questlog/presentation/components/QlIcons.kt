@@ -64,6 +64,53 @@ object QlIcons {
         "M8 16H3v5",
     )
 
+    val ChevronLeft = lineIcon("ChevronLeft", 1.8f, "m15 18-6-6 6-6")
+    val Sliders = lineIcon(
+        "Sliders",
+        1.7f,
+        "M21 4h-7",
+        "M10 4H3",
+        "M21 12h-9",
+        "M8 12H3",
+        "M21 20h-5",
+        "M12 20H3",
+        "M14 2v4",
+        "M8 10v4",
+        "M16 18v4",
+    )
+    val FileX = lineIcon(
+        "FileX",
+        1.5f,
+        "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",
+        "M14 2v4a2 2 0 0 0 2 2h4",
+        "m14.5 12.5-5 5",
+        "m9.5 12.5 5 5",
+    )
+    val Inbox = lineIcon(
+        "Inbox",
+        1.5f,
+        "M22 12h-6l-2 3h-4l-2-3H2",
+        "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z",
+    )
+    val AlertTriangle = lineIcon(
+        "AlertTriangle",
+        1.5f,
+        "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
+        "M12 9v4",
+        "M12 17h.01",
+    )
+
+    /** Bookmark terisi yang bisa diberi warna lewat `Icon(tint = ...)` (checkpoint aktif di Reader). */
+    val BookmarkSolid = ImageVector.Builder("BookmarkSolid", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            pathData = PathParser().parsePathString(BOOKMARK_PATH).toNodes(),
+            fill = SolidColor(Color.Black),
+            stroke = SolidColor(Color.Black),
+            strokeLineWidth = 1.6f,
+            strokeLineJoin = StrokeJoin.Round,
+        )
+    }.build()
+
     /** Tiga titik vertikal (terisi). */
     val MoreVert = ImageVector.Builder("MoreVert", 24.dp, 24.dp, 24f, 24f).apply {
         listOf(5f, 12f, 19f).forEach { cy ->

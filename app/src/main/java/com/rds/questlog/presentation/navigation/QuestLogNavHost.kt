@@ -58,7 +58,14 @@ fun QuestLogNavHost() {
             }
             composable<Reader> { entry ->
                 val route = entry.toRoute<Reader>()
-                ReaderScreen(route.articleId, route.resumeFrom, navController, onShowPopup = { activePopup = it })
+                ReaderScreen(
+                    articleId = route.articleId,
+                    resumeFrom = route.resumeFrom,
+                    navController = navController,
+                    activePopup = activePopup,
+                    onShowPopup = { activePopup = it },
+                    onDismissPopup = { activePopup = null },
+                )
             }
         }
         PopupHost(popup = activePopup, onDismiss = { activePopup = null })
