@@ -4,13 +4,14 @@ import com.rds.questlog.domain.model.Article
 import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.Game
 import com.rds.questlog.domain.model.PageFailure
-import com.rds.questlog.domain.model.PremiumStatus
+import com.rds.questlog.domain.model.PurchaseQuery
 import com.rds.questlog.domain.model.PurchaseResult
 import com.rds.questlog.domain.model.ReadMode
 import com.rds.questlog.domain.model.ScrapedImage
 import com.rds.questlog.domain.model.ScrapedNode
 import com.rds.questlog.domain.model.SourcePage
 import com.rds.questlog.domain.model.SourcePageStatus
+import com.rds.questlog.domain.repository.AppConfigRepository
 import com.rds.questlog.domain.repository.ArticleRepository
 import com.rds.questlog.domain.repository.BillingService
 import com.rds.questlog.domain.repository.GameRepository
@@ -19,8 +20,8 @@ import com.rds.questlog.domain.scraper.ScrapeScheduler
 import com.rds.questlog.domain.scraper.ScraperEngine
 import com.rds.questlog.domain.scraper.ScrapingResult
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
 
 fun page(id: Long, url: String = "https://example.com/$id", status: SourcePageStatus = SourcePageStatus.PENDING) =
     SourcePage(id = id, url = url, order = id.toInt(), status = status)
@@ -114,11 +115,32 @@ class FakeSourcePageRepository(private val pending: List<SourcePage>) : SourcePa
     }
 }
 
-class FakeBillingService(private val premium: Boolean = false) : BillingService {
-    override fun observePremiumStatus(): Flow<PremiumStatus> =
-        flowOf(if (premium) PremiumStatus.Unlimited else PremiumStatus.Free)
-    override suspend fun purchaseUnlimited(): PurchaseResult = PurchaseResult.Cancelled
-    override suspend fun restorePurchases(): PurchaseResult = PurchaseResult.Cancelled
+class FakeBillingService(
+    private val query: PurchaseQuery = PurchaseQuery.NotOwned,
+    private val purchase: PurchaseResult = PurchaseResult.Cancelled,
+) : BillingService {
+    var queries = 0
+    override suspend fun queryUnlimitedPurchase(): PurchaseQuery {
+        queries++
+        return query
+    }
+    override suspend fun purchaseUnlimited(): PurchaseResult = purchase
+}
+
+/** app_config di memori: [premium] bisa diubah dan Flow-nya ikut berubah, seperti tabel Room. */
+class FakeAppConfigRepository(premium: Boolean = false, private val failWith: Throwable? = null) : AppConfigRepository {
+    private val state = MutableStateFlow(premium)
+    var token: String? = null
+    var verifiedAt: Long? = null
+    var writes = 0
+    override fun observeIsPremium(): Flow<Boolean> = state
+    override suspend fun setPremium(isPremium: Boolean, purchaseToken: String?, verifiedAt: Long) {
+        failWith?.let { throw it }
+        writes++
+        state.value = isPremium
+        token = purchaseToken
+        this.verifiedAt = verifiedAt
+    }
 }
 
 class FakeScraperEngine(private val results: Map<String, ScrapingResult>) : ScraperEngine {

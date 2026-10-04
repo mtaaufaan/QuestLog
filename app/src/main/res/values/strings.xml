@@ -217,6 +217,9 @@
     <string name="unlock_processing">Menghubungi Google Play…</string>
     <string name="unlock_restore">Restore Purchase</string>
     <string name="unlock_restoring">Memeriksa pembelian…</string>
+    <string name="unlock_msg_not_found">Tidak ada pembelian Unlimited yang ditemukan di akun Google Play ini.</string>
+    <string name="unlock_msg_unavailable">Google Play tidak dapat dihubungi. Periksa koneksi lalu coba lagi.</string>
+    <string name="unlock_msg_failed">Gagal menyimpan status pembelian. Coba lagi.</string>
     <string name="unlock_done_title">Unlimited aktif</string>
     <string name="unlock_done_body">Batas game dan artikel sudah dibuka. Terima kasih sudah mendukung QuestLog.</string>
     <string name="unlock_done_continue">Lanjutkan</string>
