@@ -14,6 +14,18 @@ interface ArticleRepository {
     /** Membuat artikel di [gameId] beserta halaman sumbernya (urutan = urutan [urls]); mengembalikan id artikel. */
     suspend fun insertArticle(gameId: Long, title: String, urls: List<String>): Long
 
+    /**
+     * Menambahkan [urls] sebagai halaman baru di akhir artikel (append-only): urutan dan slot display_order
+     * dilanjutkan dari nilai terbesar yang ada, sehingga checkpoint lama tetap valid. Artikel kembali SCRAPING.
+     */
+    suspend fun appendPages(articleId: Long, urls: List<String>)
+
+    /** Jumlah artikel milik [gameId] (untuk batas tier gratis). */
+    suspend fun countForGame(gameId: Long): Int
+
+    /** Subset [urls] yang sudah tersimpan sebagai halaman sumber di artikel mana pun. */
+    suspend fun findStoredUrls(urls: List<String>): Set<String>
+
     /** Menghapus artikel beserta seluruh halaman, konten, checkpoint, dan file gambar yang tak dipakai lagi. */
     suspend fun deleteArticle(articleId: Long)
 

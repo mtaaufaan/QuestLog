@@ -26,6 +26,9 @@ interface ArticleDao {
     @Insert
     suspend fun insert(article: ArticleEntity): Long
 
+    @Query("SELECT COUNT(*) FROM articles WHERE game_id = :gameId")
+    suspend fun countByGame(gameId: Long): Int
+
     @Query("UPDATE articles SET is_scraping_done = :done WHERE id = :articleId")
     suspend fun setScrapingDone(articleId: Long, done: Boolean)
 

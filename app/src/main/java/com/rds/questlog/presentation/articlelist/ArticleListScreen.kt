@@ -13,6 +13,7 @@ import com.rds.questlog.presentation.model.GameFilterOption
 import com.rds.questlog.presentation.navigation.AddArticle
 import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
+import com.rds.questlog.presentation.scrapemode.ScrapeModeSheet
 
 /**
  * S1. Popup yang menempel padanya (GameFilter, ArticleActions, DeleteArticle, ScrapeError) dirender di sini;
@@ -77,6 +78,14 @@ private fun ArticleListPopups(
                 onClose = onDismissPopup,
             )
         }
+        Popup.ScrapeMode -> ScrapeModeSheet(
+            hasArticles = uiState.games.sumOf { it.articleCount } > 0,
+            onPick = {
+                onDismissPopup()
+                navController.navigate(AddArticle(mode = it.route))
+            },
+            onClose = onDismissPopup,
+        )
         is Popup.ArticleActions -> uiState.articleById(activePopup.articleId)?.let { article ->
             ArticleActionsSheet(
                 article = article,

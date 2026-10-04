@@ -14,6 +14,10 @@ class GameRepositoryImpl @Inject constructor(private val gameDao: GameDao) : Gam
     override fun observeGames(): Flow<List<Game>> =
         gameDao.observeWithArticleCount().map { rows -> rows.map { it.toDomain() } }
 
+    override suspend fun findIdByName(name: String): Long? = gameDao.findByTitle(name)?.id
+
+    override suspend fun count(): Int = gameDao.count()
+
     override suspend fun findOrCreate(name: String): Long = gameDao.findByTitle(name)?.id
         ?: gameDao.insert(GameEntity(title = name, createdAt = System.currentTimeMillis()))
 }

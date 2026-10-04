@@ -5,6 +5,7 @@ import com.rds.questlog.domain.error.QuestLogError.ValidationError
 import com.rds.questlog.domain.usecase.article.DeleteArticleUseCase
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.article.SaveArticleUseCase
+import com.rds.questlog.domain.usecase.premium.ObservePremiumStatusUseCase
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -22,7 +23,14 @@ class ArticleUseCasesTest {
         scheduler: FakeScheduler = FakeScheduler(),
         articles: FakeArticleRepository = FakeArticleRepository(),
         games: FakeGameRepository = FakeGameRepository(),
-    ) = runBlocking { SaveArticleUseCase(games, articles, scheduler)(game, title, urls) }
+        premium: Boolean = false,
+    ) = runBlocking {
+        SaveArticleUseCase(games, articles, scheduler, ObservePremiumStatusUseCase(FakeBillingService(premium)))(
+            game,
+            title,
+            urls,
+        )
+    }
 
     @Test
     fun `simpan artikel membuat game, artikel, dan menjadwalkan scraping dengan input di-trim`() {

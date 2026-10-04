@@ -86,4 +86,75 @@
 
     <!-- Game Filter Sheet -->
     <string name="game_filter_title">Filter per game</string>
+
+    <!-- S2 Add Article -->
+    <string name="add_article_title">Simpan Walkthrough</string>
+    <string name="add_article_back">Kembali</string>
+    <string name="add_article_tab_new">Buat artikel baru</string>
+    <string name="add_article_tab_append">Lengkapi artikel</string>
+    <string name="add_article_label_game">Game</string>
+    <string name="add_article_label_title">Judul artikel</string>
+    <string name="add_article_label_pick_article">Pilih artikel</string>
+    <string name="add_article_game_placeholder">Ketik judul game…</string>
+    <string name="add_article_title_placeholder">mis. Walkthrough Lengkap — Disc 2</string>
+    <string name="add_article_game_count_free">%1$d/5 artikel</string>
+    <string name="add_article_game_count_premium">%1$d artikel</string>
+    <string name="add_article_create_game">Buat Game baru: “%1$s”</string>
+    <string name="add_article_game_limit_inline">Limit gratis: maks. 2 game.</string>
+    <string name="add_article_upgrade">Upgrade</string>
+    <string name="add_article_game_empty_hint">Ketik untuk mencari atau membuat game.</string>
+    <string name="add_article_game_new_hint">Game baru akan dibuat saat disimpan.</string>
+    <string name="add_article_game_selected_hint">%1$d artikel tersimpan untuk game ini</string>
+    <string name="add_article_error_game_not_selected">Pilih game dari daftar atau buat game baru</string>
+    <string name="add_article_error_game_empty">Nama game tidak boleh kosong</string>
+    <string name="add_article_error_game_too_long">Nama game maksimal 100 karakter</string>
+    <string name="add_article_error_title_empty">Judul artikel tidak boleh kosong</string>
+    <string name="add_article_error_target">Pilih artikel yang akan dilengkapi</string>
+    <string name="add_article_error_url_none">Tambahkan minimal 1 URL</string>
+    <string name="add_article_error_url_empty">URL tidak boleh kosong</string>
+    <string name="add_article_error_url_invalid">URL tidak valid — harus diawali https://</string>
+    <string name="add_article_error_url_duplicate">URL duplikat — sama dengan Hal. %1$d</string>
+    <string name="add_article_error_url_exists">URL sudah ada di artikel ini (Hal. %1$d)</string>
+    <string name="add_article_error_url_stored">URL sudah tersimpan di artikel lain</string>
+    <string name="add_article_submit_duplicate">Ada URL yang sudah tersimpan atau duplikat. Periksa daftar URL.</string>
+    <string name="add_article_submit_failed">Gagal menyimpan. Coba lagi.</string>
+    <string name="add_article_target_pages">%1$d hal.</string>
+    <string name="add_article_append_note_target">Halaman baru ditambahkan setelah Hal. %1$d (append-only). Checkpoint yang ada tetap valid.</string>
+    <string name="add_article_append_note_none">Pilih artikel dulu. Halaman baru selalu ditaruh di akhir.</string>
+    <string name="add_article_urls_new">URL halaman</string>
+    <string name="add_article_urls_append">URL tambahan</string>
+    <string name="add_article_url_count">%1$d/10</string>
+    <string name="add_article_url_page">Hal. %1$d</string>
+    <string name="add_article_url_placeholder">https://</string>
+    <string name="add_article_url_up">Naikkan</string>
+    <string name="add_article_url_down">Turunkan</string>
+    <string name="add_article_url_remove">Hapus URL</string>
+    <string name="add_article_add_url">Tambah URL</string>
+    <string name="add_article_paste_hint">Tempel beberapa URL sekaligus — tiap baris jadi satu halaman.</string>
+    <string name="add_article_limit_article">Limit gratis tercapai (maks. 5 artikel per game).</string>
+    <string name="add_article_limit_game">Limit gratis tercapai (maks. 2 game).</string>
+    <string name="add_article_save_new">Simpan &amp; Mulai Unduh</string>
+    <string name="add_article_save_append">Tambahkan Halaman</string>
+    <string name="add_article_saving">Menyimpan…</string>
+    <string name="add_article_footnote">Diunduh di latar belakang · notifikasi saat siap dibaca</string>
+
+    <!-- Scrape Mode Sheet -->
+    <string name="scrape_mode_kicker">Simpan walkthrough</string>
+    <string name="scrape_mode_title">Mau menyimpan apa?</string>
+    <string name="scrape_mode_new_title">Buat artikel baru</string>
+    <string name="scrape_mode_new_body">Isi judul, pilih game, lalu masukkan satu atau beberapa URL. Urutan URL bisa diatur.</string>
+    <string name="scrape_mode_append_title">Lengkapi artikel yang ada</string>
+    <string name="scrape_mode_append_body">Tambah halaman lanjutan ke artikel tersimpan. Halaman baru selalu ditaruh di akhir.</string>
+    <string name="scrape_mode_cancel">Batal</string>
+
+    <!-- Scrape Notification -->
+    <string name="notification_app_name">QuestLog</string>
+    <string name="notification_now">sekarang</string>
+    <string name="notification_progress_text">Mengunduh… halaman %1$d dari %2$d</string>
+    <string name="notification_done_title">%1$s siap dibaca</string>
+    <string name="notification_done_text">Semua halaman tersimpan offline.</string>
+    <string name="notification_partial_title">%1$s belum lengkap</string>
+    <string name="notification_partial_text">%1$d halaman gagal dimuat. Tap untuk retry.</string>
+    <string name="notification_error_title">Gagal mengunduh %1$s</string>
+    <string name="notification_error_text">Tap untuk retry.</string>
 </resources>

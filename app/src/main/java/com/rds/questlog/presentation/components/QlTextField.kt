@@ -20,10 +20,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rds.questlog.presentation.theme.QuestLogTheme
 
-/** Input teks 48dp: border abu, fokus → aksen, error → merah + pesan di bawah (design.md §3.4). */
+/**
+ * Input teks (tinggi [height]): border abu 22%, fokus → aksen, error → merah (design.md §3.4, radius 4dp).
+ * [errorText] (bila ada) tampil di bawah field; [isError] hanya mewarnai border (pesan ditampilkan pemanggil).
+ */
 @Composable
 fun QlTextField(
     value: String,
@@ -31,16 +37,19 @@ fun QlTextField(
     modifier: Modifier = Modifier,
     placeholder: String? = null,
     errorText: String? = null,
+    isError: Boolean = errorText != null,
     enabled: Boolean = true,
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    height: Dp = 48.dp,
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
     val c = QuestLogTheme.colors
     var focused by remember { mutableStateOf(false) }
     val borderColor = when {
-        errorText != null -> c.danger
+        isError -> c.danger
         focused -> c.accentLine
-        else -> c.divider
+        else -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.22f)
     }
     Column(modifier) {
         BasicTextField(
@@ -49,20 +58,20 @@ fun QlTextField(
             enabled = enabled,
             singleLine = singleLine,
             keyboardOptions = keyboardOptions,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onBackground),
+            textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onBackground),
             cursorBrush = SolidColor(c.accentLine),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).onFocusChanged { focused = it.isFocused },
+            modifier = Modifier.fillMaxWidth().heightIn(min = height).onFocusChanged { focused = it.isFocused },
             decorationBox = { inner ->
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 48.dp)
-                        .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-                        .padding(horizontal = 14.dp),
+                        .heightIn(min = height)
+                        .border(1.dp, borderColor, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 12.dp),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     if (value.isEmpty() && placeholder != null) {
-                        Text(placeholder, color = c.textTertiary, style = MaterialTheme.typography.bodyLarge)
+                        Text(placeholder, color = c.iconMuted, style = textStyle)
                     }
                     inner()
                 }
@@ -72,7 +81,7 @@ fun QlTextField(
             Text(
                 errorText,
                 color = c.danger,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.5.sp),
                 modifier = Modifier.padding(top = 4.dp),
             )
         }
