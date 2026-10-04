@@ -21,14 +21,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 
-/** Dialog modal: radius 8dp, lebar maks 340dp, animasi qlPop (fade + scale, 0.22s). */
+/** Dialog modal: radius 8dp, lebar maks [maxWidth], animasi qlPop (fade + scale, 0.22s). */
 @Composable
-fun QlDialog(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+fun QlDialog(onDismiss: () -> Unit, maxWidth: Dp = 340.dp, content: @Composable ColumnScope.() -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val view = LocalView.current
         SideEffect { (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0.45f) }
@@ -43,9 +44,9 @@ fun QlDialog(onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit)
                 shape = RoundedCornerShape(8.dp),
                 color = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(24.dp).widthIn(max = 340.dp).fillMaxWidth(),
+                modifier = Modifier.padding(24.dp).widthIn(max = maxWidth).fillMaxWidth(),
             ) {
-                Column(Modifier.padding(20.dp), content = content)
+                Column(Modifier.padding(start = 22.dp, top = 24.dp, end = 22.dp, bottom = 14.dp), content = content)
             }
         }
     }

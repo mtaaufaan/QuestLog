@@ -7,7 +7,13 @@ import com.rds.questlog.BuildConfig
 import com.rds.questlog.data.billing.FakeBillingService
 import com.rds.questlog.data.billing.FullVersionBillingService
 import com.rds.questlog.data.billing.GooglePlayBillingService
+import com.rds.questlog.data.local.MIGRATION_1_2
 import com.rds.questlog.data.local.QuestLogDatabase
+import com.rds.questlog.data.local.dao.ArticleDao
+import com.rds.questlog.data.local.dao.ContentNodeDao
+import com.rds.questlog.data.local.dao.GameDao
+import com.rds.questlog.data.local.dao.ImageDao
+import com.rds.questlog.data.local.dao.SourcePageDao
 import com.rds.questlog.domain.repository.BillingService
 import dagger.Module
 import dagger.Provides
@@ -26,7 +32,24 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): QuestLogDatabase =
-        Room.databaseBuilder(context, QuestLogDatabase::class.java, "questlog.db").build()
+        Room.databaseBuilder(context, QuestLogDatabase::class.java, "questlog.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
+
+    @Provides
+    fun provideGameDao(db: QuestLogDatabase): GameDao = db.gameDao()
+
+    @Provides
+    fun provideArticleDao(db: QuestLogDatabase): ArticleDao = db.articleDao()
+
+    @Provides
+    fun provideSourcePageDao(db: QuestLogDatabase): SourcePageDao = db.sourcePageDao()
+
+    @Provides
+    fun provideContentNodeDao(db: QuestLogDatabase): ContentNodeDao = db.contentNodeDao()
+
+    @Provides
+    fun provideImageDao(db: QuestLogDatabase): ImageDao = db.imageDao()
 
     @Provides
     @Singleton

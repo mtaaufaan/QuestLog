@@ -12,9 +12,10 @@ import com.rds.questlog.presentation.model.PageUiModel
  */
 object PreviewData {
 
+    /** [GameUiModel.articleCount] sama dengan jumlah artikel di [articles] (dijaga `PreviewDataTest`). */
     val games = listOf(
-        GameUiModel(id = 1, name = "Dragon Quest VII"),
-        GameUiModel(id = 2, name = "Breath Of Fire III"),
+        GameUiModel(id = 1, name = "Dragon Quest VII", articleCount = 3),
+        GameUiModel(id = 2, name = "Breath Of Fire III", articleCount = 2),
     )
 
     /** Urutan sama dengan prototipe: SCRAPING, READY (checkpoint), READY (partial), READY, ERROR. */

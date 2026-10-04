@@ -30,7 +30,12 @@ fun QuestLogNavHost() {
     Box {
         NavHost(navController = navController, startDestination = ArticleList) {
             composable<ArticleList> {
-                ArticleListScreen(navController, onShowPopup = { activePopup = it })
+                ArticleListScreen(
+                    navController = navController,
+                    activePopup = activePopup,
+                    onShowPopup = { activePopup = it },
+                    onDismissPopup = { activePopup = null },
+                )
             }
             composable<AddArticle> { entry ->
                 val route = entry.toRoute<AddArticle>()
