@@ -30,8 +30,21 @@ class KsoupScraperEngine @Inject constructor(
         when (val page = fetch(url)) {
             is Fetched.Failed -> ScrapingResult.Failure(page.failure)
             is Fetched.Html -> toResult(parser.parse(page.html, url))
+            is Fetched.Image -> toImageResult(url, page.bytes)
         }
     }
+
+    /** URL yang langsung berupa gambar: satu blok gambar (keterangan dari nama file) menjadi isi halamannya. */
+    private fun toImageResult(url: String, bytes: ByteArray): ScrapingResult {
+        val image = images.save(url, bytes) ?: return ScrapingResult.Failure(PageFailure.EmptyContent)
+        val alt = imageCaption(url)
+        val metadata = JSONObject().put("path", image.filePath).put("alt", alt)
+        return ScrapingResult.Success(listOf(ScrapedNode(NodeType.IMG, alt, metadata.toString())), listOf(image))
+    }
+
+    /** Nama file dari URL tanpa ekstensi, garis bawah/strip jadi spasi ("Brosen_windrose.svg" -> "Brosen windrose"). */
+    private fun imageCaption(url: String): String = url.substringBefore('?').substringBefore('#')
+        .substringAfterLast('/').substringBeforeLast('.').replace('_', ' ').replace('-', ' ').trim()
 
     private suspend fun toResult(parsed: List<ParsedNode>): ScrapingResult {
         val nodes = mutableListOf<ScrapedNode>()
@@ -64,7 +77,9 @@ class KsoupScraperEngine @Inject constructor(
         }
         return try {
             client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
+                if (response.isSuccessful && response.body?.contentType()?.type == "image") {
+                    Fetched.Image(response.body?.bytes() ?: ByteArray(0))
+                } else if (response.isSuccessful) {
                     Fetched.Html(response.body?.string().orEmpty())
                 } else {
                     Fetched.Failed(PageFailure.Http(response.code))
@@ -79,6 +94,7 @@ class KsoupScraperEngine @Inject constructor(
 
     private sealed interface Fetched {
         data class Html(val html: String) : Fetched
+        class Image(val bytes: ByteArray) : Fetched
         data class Failed(val failure: PageFailure) : Fetched
     }
 }
