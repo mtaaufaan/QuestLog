@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.rds.questlog.data.local.QuestLogDatabase
+import com.rds.questlog.data.local.dao.AppConfigDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +18,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object PreferencesModule {
+
+    @Provides
+    fun provideAppConfigDao(db: QuestLogDatabase): AppConfigDao = db.appConfigDao()
 
     @Provides
     @Singleton

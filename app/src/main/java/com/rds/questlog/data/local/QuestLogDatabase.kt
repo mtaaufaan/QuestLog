@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.rds.questlog.data.local.dao.AppConfigDao
 import com.rds.questlog.data.local.dao.ArticleDao
 import com.rds.questlog.data.local.dao.CheckpointDao
 import com.rds.questlog.data.local.dao.ContentNodeDao
@@ -39,6 +40,7 @@ abstract class QuestLogDatabase : RoomDatabase() {
     abstract fun contentNodeDao(): ContentNodeDao
     abstract fun imageDao(): ImageDao
     abstract fun checkpointDao(): CheckpointDao
+    abstract fun appConfigDao(): AppConfigDao
 }
 
 /** v1 → v2: alasan gagal per halaman sumber (ditampilkan di Scrape Error Dialog). */

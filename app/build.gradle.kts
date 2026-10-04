@@ -104,8 +104,8 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.datastore.preferences)
 
-    // Hanya build release (tech-stack.md §12); belum dipakai kodenya di Sprint 0.
-    releaseImplementation(libs.billing.ktx)
+    // GooglePlayBillingService dikompilasi di semua variant (dipilih di AppModule); hanya dipakai build release.
+    implementation(libs.billing.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

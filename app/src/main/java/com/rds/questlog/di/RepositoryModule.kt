@@ -1,12 +1,14 @@
 package com.rds.questlog.di
 
 import com.rds.questlog.data.prefs.DataStoreUserPreferencesRepository
+import com.rds.questlog.data.repository.AppConfigRepositoryImpl
 import com.rds.questlog.data.repository.ArticleRepositoryImpl
 import com.rds.questlog.data.repository.CheckpointRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
 import com.rds.questlog.data.repository.SourcePageRepositoryImpl
 import com.rds.questlog.data.scraper.KsoupScraperEngine
 import com.rds.questlog.data.worker.WorkManagerScrapeScheduler
+import com.rds.questlog.domain.repository.AppConfigRepository
 import com.rds.questlog.domain.repository.ArticleRepository
 import com.rds.questlog.domain.repository.CheckpointRepository
 import com.rds.questlog.domain.repository.GameRepository
@@ -36,6 +38,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSourcePageRepository(impl: SourcePageRepositoryImpl): SourcePageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAppConfigRepository(impl: AppConfigRepositoryImpl): AppConfigRepository
 
     @Binds
     @Singleton
