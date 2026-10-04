@@ -100,6 +100,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.ksoup)
     implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
     implementation(libs.work.runtime.ktx)
     implementation(libs.coroutines.android)
     implementation(libs.datastore.preferences)
