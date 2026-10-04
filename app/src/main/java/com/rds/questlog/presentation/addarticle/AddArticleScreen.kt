@@ -1,17 +1,35 @@
 package com.rds.questlog.presentation.addarticle
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import com.rds.questlog.R
-import com.rds.questlog.presentation.components.PlaceholderScreen
-import com.rds.questlog.presentation.components.QlOutlineButton
+import com.rds.questlog.presentation.model.AddArticlePayload
+import com.rds.questlog.presentation.model.ScrapeMode
+import com.rds.questlog.presentation.popup.Popup
+import com.rds.questlog.presentation.preview.PreviewData
 
-// Parameter sesuai kontrak route (screen_flow.md §2); dipakai saat layar nyata dibangun.
-@Suppress("UnusedParameter")
+/**
+ * S2. Tahap 1 memakai data dummy ([PreviewData]); penyimpanan dan data nyata menyusul di Tahap 2.
+ * [onSaved] dipanggil setelah form valid disimpan, sebelum kembali ke daftar.
+ */
 @Composable
-fun AddArticleScreen(mode: String, targetArticleId: Long?, navController: NavController) {
-    PlaceholderScreen(stringResource(R.string.placeholder_s2), stringResource(R.string.placeholder_s2_subtitle)) {
-        QlOutlineButton(stringResource(R.string.placeholder_back), { navController.popBackStack() })
-    }
+fun AddArticleScreen(
+    mode: String,
+    targetArticleId: Long?,
+    navController: NavController,
+    onShowPopup: (Popup) -> Unit,
+    onSaved: (AddArticlePayload) -> Unit,
+) {
+    AddArticleContent(
+        mode = ScrapeMode.fromRoute(mode),
+        targetArticleId = targetArticleId,
+        games = PreviewData.games,
+        articles = PreviewData.articles,
+        isPremium = false,
+        onBack = { navController.popBackStack() },
+        onSave = {
+            navController.popBackStack()
+            onSaved(it)
+        },
+        onOpenUnlock = { onShowPopup(Popup.Unlock) },
+    )
 }
