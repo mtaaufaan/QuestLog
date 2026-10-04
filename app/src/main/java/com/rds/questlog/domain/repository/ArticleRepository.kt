@@ -1,6 +1,8 @@
 package com.rds.questlog.domain.repository
 
 import com.rds.questlog.domain.model.Article
+import com.rds.questlog.domain.model.ContentNode
+import com.rds.questlog.domain.model.ReadMode
 import kotlinx.coroutines.flow.Flow
 
 interface ArticleRepository {
@@ -10,6 +12,15 @@ interface ArticleRepository {
      * dijalankan oleh database, bukan di memori.
      */
     fun observeArticles(query: String, gameId: Long?): Flow<List<Article>>
+
+    /** Stream satu artikel (null bila tidak ada); emit ulang tiap data artikelnya berubah. */
+    fun observeArticle(articleId: Long): Flow<Article?>
+
+    /** Stream seluruh konten artikel berurutan menurut display_order. */
+    fun observeContent(articleId: Long): Flow<List<ContentNode>>
+
+    /** Menyimpan mode baca artikel (per artikel, bukan app-wide). */
+    suspend fun setReadMode(articleId: Long, mode: ReadMode)
 
     /** Membuat artikel di [gameId] beserta halaman sumbernya (urutan = urutan [urls]); mengembalikan id artikel. */
     suspend fun insertArticle(gameId: Long, title: String, urls: List<String>): Long

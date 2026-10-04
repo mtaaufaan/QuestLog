@@ -33,6 +33,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.rds.questlog.R
 import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.model.ContentNodeType
@@ -50,6 +52,7 @@ import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.JetBrainsMono
 import com.rds.questlog.presentation.theme.Lora
 import com.rds.questlog.presentation.theme.QuestLogTheme
+import java.io.File
 import kotlin.math.roundToInt
 
 private const val MARK_MS = 300
@@ -103,7 +106,7 @@ private fun NodeBlock(node: ContentNodeUi, fs: Int, articleTitle: String) {
         )
         ContentNodeType.LI -> ListItem(node.text, fs)
         ContentNodeType.PRE -> Preformatted(node.text, fs)
-        ContentNodeType.IMG -> ImagePlaceholder(node.text)
+        ContentNodeType.IMG -> ImageBlock(node.text, node.imagePath)
         ContentNodeType.TABLE -> TableBlock(node, fs)
     }
 }
@@ -174,36 +177,61 @@ private fun Preformatted(text: String, fs: Int) {
     }
 }
 
-/** Tahap 1: placeholder bergaris + keterangan; gambar asli (Coil) menyusul di Tahap 2. Selalu proporsional 4:3. */
+/**
+ * Gambar tersimpan: selebar kolom dengan proporsi aslinya (tidak pernah melebihi lebar layar). Tanpa [imagePath]
+ * (mis. data dummy) tampil placeholder bergaris 4:3.
+ */
 @Composable
-private fun ImagePlaceholder(caption: String) {
+private fun ImageBlock(caption: String, imagePath: String?) {
+    val c = QuestLogTheme.colors
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 18.dp)) {
+        if (imagePath != null) {
+            AsyncImage(
+                model = File(imagePath),
+                contentDescription = caption.ifEmpty { null },
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier.fillMaxWidth().border(1.dp, c.divider).padding(1.dp),
+            )
+        } else {
+            ImagePlaceholder()
+        }
+        if (caption.isNotEmpty()) {
+            Text(
+                text = caption,
+                color = c.textSecondary,
+                modifier = Modifier.padding(top = 8.dp),
+                style = TextStyle(
+                    fontFamily = Lora,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    fontStyle = FontStyle.Italic,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ImagePlaceholder() {
     val c = QuestLogTheme.colors
     val bg = MaterialTheme.colorScheme.background
-    Column(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 18.dp)) {
-        Box(Modifier.fillMaxWidth().border(1.dp, c.divider).padding(1.dp).border(6.dp, c.surface)) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(4f / 3f)
-                    .padding(6.dp)
-                    .clipToBounds()
-                    .drawBehind { drawStripes(c.surface, c.hover) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.reader_image_placeholder),
-                    color = c.textSecondary,
-                    modifier = Modifier.background(bg).padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = TextStyle(fontFamily = JetBrainsMono, fontSize = 11.sp),
-                )
-            }
+    Box(Modifier.fillMaxWidth().border(1.dp, c.divider).padding(1.dp).border(6.dp, c.surface)) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(4f / 3f)
+                .padding(6.dp)
+                .clipToBounds()
+                .drawBehind { drawStripes(c.surface, c.hover) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.reader_image_placeholder),
+                color = c.textSecondary,
+                modifier = Modifier.background(bg).padding(horizontal = 8.dp, vertical = 4.dp),
+                style = TextStyle(fontFamily = JetBrainsMono, fontSize = 11.sp),
+            )
         }
-        Text(
-            text = caption,
-            color = c.textSecondary,
-            modifier = Modifier.padding(top = 8.dp),
-            style = TextStyle(fontFamily = Lora, fontSize = 13.sp, lineHeight = 18.sp, fontStyle = FontStyle.Italic),
-        )
     }
 }
 

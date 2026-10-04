@@ -60,7 +60,6 @@ fun QuestLogNavHost() {
                 val route = entry.toRoute<Reader>()
                 ReaderScreen(
                     articleId = route.articleId,
-                    resumeFrom = route.resumeFrom,
                     navController = navController,
                     activePopup = activePopup,
                     onShowPopup = { activePopup = it },

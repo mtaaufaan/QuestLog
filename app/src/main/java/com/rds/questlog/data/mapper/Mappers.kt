@@ -6,6 +6,7 @@ import com.rds.questlog.data.local.relation.GameWithCount
 import com.rds.questlog.domain.model.Article
 import com.rds.questlog.domain.model.Game
 import com.rds.questlog.domain.model.PageFailure
+import com.rds.questlog.domain.model.ReadMode
 import com.rds.questlog.domain.model.SourcePage
 import com.rds.questlog.domain.model.SourcePageStatus
 
@@ -48,6 +49,8 @@ internal fun ArticleWithDetails.toDomain() = Article(
     lastVisitedNodeId = checkpoint?.lastVisitedNodeId,
     lastReadAt = checkpoint?.lastReadAt,
     createdAt = article.createdAt,
+    checkpointFallbackOrder = checkpoint?.fallbackOrder,
+    readMode = article.readMode?.let { name -> ReadMode.entries.firstOrNull { it.name == name } },
 )
 
 internal fun GameWithCount.toDomain() = Game(id = id, name = name, createdAt = createdAt, articleCount = articleCount)
