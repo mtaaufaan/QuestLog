@@ -69,8 +69,9 @@ import com.rds.questlog.presentation.theme.QuestLogTheme
 
 /**
  * Isi layar S1 tanpa state sendiri; props dan callback mengikuti component-contract.md §1.
- * [articles] adalah SELURUH artikel: search ([query]) dan filter ([filterGameId]) diterapkan di sini
- * (seperti prototipe), jumlah "walkthrough" di subjudul tetap menghitung semuanya.
+ * [articles] adalah hasil yang SUDAH disaring database menurut [query] dan [filterGameId] (keduanya hanya untuk
+ * tampilan field/chip). Jumlah "walkthrough" di subjudul dan pilihan empty state memakai
+ * `GameUiModel.articleCount` (total seluruh artikel, bukan hasil saringan).
  */
 @Composable
 fun ArticleListContent(
@@ -89,13 +90,13 @@ fun ArticleListContent(
     onOpenUnlock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val visible = remember(articles, query, filterGameId) { filterArticles(articles, query, filterGameId) }
+    val totalArticles = games.sumOf { it.articleCount }
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             ArticleListHeader(
                 games = games,
-                totalArticles = articles.size,
-                visibleArticles = visible.size,
+                totalArticles = totalArticles,
+                visibleArticles = articles.size,
                 isPremium = isPremium,
                 query = query,
                 filterGameId = filterGameId,
@@ -104,7 +105,7 @@ fun ArticleListContent(
                 onOpenUnlock = onOpenUnlock,
             )
             LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 110.dp)) {
-                items(visible, key = { it.id }) { article ->
+                items(articles, key = { it.id }) { article ->
                     ArticleRow(
                         article = article,
                         onTap = { onArticleTap(article) },
@@ -112,8 +113,8 @@ fun ArticleListContent(
                         onOpenActions = { onOpenActions(article) },
                     )
                 }
-                if (visible.isEmpty()) {
-                    item { EmptyState(hasArticles = articles.isNotEmpty()) }
+                if (articles.isEmpty()) {
+                    item { EmptyState(hasArticles = totalArticles > 0) }
                 }
             }
         }
@@ -461,7 +462,9 @@ private fun PreviewContent(query: String, filterGameId: Long?, snackbar: String?
     QuestLogTheme {
         ArticleListContent(
             games = PreviewData.games,
-            articles = PreviewData.articles,
+            articles = PreviewData.articles
+                .filter { filterGameId == null || it.gameId == filterGameId }
+                .filter { it.title.contains(query, ignoreCase = true) },
             isPremium = false,
             query = query,
             filterGameId = filterGameId,

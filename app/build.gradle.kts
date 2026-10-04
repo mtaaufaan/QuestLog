@@ -60,6 +60,9 @@ android {
         buildConfig = true
     }
 
+    // Schema JSON dibaca MigrationTestHelper pada test migrasi.
+    sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -107,4 +110,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.okhttp.mockwebserver)
 }

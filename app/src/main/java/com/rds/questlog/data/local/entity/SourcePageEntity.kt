@@ -27,4 +27,6 @@ data class SourcePageEntity(
     @ColumnInfo(name = "order_start") val orderStart: Int? = null,
     /** Akhir slot display_order yang dipesan untuk page ini (mis. 1000, 2000, 3000). */
     @ColumnInfo(name = "order_end") val orderEnd: Int? = null,
+    /** Kode alasan gagal (mis. "HTTP:404", "TIMEOUT"); null bila tidak gagal. Ditambahkan di skema v2. */
+    @ColumnInfo(name = "failure_reason") val failureReason: String? = null,
 )

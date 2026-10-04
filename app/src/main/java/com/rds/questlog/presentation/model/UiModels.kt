@@ -10,6 +10,8 @@ enum class ReadMode { SEAMLESS, PAGED }
 data class GameUiModel(
     val id: Long,
     val name: String,
+    /** Jumlah artikel game ini; jumlahnya dipakai untuk total "walkthrough" dan opsi Game Filter Sheet. */
+    val articleCount: Int = 0,
 )
 
 /** Opsi di Game Filter Sheet; [count] = jumlah artikel game itu (component-contract.md §10). */
