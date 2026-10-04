@@ -43,6 +43,21 @@
     <string name="article_list_snackbar_scraping">Artikel masih diproses, harap tunggu</string>
     <string name="article_list_snackbar_deleted">Artikel dihapus</string>
     <string name="article_list_snackbar_retrying">Mengulang halaman yang gagal…</string>
+    <string name="article_list_snackbar_delete_failed">Gagal menghapus artikel. Coba lagi.</string>
+    <string name="article_list_snackbar_retry_failed">Gagal mengulang halaman. Coba lagi.</string>
+    <string name="article_list_snackbar_read_failed">Terjadi kesalahan membaca data.</string>
+
+    <!-- Alasan halaman gagal diunduh (PageFailureFormatter) -->
+    <string name="page_failure_http">HTTP %1$d — %2$s</string>
+    <string name="page_failure_http_forbidden">butuh login</string>
+    <string name="page_failure_http_not_found">halaman tidak ditemukan</string>
+    <string name="page_failure_http_server">server bermasalah</string>
+    <string name="page_failure_http_other">permintaan ditolak</string>
+    <string name="page_failure_timeout">Timeout — server tidak merespons</string>
+    <string name="page_failure_connection">Tidak bisa terhubung ke server</string>
+    <string name="page_failure_empty">Halaman tidak berisi konten yang bisa disimpan</string>
+    <string name="page_failure_too_long">Halaman terlalu panjang untuk disimpan</string>
+    <string name="page_failure_unknown">Terjadi kesalahan tak terduga</string>
 
     <!-- Article Actions Sheet -->
     <string name="article_actions_meta">%1$d dari %2$d halaman tersimpan</string>

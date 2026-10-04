@@ -29,6 +29,7 @@ complexity:
     ignoreAnnotated: ['Composable']
   TooManyFunctions:
     thresholdInFiles: 20 # file UI berisi banyak composable kecil
+    thresholdInClasses: 15 # parser berisi banyak fungsi privat kecil per jenis elemen
 
 comments:
   # KDoc wajib di UseCase dan Repository interface (coding_convention.md §7).

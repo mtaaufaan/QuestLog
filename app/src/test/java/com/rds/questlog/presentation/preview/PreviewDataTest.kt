@@ -19,6 +19,13 @@ class PreviewDataTest {
     }
 
     @Test
+    fun `jumlah artikel per game konsisten dengan daftar artikel`() {
+        PreviewData.games.forEach { game ->
+            assertEquals(PreviewData.articles.count { it.gameId == game.id }, game.articleCount)
+        }
+    }
+
+    @Test
     fun `tepat satu artikel partial dan artikel ERROR gagal total`() {
         val partial = PreviewData.articles.filter { it.isPartial }
         assertEquals(listOf(2L), partial.map { it.id })

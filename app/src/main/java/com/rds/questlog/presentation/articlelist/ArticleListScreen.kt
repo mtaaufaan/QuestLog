@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.GameFilterOption
 import com.rds.questlog.presentation.navigation.AddArticle
 import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
@@ -63,8 +64,9 @@ private fun ArticleListPopups(
 ) {
     when (activePopup) {
         Popup.GameFilter -> {
-            val options =
-                remember(uiState.games, uiState.articles) { gameFilterOptions(uiState.games, uiState.articles) }
+            val options = remember(uiState.games) {
+                uiState.games.map { GameFilterOption(it.id, it.name, it.articleCount) }
+            }
             GameFilterSheet(
                 games = options,
                 selectedId = uiState.selectedGameFilter,
