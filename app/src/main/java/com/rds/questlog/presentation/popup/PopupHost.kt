@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.rds.questlog.R
 import com.rds.questlog.presentation.components.QlBottomSheet
 import com.rds.questlog.presentation.components.QlGhostButton
+import com.rds.questlog.presentation.unlock.UnlockSheetHost
 
 /**
  * Merender popup aktif di atas layar. Popup S1 (GameFilter, ArticleActions, DeleteArticle, ScrapeError)
@@ -27,6 +28,7 @@ fun PopupHost(popup: Popup?, onDismiss: () -> Unit) {
         null, Popup.GameFilter, Popup.ScrapeMode, Popup.DisplaySettings, is Popup.ArticleActions,
         is Popup.DeleteArticle, is Popup.ScrapeError,
         -> Unit
+        Popup.Unlock -> UnlockSheetHost(onClose = onDismiss)
         else -> QlBottomSheet(onDismiss) { PlaceholderBody(popup.nameRes(), onDismiss) }
     }
 }
