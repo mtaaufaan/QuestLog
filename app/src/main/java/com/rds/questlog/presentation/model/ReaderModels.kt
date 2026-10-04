@@ -16,4 +16,6 @@ data class ContentNodeUi(
     val text: String = "",
     val head: List<String> = emptyList(),
     val rows: List<List<String>> = emptyList(),
+    /** File gambar lokal untuk IMG; null = tampilkan placeholder. */
+    val imagePath: String? = null,
 )

@@ -188,6 +188,7 @@
     <string name="reader_snackbar_checkpoint_updated">Checkpoint diperbarui ke posisi ini</string>
     <string name="reader_snackbar_resume_last">Melanjutkan dari posisi terakhir</string>
     <string name="reader_snackbar_resume_checkpoint">Lanjut dari checkpoint</string>
+    <string name="reader_snackbar_save_failed">Gagal menyimpan. Coba lagi.</string>
     <string name="reader_snackbar_nearest">%1$s (elemen terdekat)</string>
 
     <!-- Display Settings Sheet -->

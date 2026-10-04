@@ -21,13 +21,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -52,10 +52,8 @@ import com.rds.questlog.presentation.preview.ReaderPreviewData
 import com.rds.questlog.presentation.theme.Lora
 import com.rds.questlog.presentation.theme.QuestLogTheme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private const val TOAST_MS = 2_400L
-private const val RETRY_DEMO_MS = 1_500L
 private const val FULL = 100
 
 /** Pemicu auto-scroll: [nodeId] tujuan dan pesan snackbar (null = tanpa pesan, mis. saat ganti mode). */
@@ -64,9 +62,10 @@ private data class Jump(val nodeId: Long, val messageRes: Int?)
 private data class Toast(val text: String, val serial: Int)
 
 /**
- * Layar baca (component-contract.md §3) dengan 5 [viewState]. Posisi (mode, halaman, checkpoint) dipegang di sini
- * seperti prototipe; penyimpanan nyata (checkpoint, last position, DataStore) menyusul di Tahap 2.
- * [content] = blok per halaman sumber (indeks = urutan halaman, kosong untuk halaman gagal).
+ * Layar baca (component-contract.md §3) dengan 5 [viewState]. State baca (mode, halaman, posisi scroll) dipegang di
+ * sini; [article]/[content] selalu data terbaru dari database, sedangkan penyimpanan checkpoint, posisi terakhir,
+ * mode baca, dan retry dilakukan pemanggil lewat callback. Auto-scroll ke [resumeNodeId] hanya sekali, saat konten
+ * pertama kali tampil. [content] = blok per halaman sumber (kosong untuk halaman gagal).
  */
 @Composable
 fun ReaderContent(
@@ -136,8 +135,9 @@ private fun ColumnScope.SuccessBody(
     onModeChange: (ReadMode) -> Unit,
     onRetryFailed: () -> Unit,
 ) {
-    val failed = article.pages.count { it.status == PageStatus.FAILED }
-    val scope = rememberCoroutineScope()
+    // Halaman belum selesai = gagal atau sedang diulang; spinner tampil selama ada yang diproses ulang.
+    val unfinished = article.pages.count { it.status != PageStatus.DONE }
+    val retrying = article.pages.any { it.status == PageStatus.PENDING }
     ReaderModeBar(
         mode = state.mode,
         positionLabel = if (state.paged) {
@@ -147,16 +147,7 @@ private fun ColumnScope.SuccessBody(
         },
         onModeChange = { state.changeMode(it, onModeChange) },
     )
-    if (failed > 0) {
-        PartialBanner(failed, state.retrying) {
-            state.retrying = true
-            scope.launch {
-                delay(RETRY_DEMO_MS)
-                state.retrying = false
-                onRetryFailed()
-            }
-        }
-    }
+    if (unfinished > 0) PartialBanner(unfinished, retrying, onRetryFailed)
     LazyColumn(
         state = state.listState,
         modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -205,20 +196,23 @@ private fun ColumnScope.SuccessBody(
 /** State dan perilaku scroll Reader; dipisah dari tampilan agar [ReaderContent] tetap ringkas. */
 @Stable
 private class ReaderState(
-    val article: ArticleUiModel,
-    val content: List<List<ContentNodeUi>>,
+    initialArticle: ArticleUiModel,
+    initialContent: List<List<ContentNodeUi>>,
     val listState: LazyListState,
     private val res: Resources,
 ) {
-    var mode by mutableStateOf(article.readMode ?: ReadMode.SEAMLESS)
+    /** Selalu data terbaru dari database; state baca (mode, halaman, posisi) tetap bertahan saat data berubah. */
+    var article by mutableStateOf(initialArticle)
+    var content by mutableStateOf(initialContent)
+    private var modeOverride by mutableStateOf<ReadMode?>(null)
     var pageIndex by mutableIntStateOf(0)
-    var checkpoint by mutableStateOf(article.checkpointNodeId)
-    var retrying by mutableStateOf(false)
     var toast by mutableStateOf<Toast?>(null)
     var lastNodeId by mutableStateOf<Long?>(null)
     var jump by mutableStateOf<Jump?>(null)
     private var toastSerial = 0
 
+    val mode get() = modeOverride ?: article.readMode ?: ReadMode.SEAMLESS
+    val checkpoint get() = article.checkpointNodeId
     val paged get() = mode == ReadMode.PAGED
     val okCount get() = okPageIndexes(article).size
     val rows get() = readerRows(article, content, paged, pageIndex)
@@ -244,7 +238,7 @@ private class ReaderState(
     fun changeMode(newMode: ReadMode, onModeChange: (ReadMode) -> Unit) {
         if (newMode == mode) return
         val keep = currentNodeId() ?: lastNodeId
-        mode = newMode
+        modeOverride = newMode
         onModeChange(newMode)
         keep?.let { jump = Jump(it, null) }
     }
@@ -262,7 +256,6 @@ private class ReaderState(
             R.string.reader_snackbar_checkpoint_saved
         }
         showToast(message)
-        checkpoint = id
         onSetCheckpoint(id)
     }
 
@@ -301,7 +294,11 @@ private fun rememberReaderState(
 ): ReaderState {
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
-    val state = remember(article, content) { ReaderState(article, content, listState, res) }
+    val state = remember(article.id) { ReaderState(article, content, listState, res) }
+    SideEffect {
+        state.article = article
+        state.content = content
+    }
 
     LaunchedEffect(state.toast) {
         if (state.toast != null) {

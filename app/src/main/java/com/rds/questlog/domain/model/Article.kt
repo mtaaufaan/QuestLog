@@ -14,6 +14,10 @@ data class Article(
     val lastVisitedNodeId: Long?,
     val lastReadAt: Long?,
     val createdAt: Long,
+    /** display_order anchor checkpoint; cadangan bila node anchor sudah tidak ada. */
+    val checkpointFallbackOrder: Int? = null,
+    /** Mode baca terakhir artikel ini; null = belum pernah dipilih (anggap SEAMLESS). */
+    val readMode: ReadMode? = null,
 ) {
     val status: ScrapingStatus get() = pages.toScrapingStatus()
 }
