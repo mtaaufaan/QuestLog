@@ -15,6 +15,19 @@ object QlIcons {
     val ChevronDown = lineIcon("ChevronDown", 1.8f, "m6 9 6 6 6-6")
     val ChevronRight = lineIcon("ChevronRight", 1.6f, "m9 18 6-6-6-6")
     val Plus = lineIcon("Plus", 1.6f, "M5 12h14", "M12 5v14")
+    val PlusSmall = lineIcon("PlusSmall", 2f, "M5 12h14", "M12 5v14")
+    val ArrowLeft = lineIcon("ArrowLeft", 1.7f, "m12 19-7-7 7-7", "M19 12H5")
+    val Check = lineIcon("Check", 1.8f, "M20 6 9 17l-5-5")
+    val ChevronUp = lineIcon("ChevronUp", 2f, "m18 15-6-6-6 6")
+    val ChevronDownSmall = lineIcon("ChevronDownSmall", 2f, "m6 9 6 6 6-6")
+    val FilePlus = lineIcon(
+        "FilePlus",
+        1.6f,
+        "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",
+        "M14 2v4a2 2 0 0 0 2 2h4",
+        "M9 15h6",
+        "M12 18v-6",
+    )
     val Lock = lineIcon(
         "Lock",
         2f,
