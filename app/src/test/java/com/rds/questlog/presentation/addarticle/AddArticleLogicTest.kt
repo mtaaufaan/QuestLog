@@ -51,13 +51,13 @@ class AddArticleLogicTest {
 
     @Test
     fun urlErrors_formatAndDuplicate() {
-        val errors = urlErrors(listOf("https://a.com", "http://x.com", "https://a.com", ""), emptyList(), 0, false)
+        val errors = urlErrors(listOf("https://a.com", "http://x.com", "https://a.com", ""), UrlScope(), false)
         assertNull(errors[0])
         assertEquals(UrlError.InvalidFormat, errors[1])
         assertEquals(UrlError.DuplicateOf(1), errors[2])
         assertNull(errors[3])
-        assertEquals(UrlError.Empty, urlErrors(listOf("https://a.com", ""), emptyList(), 0, true)[1])
-        assertEquals(UrlError.NoUrls, urlErrors(listOf(""), emptyList(), 0, true)[0])
+        assertEquals(UrlError.Empty, urlErrors(listOf("https://a.com", ""), UrlScope(), true)[1])
+        assertEquals(UrlError.NoUrls, urlErrors(listOf(""), UrlScope(), true)[0])
     }
 
     @Test

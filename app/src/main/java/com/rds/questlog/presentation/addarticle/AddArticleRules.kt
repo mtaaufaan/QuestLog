@@ -55,38 +55,47 @@ sealed interface UrlError {
     data object InvalidFormat : UrlError
     data class DuplicateOf(val page: Int) : UrlError
     data class ExistsInArticle(val page: Int) : UrlError
+
+    /** Sudah tersimpan di artikel lain. */
+    data object StoredElsewhere : UrlError
+}
+
+/** Konteks pembanding URL: halaman artikel target ([existing]), semua URL tersimpan ([stored]), dan nomor awal. */
+class UrlScope(val existing: List<String> = emptyList(), val stored: Set<String> = emptySet(), val pageOffset: Int = 0)
+
+/** Semua URL halaman sumber yang sudah tersimpan di artikel mana pun. */
+fun storedUrls(articles: List<ArticleUiModel>): Set<String> = articles.flatMap { a -> a.pages.map { it.url } }.toSet()
+
+fun urlScope(form: AddArticleForm, articles: List<ArticleUiModel>): UrlScope {
+    val target = targetArticle(form, articles)
+    return UrlScope(target?.pages?.map { it.url }.orEmpty(), storedUrls(articles), urlPageOffset(target))
 }
 
 /**
  * Error per baris URL (kunci = indeks baris). Format dan duplikat dicek langsung saat mengetik; "tidak boleh kosong"
- * dan "minimal 1 URL" hanya bila [forSave]. Duplikat terhadap database menyusul bersama logika Tahap 2.
+ * dan "minimal 1 URL" hanya bila [forSave]. URL yang sudah tersimpan (artikel target atau lain) juga ditolak.
  */
-fun urlErrors(urls: List<String>, existingUrls: List<String>, pageOffset: Int, forSave: Boolean): Map<Int, UrlError> {
+fun urlErrors(urls: List<String>, scope: UrlScope, forSave: Boolean): Map<Int, UrlError> {
     val trimmed = urls.map { it.trim() }
     val errors = mutableMapOf<Int, UrlError>()
     if (forSave && trimmed.none { it.isNotEmpty() }) errors[0] = UrlError.NoUrls
     trimmed.forEachIndexed { index, url ->
         errors.putIfAbsent(
             index,
-            urlErrorFor(index, trimmed, existingUrls, pageOffset, forSave) ?: return@forEachIndexed,
+            urlErrorFor(index, trimmed, scope, forSave) ?: return@forEachIndexed,
         )
     }
     return errors
 }
 
-private fun urlErrorFor(
-    index: Int,
-    all: List<String>,
-    existingUrls: List<String>,
-    pageOffset: Int,
-    forSave: Boolean,
-): UrlError? {
+private fun urlErrorFor(index: Int, all: List<String>, scope: UrlScope, forSave: Boolean): UrlError? {
     val url = all[index]
     return when {
         url.isEmpty() -> if (forSave && all.any { it.isNotEmpty() }) UrlError.Empty else null
         !VALID_URL.matches(url) -> UrlError.InvalidFormat
-        all.indexOf(url) < index -> UrlError.DuplicateOf(pageOffset + all.indexOf(url) + 1)
-        url in existingUrls -> UrlError.ExistsInArticle(existingUrls.indexOf(url) + 1)
+        all.indexOf(url) < index -> UrlError.DuplicateOf(scope.pageOffset + all.indexOf(url) + 1)
+        url in scope.existing -> UrlError.ExistsInArticle(scope.existing.indexOf(url) + 1)
+        url in scope.stored -> UrlError.StoredElsewhere
         else -> null
     }
 }
@@ -117,7 +126,7 @@ fun validate(form: AddArticleForm, articles: List<ArticleUiModel>): FormErrors {
         game = game,
         title = isNew && form.title.isBlank(),
         target = !isNew && target == null,
-        urls = urlErrors(form.urls, target?.pages?.map { it.url }.orEmpty(), urlPageOffset(target), forSave = true),
+        urls = urlErrors(form.urls, urlScope(form, articles), forSave = true),
     )
 }
 

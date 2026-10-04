@@ -350,6 +350,7 @@ private fun UrlRow(
 private fun urlErrorText(error: UrlError): String = when (error) {
     UrlError.NoUrls -> stringResource(R.string.add_article_error_url_none)
     UrlError.Empty -> stringResource(R.string.add_article_error_url_empty)
+    UrlError.StoredElsewhere -> stringResource(R.string.add_article_error_url_stored)
     UrlError.InvalidFormat -> stringResource(R.string.add_article_error_url_invalid)
     is UrlError.DuplicateOf -> stringResource(R.string.add_article_error_url_duplicate, error.page)
     is UrlError.ExistsInArticle -> stringResource(R.string.add_article_error_url_exists, error.page)
