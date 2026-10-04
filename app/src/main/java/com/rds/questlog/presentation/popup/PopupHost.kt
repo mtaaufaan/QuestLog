@@ -14,19 +14,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rds.questlog.R
 import com.rds.questlog.presentation.components.QlBottomSheet
-import com.rds.questlog.presentation.components.QlDialog
 import com.rds.questlog.presentation.components.QlGhostButton
 
 /**
- * Merender popup aktif di atas layar. Sprint 0: isi hanya nama popup; UI nyata diisi per sprint.
- * Dismiss (scrim / back / Tutup) selalu menutup lewat [onDismiss].
+ * Merender popup aktif di atas layar. Popup S1 (GameFilter, ArticleActions, DeleteArticle, ScrapeError)
+ * sudah nyata dan dirender oleh ArticleListScreen; sisanya masih placeholder berisi nama popup,
+ * diisi per sprint. Dismiss (scrim / back / Tutup) selalu menutup lewat [onDismiss].
  */
 @Composable
 fun PopupHost(popup: Popup?, onDismiss: () -> Unit) {
     when (popup) {
-        null -> Unit
-        is Popup.DeleteArticle, is Popup.ScrapeError ->
-            QlDialog(onDismiss) { PlaceholderBody(popup.nameRes(), onDismiss) }
+        null, Popup.GameFilter, is Popup.ArticleActions, is Popup.DeleteArticle, is Popup.ScrapeError -> Unit
         else -> QlBottomSheet(onDismiss) { PlaceholderBody(popup.nameRes(), onDismiss) }
     }
 }

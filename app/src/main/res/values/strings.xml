@@ -2,18 +2,13 @@
 <resources>
     <string name="app_name">QuestLog</string>
 
-    <!-- Layar placeholder Sprint 0 -->
-    <string name="placeholder_s1">Layar S1</string>
+    <!-- Layar placeholder (S2 dan S3 menunggu sprint berikutnya) -->
     <string name="placeholder_s2">Layar S2</string>
     <string name="placeholder_s3">Layar S3</string>
-    <string name="placeholder_s1_subtitle">Article List — belum ada fitur</string>
     <string name="placeholder_s2_subtitle">Add Article — belum ada fitur</string>
     <string name="placeholder_s3_subtitle">Reader — belum ada fitur</string>
-    <string name="placeholder_go_add_article">Ke Layar S2</string>
-    <string name="placeholder_go_reader">Ke Layar S3</string>
     <string name="placeholder_back">Kembali</string>
     <string name="placeholder_open_sheet">Uji bottom sheet</string>
-    <string name="placeholder_open_dialog">Uji dialog</string>
 
     <!-- Popup placeholder (screen_flow.md §4) -->
     <string name="popup_close">Tutup</string>
@@ -24,4 +19,56 @@
     <string name="popup_unlock">Unlock Sheet</string>
     <string name="popup_game_filter">Game Filter Sheet</string>
     <string name="popup_display_settings">Display Settings Sheet</string>
+
+    <!-- S1 Article List -->
+    <string name="article_list_subtitle">%1$d walkthrough · tersedia offline</string>
+    <string name="article_list_tier_free">%1$d/2 game</string>
+    <string name="article_list_tier_unlimited">Unlimited</string>
+    <string name="article_list_search_hint">Cari judul artikel</string>
+    <string name="article_list_search_clear">Hapus pencarian</string>
+    <string name="article_list_filter_all">Semua Game</string>
+    <string name="article_list_count">%1$d artikel</string>
+    <string name="article_list_meta">%1$s halaman · %2$s</string>
+    <string name="article_list_meta_unread">belum dibaca</string>
+    <string name="article_list_partial">%1$d halaman gagal</string>
+    <string name="article_list_progress">Memproses… %1$d/%2$d</string>
+    <string name="article_list_error_row">Gagal — tap untuk retry</string>
+    <string name="article_list_resume">Lanjutkan Baca</string>
+    <string name="article_list_actions">Aksi artikel</string>
+    <string name="article_list_add">Simpan walkthrough baru</string>
+    <string name="article_list_empty_none_title">Belum ada walkthrough</string>
+    <string name="article_list_empty_none_body">Tap ＋ untuk menyimpan walkthrough pertama. Kontennya bisa dibaca tanpa internet.</string>
+    <string name="article_list_empty_nomatch_title">Tidak ada yang cocok</string>
+    <string name="article_list_empty_nomatch_body">Coba kata kunci lain atau tampilkan semua game.</string>
+    <string name="article_list_snackbar_scraping">Artikel masih diproses, harap tunggu</string>
+    <string name="article_list_snackbar_deleted">Artikel dihapus</string>
+    <string name="article_list_snackbar_retrying">Mengulang halaman yang gagal…</string>
+
+    <!-- Article Actions Sheet -->
+    <string name="article_actions_meta">%1$d dari %2$d halaman tersimpan</string>
+    <string name="article_actions_resume">Lanjutkan dari checkpoint</string>
+    <string name="article_actions_open">Buka artikel</string>
+    <string name="article_actions_append">Tambah halaman</string>
+    <string name="article_actions_append_hint">Ditambahkan di akhir artikel</string>
+    <string name="article_actions_delete">Hapus artikel</string>
+
+    <!-- Delete Article Dialog -->
+    <string name="delete_article_title">Hapus artikel ini?</string>
+    <string name="delete_article_body">Semua konten yang sudah diunduh akan ikut terhapus, termasuk checkpoint.</string>
+    <string name="delete_article_cancel">Batal</string>
+    <string name="delete_article_confirm">Hapus</string>
+
+    <!-- Scrape Error Dialog -->
+    <string name="scrape_error_kicker_all">Gagal diunduh</string>
+    <string name="scrape_error_kicker_partial">Belum lengkap</string>
+    <string name="scrape_error_body_all">Semua halaman gagal diunduh. Periksa koneksi atau URL sumber, lalu coba lagi.</string>
+    <string name="scrape_error_body_partial">%1$d dari %2$d halaman gagal dimuat. Konten lain tetap bisa dibaca.</string>
+    <string name="scrape_error_page">Hal. %1$d</string>
+    <string name="scrape_error_note">Hanya halaman yang gagal yang diunduh ulang.</string>
+    <string name="scrape_error_delete">Hapus</string>
+    <string name="scrape_error_close">Tutup</string>
+    <string name="scrape_error_retry">Coba Lagi</string>
+
+    <!-- Game Filter Sheet -->
+    <string name="game_filter_title">Filter per game</string>
 </resources>
