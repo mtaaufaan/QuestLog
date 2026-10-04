@@ -24,6 +24,12 @@ data class AddArticlePayload(
     val targetArticleId: Long?,
 )
 
+/**
+ * Pekerjaan scraping yang baru dijadwalkan. [skipPages] = jumlah halaman yang sudah ada sebelumnya (mode Lengkapi),
+ * agar progres notifikasi hanya menghitung halaman yang baru ditambahkan.
+ */
+data class ScrapeJob(val articleId: Long, val skipPages: Int)
+
 /** Empat varian Scrape Notification (component-contract.md §8). */
 enum class ScrapeNotificationKind { PROGRESS, DONE, PARTIAL, ERROR }
 

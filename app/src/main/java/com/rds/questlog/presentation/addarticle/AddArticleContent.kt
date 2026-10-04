@@ -77,14 +77,14 @@ fun AddArticleContent(
     onSave: (AddArticlePayload) -> Unit,
     onOpenUnlock: () -> Unit,
     modifier: Modifier = Modifier,
+    submitError: String? = null,
 ) {
     var form by rememberSaveable(stateSaver = AddArticleFormSaver) {
         mutableStateOf(AddArticleForm(mode = mode, targetId = targetArticleId))
     }
     val target = targetArticle(form, articles)
     val errors = if (form.showErrors) validate(form, articles) else FormErrors()
-    val urlErrors =
-        urlErrors(form.urls, target?.pages?.map { it.url }.orEmpty(), urlPageOffset(target), form.showErrors)
+    val urlErrors = urlErrors(form.urls, urlScope(form, articles), form.showErrors)
     val limitText = when {
         articleLimitReached(form, articles, isPremium) -> R.string.add_article_limit_article
         gameLimitReached(form, games, isPremium) -> R.string.add_article_limit_game
@@ -138,6 +138,7 @@ fun AddArticleContent(
         }
         AddArticleFooter(
             limitText = limitText?.let { stringResource(it) },
+            submitError = submitError,
             isNew = form.mode == ScrapeMode.NEW,
             saving = form.saving,
             saveEnabled = !form.saving && limitText == null,
@@ -230,6 +231,7 @@ private fun TitleField(title: String, hasError: Boolean, onChange: (String) -> U
 @Composable
 private fun AddArticleFooter(
     limitText: String?,
+    submitError: String?,
     isNew: Boolean,
     saving: Boolean,
     saveEnabled: Boolean,
@@ -247,6 +249,13 @@ private fun AddArticleFooter(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (limitText != null) LimitBanner(limitText, onUpgrade)
+            if (submitError != null) {
+                Text(
+                    text = submitError,
+                    color = QuestLogTheme.colors.danger,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.5.sp),
+                )
+            }
             SaveButton(
                 label = when {
                     saving -> stringResource(R.string.add_article_saving)

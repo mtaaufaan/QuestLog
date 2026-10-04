@@ -47,6 +47,31 @@ class ArticleRepositoryImpl @Inject constructor(
         articleId
     }
 
+    override suspend fun appendPages(articleId: Long, urls: List<String>) {
+        db.withTransaction {
+            val slot = ScrapeLimits.MAX_NODES_PER_PAGE
+            val lastOrder = pageDao.maxPageOrder(articleId)
+            // Artikel lama tanpa slot tercatat: pakai slot baku (nomor halaman × slot).
+            val lastEnd = pageDao.maxOrderEnd(articleId).takeIf { it > 0 } ?: (lastOrder * slot)
+            pageDao.insertAll(
+                urls.mapIndexed { index, url ->
+                    SourcePageEntity(
+                        articleId = articleId,
+                        sourceUrl = url,
+                        pageOrder = lastOrder + index + 1,
+                        orderStart = lastEnd + index * slot + 1,
+                        orderEnd = lastEnd + (index + 1) * slot,
+                    )
+                },
+            )
+            articleDao.setScrapingDone(articleId, false)
+        }
+    }
+
+    override suspend fun countForGame(gameId: Long): Int = articleDao.countByGame(gameId)
+
+    override suspend fun findStoredUrls(urls: List<String>): Set<String> = pageDao.findStoredUrls(urls).toSet()
+
     override suspend fun deleteArticle(articleId: Long) {
         val filenames = imageDao.filenamesOf(articleId)
         db.withTransaction { articleDao.delete(articleId) }

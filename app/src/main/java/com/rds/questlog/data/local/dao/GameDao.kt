@@ -20,6 +20,9 @@ interface GameDao {
     @Query("SELECT * FROM games WHERE title = :title COLLATE NOCASE LIMIT 1")
     suspend fun findByTitle(title: String): GameEntity?
 
+    @Query("SELECT COUNT(*) FROM games")
+    suspend fun count(): Int
+
     @Insert
     suspend fun insert(game: GameEntity): Long
 }

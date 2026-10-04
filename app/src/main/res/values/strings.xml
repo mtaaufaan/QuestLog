@@ -5,12 +5,12 @@
     <!-- Layar placeholder (S2 dan S3 menunggu sprint berikutnya) -->
     <string name="placeholder_s2">Layar S2</string>
     <string name="placeholder_s3">Layar S3</string>
-    <string name="placeholder_s2_subtitle">Add Article â€” belum ada fitur</string>
-    <string name="placeholder_s3_subtitle">Reader â€” belum ada fitur</string>
+    <string name="placeholder_s2_subtitle">Add Article — belum ada fitur</string>
+    <string name="placeholder_s3_subtitle">Reader — belum ada fitur</string>
     <string name="placeholder_back">Kembali</string>
     <string name="placeholder_open_sheet">Uji bottom sheet</string>
 
-    <!-- Popup placeholder (screen_flow.md Â§4) -->
+    <!-- Popup placeholder (screen_flow.md §4) -->
     <string name="popup_close">Tutup</string>
     <string name="popup_scrape_mode">Scrape Mode Sheet</string>
     <string name="popup_article_actions">Article Actions Sheet</string>
@@ -21,39 +21,39 @@
     <string name="popup_display_settings">Display Settings Sheet</string>
 
     <!-- S1 Article List -->
-    <string name="article_list_subtitle">%1$d walkthrough Â· tersedia offline</string>
+    <string name="article_list_subtitle">%1$d walkthrough · tersedia offline</string>
     <string name="article_list_tier_free">%1$d/2 game</string>
     <string name="article_list_tier_unlimited">Unlimited</string>
     <string name="article_list_search_hint">Cari judul artikel</string>
     <string name="article_list_search_clear">Hapus pencarian</string>
     <string name="article_list_filter_all">Semua Game</string>
     <string name="article_list_count">%1$d artikel</string>
-    <string name="article_list_meta">%1$s halaman Â· %2$s</string>
+    <string name="article_list_meta">%1$s halaman · %2$s</string>
     <string name="article_list_meta_unread">belum dibaca</string>
     <string name="article_list_partial">%1$d halaman gagal</string>
-    <string name="article_list_progress">Memprosesâ€¦ %1$d/%2$d</string>
-    <string name="article_list_error_row">Gagal â€” tap untuk retry</string>
+    <string name="article_list_progress">Memproses… %1$d/%2$d</string>
+    <string name="article_list_error_row">Gagal — tap untuk retry</string>
     <string name="article_list_resume">Lanjutkan Baca</string>
     <string name="article_list_actions">Aksi artikel</string>
     <string name="article_list_add">Simpan walkthrough baru</string>
     <string name="article_list_empty_none_title">Belum ada walkthrough</string>
-    <string name="article_list_empty_none_body">Tap ï¼‹ untuk menyimpan walkthrough pertama. Kontennya bisa dibaca tanpa internet.</string>
+    <string name="article_list_empty_none_body">Tap ＋ untuk menyimpan walkthrough pertama. Kontennya bisa dibaca tanpa internet.</string>
     <string name="article_list_empty_nomatch_title">Tidak ada yang cocok</string>
     <string name="article_list_empty_nomatch_body">Coba kata kunci lain atau tampilkan semua game.</string>
     <string name="article_list_snackbar_scraping">Artikel masih diproses, harap tunggu</string>
     <string name="article_list_snackbar_deleted">Artikel dihapus</string>
-    <string name="article_list_snackbar_retrying">Mengulang halaman yang gagalâ€¦</string>
+    <string name="article_list_snackbar_retrying">Mengulang halaman yang gagal…</string>
     <string name="article_list_snackbar_delete_failed">Gagal menghapus artikel. Coba lagi.</string>
     <string name="article_list_snackbar_retry_failed">Gagal mengulang halaman. Coba lagi.</string>
     <string name="article_list_snackbar_read_failed">Terjadi kesalahan membaca data.</string>
 
     <!-- Alasan halaman gagal diunduh (PageFailureFormatter) -->
-    <string name="page_failure_http">HTTP %1$d â€” %2$s</string>
+    <string name="page_failure_http">HTTP %1$d — %2$s</string>
     <string name="page_failure_http_forbidden">butuh login</string>
     <string name="page_failure_http_not_found">halaman tidak ditemukan</string>
     <string name="page_failure_http_server">server bermasalah</string>
     <string name="page_failure_http_other">permintaan ditolak</string>
-    <string name="page_failure_timeout">Timeout â€” server tidak merespons</string>
+    <string name="page_failure_timeout">Timeout — server tidak merespons</string>
     <string name="page_failure_connection">Tidak bisa terhubung ke server</string>
     <string name="page_failure_empty">Halaman tidak berisi konten yang bisa disimpan</string>
     <string name="page_failure_too_long">Halaman terlalu panjang untuk disimpan</string>
@@ -115,6 +115,9 @@
     <string name="add_article_error_url_invalid">URL tidak valid — harus diawali https://</string>
     <string name="add_article_error_url_duplicate">URL duplikat — sama dengan Hal. %1$d</string>
     <string name="add_article_error_url_exists">URL sudah ada di artikel ini (Hal. %1$d)</string>
+    <string name="add_article_error_url_stored">URL sudah tersimpan di artikel lain</string>
+    <string name="add_article_submit_duplicate">Ada URL yang sudah tersimpan atau duplikat. Periksa daftar URL.</string>
+    <string name="add_article_submit_failed">Gagal menyimpan. Coba lagi.</string>
     <string name="add_article_target_pages">%1$d hal.</string>
     <string name="add_article_append_note_target">Halaman baru ditambahkan setelah Hal. %1$d (append-only). Checkpoint yang ada tetap valid.</string>
     <string name="add_article_append_note_none">Pilih artikel dulu. Halaman baru selalu ditaruh di akhir.</string>
