@@ -17,8 +17,8 @@ data class DisplayPreferences(
 }
 
 /**
- * Satu blok konten tersimpan. [imagePath] (IMG) = file gambar lokal; [tableRows] (TABLE) = baris sel, baris pertama
- * dipakai sebagai header. [displayOrder] menentukan urutan baca dan menjadi cadangan anchor checkpoint.
+ * Satu blok konten tersimpan. [imagePath] (IMG) = file gambar lokal; [tableRows] (TABLE) = baris berisi sel (dengan
+ * colspan dan penanda header). [displayOrder] menentukan urutan baca dan menjadi cadangan anchor checkpoint.
  */
 data class ContentNode(
     val id: Long,
@@ -27,8 +27,11 @@ data class ContentNode(
     val displayOrder: Int,
     val text: String = "",
     val imagePath: String? = null,
-    val tableRows: List<List<String>> = emptyList(),
+    val tableRows: List<List<TableCell>> = emptyList(),
 )
+
+/** Satu sel tabel: teks, lebar dalam kolom ([colSpan], minimal 1), dan apakah sel judul (th). */
+data class TableCell(val text: String, val colSpan: Int = 1, val isHeader: Boolean = false)
 
 /** Artikel beserta seluruh kontennya, berurutan menurut [ContentNode.displayOrder]. */
 data class ArticleDetail(val article: Article, val nodes: List<ContentNode>)

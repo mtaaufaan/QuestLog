@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.Ksoup
 import com.rds.questlog.data.local.entity.ContentNodeEntity
 import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.NodeType
+import com.rds.questlog.domain.model.TableCell
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -31,10 +32,29 @@ internal fun ContentNodeEntity.toDomain(): ContentNode {
     )
 }
 
-/** Baris tabel (sel th/td per tr, teks saja); baris tanpa sel dibuang. */
-internal fun parseTableRows(html: String): List<List<String>> = Ksoup.parse(html).select("tr")
-    .map { row -> row.select("th, td").map { it.text().trim() } }
-    .filter { it.isNotEmpty() }
+/**
+ * Baris tabel: sel th/td (teks saja) dengan colspan dan penanda header. Hanya baris milik tabel ini; baris dari
+ * tabel bersarang tidak ikut sehingga tidak ganda. Baris tanpa sel dibuang.
+ */
+internal fun parseTableRows(html: String): List<List<TableCell>> {
+    val table = Ksoup.parse(html).selectFirst("table") ?: return emptyList()
+    return table.select("tr")
+        .filter { row -> row.parents().firstOrNull { it.tagName().equals("table", ignoreCase = true) } == table }
+        .map { row ->
+            row.children()
+                .filter { it.tagName().equals("th", ignoreCase = true) || it.tagName().equals("td", ignoreCase = true) }
+                .map { cell ->
+                    TableCell(
+                        text = cell.text().trim(),
+                        colSpan = cell.attr("colspan").toIntOrNull()?.coerceIn(1, MAX_COLSPAN) ?: 1,
+                        isHeader = cell.tagName().equals("th", ignoreCase = true),
+                    )
+                }
+        }
+        .filter { it.isNotEmpty() }
+}
+
+private const val MAX_COLSPAN = 50
 
 private fun JSONObject.optStringOrNull(key: String): String? = try {
     getString(key).takeIf { it.isNotBlank() }
