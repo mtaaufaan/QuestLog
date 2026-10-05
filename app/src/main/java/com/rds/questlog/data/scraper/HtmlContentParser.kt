@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.domain.model.NodeType
 import javax.inject.Inject
 
@@ -53,7 +54,7 @@ class HtmlContentParser @Inject constructor() {
         for (node in container.childNodes()) {
             when {
                 node is TextNode -> inline.append(node.text())
-                node is Element && node.isInline() -> inline.append(' ').append(node.text()).append(' ')
+                node is Element && node.isInline() -> inline.append(' ').append(node.inlineText()).append(' ')
                 node is Element -> {
                     emitParagraph(inline.toString(), out)
                     inline.clear()
@@ -70,7 +71,7 @@ class HtmlContentParser @Inject constructor() {
             "h2" -> emitHeading(NodeType.H2, element, out)
             "h3", "h4", "h5", "h6" -> emitHeading(NodeType.H3, element, out)
             in PARAGRAPH_TAGS -> {
-                emitParagraph(element.text(), out)
+                emitParagraph(element.inlineText(), out)
                 element.select("img").forEach { emitImage(it, out) }
             }
             "ul", "ol" -> emitListItems(element, out)
@@ -86,8 +87,8 @@ class HtmlContentParser @Inject constructor() {
     private fun emitListItems(list: Element, out: MutableList<ParsedNode>) {
         for (item in list.children()) {
             if (!item.tagName().equals("li", ignoreCase = true)) continue
-            val text = normalize(item.text())
-            if (text.isNotEmpty()) out += ParsedNode(NodeType.LI, text)
+            val text = normalize(item.inlineText())
+            if (InlineMarkup.strip(text).isNotBlank()) out += ParsedNode(NodeType.LI, text)
         }
     }
 
@@ -101,7 +102,7 @@ class HtmlContentParser @Inject constructor() {
 
     private fun emitParagraph(raw: String, out: MutableList<ParsedNode>) {
         val text = normalize(raw)
-        if (text.isEmpty()) return
+        if (InlineMarkup.strip(text).isBlank()) return
         splitParagraph(text).forEachIndexed { index, chunk ->
             out += ParsedNode(if (index == 0) NodeType.P else NodeType.P_CONT, chunk)
         }
