@@ -98,7 +98,7 @@ private fun NodeBlock(node: ContentNodeUi, fs: Int, articleTitle: String) {
         )
         ContentNodeType.H3 -> Heading(node.text, Lora, FontWeight.SemiBold, fs * H3_SCALE, 1.3f, 18.dp, 6.dp)
         ContentNodeType.P -> Text(
-            text = remember(node.text) { node.text.toStyledText() },
+            text = rememberStyled(node.text),
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Justify,
             modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
@@ -144,7 +144,7 @@ private fun ListItem(text: String, fs: Int) {
     Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("—", color = QuestLogTheme.colors.accentLine, style = TextStyle(fontFamily = Lora, fontSize = fs.sp))
         Text(
-            text = remember(text) { text.toStyledText() },
+            text = rememberStyled(text),
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
             style = TextStyle(fontFamily = Lora, fontSize = fs.sp, lineHeight = (fs * 1.6f).sp),

@@ -95,7 +95,7 @@ fun TableBlock(node: ContentNodeUi, fs: Int) {
                         val cellDp = with(density) { widths.drop(column).take(span).sum().toDp() }
                         column += span
                         Text(
-                            text = remember(cell.text) { cell.text.toStyledText() },
+                            text = rememberStyled(cell.text),
                             color = MaterialTheme.colorScheme.onBackground,
                             textAlign = if (cell.isHeader && span > 1) TextAlign.Center else TextAlign.Start,
                             modifier = Modifier.width(
