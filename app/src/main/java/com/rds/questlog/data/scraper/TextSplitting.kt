@@ -1,5 +1,7 @@
 package com.rds.questlog.data.scraper
 
+import com.rds.questlog.domain.model.InlineMarkup
+
 private const val MAX_PARAGRAPH_CHARS = 400
 private const val MAX_SHORT_SENTENCES = 3
 private const val MAX_PRE_CHARS = 4000
@@ -25,7 +27,7 @@ fun splitParagraph(text: String): List<String> {
         current.append(sentence).append(' ')
     }
     if (current.isNotEmpty()) chunks.add(current.toString().trim())
-    return chunks
+    return InlineMarkup.rebalance(chunks)
 }
 
 /**

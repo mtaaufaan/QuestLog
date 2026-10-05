@@ -13,3 +13,6 @@ docs/
 
 # Log crash JVM
 hs_err_pid*.log
+
+# Log compiler Kotlin
+.kotlin/

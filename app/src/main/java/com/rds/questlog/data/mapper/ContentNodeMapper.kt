@@ -2,6 +2,7 @@ package com.rds.questlog.data.mapper
 
 import com.fleeksoft.ksoup.Ksoup
 import com.rds.questlog.data.local.entity.ContentNodeEntity
+import com.rds.questlog.data.scraper.inlineText
 import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.NodeType
 import com.rds.questlog.domain.model.TableCell
@@ -45,7 +46,7 @@ internal fun parseTableRows(html: String): List<List<TableCell>> {
                 .filter { it.tagName().equals("th", ignoreCase = true) || it.tagName().equals("td", ignoreCase = true) }
                 .map { cell ->
                     TableCell(
-                        text = cell.text().trim(),
+                        text = cell.inlineText(),
                         colSpan = cell.attr("colspan").toIntOrNull()?.coerceIn(1, MAX_COLSPAN) ?: 1,
                         isHeader = cell.tagName().equals("th", ignoreCase = true),
                     )
