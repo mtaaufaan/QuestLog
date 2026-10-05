@@ -6,6 +6,7 @@ import com.rds.questlog.data.local.entity.ContentNodeEntity
 import com.rds.questlog.data.prefs.DataStoreUserPreferencesRepository
 import com.rds.questlog.domain.model.NodeType
 import com.rds.questlog.domain.model.ReadMode
+import com.rds.questlog.domain.model.TableCell
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -83,7 +84,13 @@ class ReaderDataTest {
 
         assertEquals(listOf(NodeType.H1, NodeType.IMG, NodeType.P, NodeType.TABLE), nodes.map { it.type })
         assertEquals("/data/peta.webp", nodes[1].imagePath)
-        assertEquals(listOf(listOf("Item", "Lokasi"), listOf("Herb", "Desa")), nodes[3].tableRows)
+        assertEquals(
+            listOf(
+                listOf(TableCell("Item", isHeader = true), TableCell("Lokasi", isHeader = true)),
+                listOf(TableCell("Herb"), TableCell("Desa")),
+            ),
+            nodes[3].tableRows,
+        )
     }
 
     @Test(timeout = 30_000)

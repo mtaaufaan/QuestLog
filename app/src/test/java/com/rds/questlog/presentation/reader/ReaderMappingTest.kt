@@ -6,8 +6,10 @@ import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.NodeType
 import com.rds.questlog.domain.model.SourcePage
 import com.rds.questlog.domain.model.SourcePageStatus
+import com.rds.questlog.domain.model.TableCell
 import com.rds.questlog.presentation.model.ContentNodeType
 import com.rds.questlog.presentation.model.ReaderViewState
+import com.rds.questlog.presentation.model.TableCellUi
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -50,12 +52,15 @@ class ReaderMappingTest {
             1,
             NodeType.TABLE,
             1,
-            tableRows = listOf(listOf("Item", "Lokasi"), listOf("Herb", "Desa")),
+            tableRows = listOf(
+                listOf(TableCell("Item", isHeader = true), TableCell("Lokasi", isHeader = true)),
+                listOf(TableCell("Herb"), TableCell("Desa", colSpan = 2)),
+            ),
         )
         assertEquals(ContentNodeType.P, node(2, 1, 2, NodeType.P_CONT).toUi().type)
         val ui = table.toUi()
-        assertEquals(listOf("Item", "Lokasi"), ui.head)
-        assertEquals(listOf(listOf("Herb", "Desa")), ui.rows)
+        assertEquals(listOf(TableCellUi("Item", 1, true), TableCellUi("Lokasi", 1, true)), ui.table[0])
+        assertEquals(listOf(TableCellUi("Herb"), TableCellUi("Desa", 2)), ui.table[1])
     }
 
     @Test

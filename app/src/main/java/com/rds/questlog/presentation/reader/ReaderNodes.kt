@@ -115,7 +115,6 @@ private const val H1_SCALE = 1.95f
 private const val H2_SCALE = 1.45f
 private const val H3_SCALE = 1.08f
 private const val PRE_SCALE = 0.72f
-private const val TABLE_SCALE = 0.86f
 
 @Composable
 private fun Heading(
@@ -246,32 +245,6 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawStripes(
     while (x < size.width) {
         drawLine(b, Offset(x, size.height), Offset(x + size.height, 0f), strokeWidth = stroke)
         x += period
-    }
-}
-
-@Composable
-private fun TableBlock(node: ContentNodeUi, fs: Int) {
-    val c = QuestLogTheme.colors
-    val cellSp = (fs * TABLE_SCALE).roundToInt()
-    val style = TextStyle(fontFamily = Lora, fontSize = cellSp.sp, lineHeight = (cellSp * 1.4f).sp)
-    Column(Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 18.dp)) {
-        Box(Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.onBackground))
-        (listOf(node.head) + node.rows).forEachIndexed { index, cells ->
-            Row(
-                Modifier.fillMaxWidth().drawBehind {
-                    drawLine(c.divider, Offset(0f, size.height), Offset(this.size.width, size.height), 1.dp.toPx())
-                },
-            ) {
-                cells.forEach { cell ->
-                    Text(
-                        text = cell,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f).padding(top = 8.dp, bottom = 8.dp, end = 8.dp),
-                        style = style.copy(fontWeight = if (index == 0) FontWeight.SemiBold else FontWeight.Normal),
-                    )
-                }
-            }
-        }
     }
 }
 
