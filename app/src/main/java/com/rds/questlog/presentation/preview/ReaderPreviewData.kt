@@ -6,6 +6,7 @@ import com.rds.questlog.presentation.model.ContentNodeType
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PageStatus
 import com.rds.questlog.presentation.model.PageUiModel
+import com.rds.questlog.presentation.model.TableCellUi
 
 /**
  * Artikel dummy untuk Reader (sumber: Reader.dc.html): 5 halaman, campuran tipe blok, halaman ke-4 FAILED
@@ -102,11 +103,15 @@ object ReaderPreviewData {
             ContentNodeUi(
                 id = 305,
                 type = ContentNodeType.TABLE,
-                head = listOf("Item", "Lokasi", "Catatan"),
-                rows = listOf(
-                    listOf("Mini Medal", "Sumur timur", "Periksa dua kali"),
-                    listOf("Seed of Life", "Lemari kepala desa", "—"),
-                    listOf("Fishing Rod", "Dermaga", "Setelah event"),
+                table = listOf(
+                    listOf(
+                        TableCellUi("Item", isHeader = true),
+                        TableCellUi("Lokasi", isHeader = true),
+                        TableCellUi("Catatan", isHeader = true),
+                    ),
+                    listOf(TableCellUi("Mini Medal"), TableCellUi("Sumur timur"), TableCellUi("Periksa dua kali")),
+                    listOf(TableCellUi("Seed of Life"), TableCellUi("Lemari kepala desa"), TableCellUi("—")),
+                    listOf(TableCellUi("Fishing Rod"), TableCellUi("Dermaga"), TableCellUi("Setelah event")),
                 ),
             ),
         ),

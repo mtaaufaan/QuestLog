@@ -8,6 +8,7 @@ import com.rds.questlog.domain.model.resolveAnchor
 import com.rds.questlog.presentation.model.ContentNodeType
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.ReaderViewState
+import com.rds.questlog.presentation.model.TableCellUi
 
 /** Blok konten dikelompokkan per halaman sumber menurut urutan halaman artikel (indeks = urutan halaman). */
 fun ArticleDetail.toContentPages(): List<List<ContentNodeUi>> {
@@ -29,8 +30,7 @@ fun ContentNode.toUi() = ContentNodeUi(
         NodeType.LI -> ContentNodeType.LI
     },
     text = text,
-    head = tableRows.firstOrNull().orEmpty(),
-    rows = tableRows.drop(1),
+    table = tableRows.map { row -> row.map { TableCellUi(it.text, it.colSpan, it.isHeader) } },
     imagePath = imagePath,
 )
 

@@ -8,14 +8,16 @@ enum class ContentNodeType { H1, H2, H3, P, LI, PRE, IMG, TABLE }
 
 /**
  * Satu blok konten. [text] = isi (alt gambar untuk IMG); untuk H1 yang kosong Reader memakai judul artikel.
- * [head]/[rows] hanya dipakai TABLE.
+ * [table] (baris berisi sel) hanya dipakai TABLE.
  */
+/** Sel tabel Reader: [colSpan] kolom lebarnya, [isHeader] = sel judul (tebal). */
+data class TableCellUi(val text: String, val colSpan: Int = 1, val isHeader: Boolean = false)
+
 data class ContentNodeUi(
     val id: Long,
     val type: ContentNodeType,
     val text: String = "",
-    val head: List<String> = emptyList(),
-    val rows: List<List<String>> = emptyList(),
+    val table: List<List<TableCellUi>> = emptyList(),
     /** File gambar lokal untuk IMG; null = tampilkan placeholder. */
     val imagePath: String? = null,
 )
