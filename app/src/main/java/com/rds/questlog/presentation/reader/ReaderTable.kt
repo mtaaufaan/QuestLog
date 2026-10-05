@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.TableCellUi
 import com.rds.questlog.presentation.theme.Lora
@@ -94,7 +95,7 @@ fun TableBlock(node: ContentNodeUi, fs: Int) {
                         val cellDp = with(density) { widths.drop(column).take(span).sum().toDp() }
                         column += span
                         Text(
-                            text = cell.text,
+                            text = remember(cell.text) { cell.text.toStyledText() },
                             color = MaterialTheme.colorScheme.onBackground,
                             textAlign = if (cell.isHeader && span > 1) TextAlign.Center else TextAlign.Start,
                             modifier = Modifier.width(
@@ -135,6 +136,7 @@ private fun measureColumns(
     val min = MutableList(columns) { floor }
     val preferred = MutableList(columns) { floor }
     rows.flatMap { it.withColumn() }
+        .map { (column, cell) -> column to cell.copy(text = InlineMarkup.strip(cell.text)) }
         .filter { (column, cell) -> cell.colSpan == 1 && column < columns && cell.text.isNotBlank() }
         .forEach { (column, cell) ->
             val font = if (cell.isHeader) style.copy(fontWeight = FontWeight.SemiBold) else style

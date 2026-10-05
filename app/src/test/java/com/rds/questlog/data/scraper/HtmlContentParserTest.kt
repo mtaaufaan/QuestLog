@@ -1,5 +1,6 @@
 package com.rds.questlog.data.scraper
 
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.domain.model.NodeType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -8,6 +9,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HtmlContentParserTest {
+
+    private val boldOn = InlineMarkup.BOLD_ON
+    private val boldOff = InlineMarkup.BOLD_OFF
+    private val italicOn = InlineMarkup.ITALIC_ON
+    private val italicOff = InlineMarkup.ITALIC_OFF
 
     private val parser = HtmlContentParser()
     private val base = "https://example.com/wiki/page"
@@ -60,7 +66,39 @@ class HtmlContentParserTest {
     @Test
     fun `teks lepas di dalam div dan elemen inline digabung menjadi satu paragraf`() {
         val nodes = parse("<body><div>Halo <b>dunia</b> dan <a href='/x'>tautan</a> ini.</div></body>")
-        assertEquals(listOf(NodeType.P to "Halo dunia dan tautan ini."), nodes.map { it.type to it.text })
+        assertEquals(
+            listOf(NodeType.P to "Halo ${boldOn}dunia$boldOff dan tautan ini."),
+            nodes.map { it.type to it.text },
+        )
+    }
+
+    @Test
+    fun `tebal dan miring dipertahankan di paragraf, list, dan lewat gaya CSS`() {
+        val nodes = parse(
+            "<body><p>Ambil <strong>medicinal herb</strong> lalu <em>simpan</em>.</p>" +
+                "<ul><li>Cek <b>laci</b> kanan</li></ul>" +
+                "<p>Boleh <span style='font-weight: bold'>tebal css</span> juga.</p></body>",
+        )
+        assertEquals(
+            listOf(
+                "Ambil ${boldOn}medicinal herb$boldOff lalu ${italicOn}simpan$italicOff.",
+                "Cek ${boldOn}laci$boldOff kanan",
+                "Boleh ${boldOn}tebal css$boldOff juga.",
+            ),
+            nodes.map { it.text },
+        )
+    }
+
+    @Test
+    fun `tebal di dalam tebal dan gaya kosong tidak meninggalkan penanda kosong`() {
+        val nodes = parse("<body><p>A <b>satu <b>dua</b></b><b> </b> tiga</p></body>")
+        assertEquals("A ${boldOn}satu ${boldOn}dua${boldOff}$boldOff tiga", nodes.single().text)
+    }
+
+    @Test
+    fun `teks tanpa gaya tetap polos tanpa penanda`() {
+        val nodes = parse("<body><p>Hanya teks biasa dengan a * b = c.</p></body>")
+        assertEquals("Hanya teks biasa dengan a * b = c.", nodes.single().text)
     }
 
     @Test
