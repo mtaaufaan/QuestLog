@@ -1,5 +1,6 @@
 package com.rds.questlog.presentation.reader
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.rds.questlog.domain.model.InlineMarkup
@@ -33,5 +34,15 @@ class StyledTextTest {
         assertEquals("Hanya penutup", "Hanya penutup$boldOff".toStyledText().text)
         assertEquals("Teks biasa * tanpa gaya", "Teks biasa * tanpa gaya".toStyledText().text)
         assertEquals(0, "Teks biasa".toStyledText().spanStyles.size)
+    }
+
+    @Test
+    fun `warna tebal hanya dipasang pada teks tebal`() {
+        val gold = Color(0xFFE1AD66)
+        val styled = "Ambil ${boldOn}herb$boldOff dan ${italicOn}simpan$italicOff.".toStyledText(boldColor = gold)
+
+        assertEquals(gold, styled.spanStyles.single { it.item.fontWeight == FontWeight.SemiBold }.item.color)
+        assertEquals(Color.Unspecified, styled.spanStyles.single { it.item.fontStyle == FontStyle.Italic }.item.color)
+        assertEquals(Color.Unspecified, "${boldOn}x$boldOff".toStyledText().spanStyles.single().item.color)
     }
 }
