@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.rds.questlog.data.local.QuestLogDatabase
+import com.rds.questlog.data.repository.ArticleManagementRepositoryImpl
 import com.rds.questlog.data.repository.ArticleRepositoryImpl
 import com.rds.questlog.data.repository.CheckpointRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
@@ -23,6 +24,7 @@ class TestEnvironment(timeoutSeconds: Long = 3) {
     val games = GameRepositoryImpl(db.gameDao())
     val articles =
         ArticleRepositoryImpl(db, db.articleDao(), db.sourcePageDao(), db.imageDao(), imageStore, db.contentNodeDao())
+    val management = ArticleManagementRepositoryImpl(db, db.articleDao(), db.gameDao())
     val checkpoints = CheckpointRepositoryImpl(db, db.checkpointDao(), db.contentNodeDao())
     val pages = SourcePageRepositoryImpl(db, db.sourcePageDao(), db.contentNodeDao(), db.imageDao(), db.articleDao())
 

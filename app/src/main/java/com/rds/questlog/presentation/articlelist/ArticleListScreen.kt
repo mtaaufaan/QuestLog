@@ -117,7 +117,7 @@ private fun ArticleListPopups(
                 onClose = onDismissPopup,
             )
         }
-        else -> ArticleManagementPopups(activePopup, uiState, onShowPopup, onDismissPopup)
+        else -> ArticleManagementPopups(activePopup, uiState, viewModel, onShowPopup, onDismissPopup)
     }
 }
 
@@ -126,21 +126,27 @@ private fun ArticleListPopups(
 private fun ArticleManagementPopups(
     activePopup: Popup?,
     uiState: ArticleListUiState,
+    viewModel: ArticleListViewModel,
     onShowPopup: (Popup) -> Unit,
     onDismissPopup: () -> Unit,
 ) {
     when (activePopup) {
         is Popup.EditArticle -> uiState.articleById(activePopup.articleId)?.let { article ->
-            // Tahap 1: Simpan hanya menutup popup; penyimpanan nyata (UpdateArticleUseCase) di Tahap 2A.
             EditArticleSheet(
                 article = article,
                 games = uiState.games,
                 isPremium = uiState.isPremium,
-                saving = false,
-                saveError = false,
-                onSave = { onDismissPopup() },
-                onOpenUnlock = { onShowPopup(Popup.Unlock) },
-                onClose = onDismissPopup,
+                saving = uiState.isSavingEdit,
+                saveError = uiState.editSaveError,
+                onSave = { viewModel.updateArticle(article.id, it, onSaved = onDismissPopup) },
+                onOpenUnlock = {
+                    viewModel.onEditDismissed()
+                    onShowPopup(Popup.Unlock)
+                },
+                onClose = {
+                    viewModel.onEditDismissed()
+                    onDismissPopup()
+                },
             )
         }
         is Popup.ManagePages, is Popup.DeletePage -> uiState.articleById(activePopup.managedArticleId())?.let {
