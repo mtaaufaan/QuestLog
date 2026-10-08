@@ -25,4 +25,8 @@ interface GameDao {
 
     @Insert
     suspend fun insert(game: GameEntity): Long
+
+    /** Menghapus game hanya bila tidak ada artikel yang memakainya; game berisi tidak disentuh. */
+    @Query("DELETE FROM games WHERE id = :gameId AND NOT EXISTS (SELECT 1 FROM articles WHERE game_id = :gameId)")
+    suspend fun deleteIfEmpty(gameId: Long)
 }

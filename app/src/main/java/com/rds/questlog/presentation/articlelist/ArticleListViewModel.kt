@@ -7,6 +7,7 @@ import com.rds.questlog.R
 import com.rds.questlog.domain.usecase.article.DeleteArticleUseCase
 import com.rds.questlog.domain.usecase.article.GetArticlesUseCase
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
+import com.rds.questlog.domain.usecase.article.UpdateArticleUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
 import com.rds.questlog.domain.usecase.premium.ObservePremiumStatusUseCase
 import com.rds.questlog.presentation.model.ArticleUiModel
@@ -32,18 +33,21 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
+@Suppress("LongParameterList") // satu use case per aksi S1; digabung hanya menambah lapisan
 class ArticleListViewModel @Inject constructor(
     getArticles: GetArticlesUseCase,
     getGames: GetGamesUseCase,
     observePremiumStatus: ObservePremiumStatusUseCase,
     private val deleteArticleUseCase: DeleteArticleUseCase,
     private val retryFailedPagesUseCase: RetryFailedPagesUseCase,
+    private val updateArticleUseCase: UpdateArticleUseCase,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
     private val gameFilter = MutableStateFlow<Long?>(null)
     private val snackbar = MutableStateFlow<Int?>(null)
+    private val edit = MutableStateFlow(EditState())
     private var snackbarJob: Job? = null
 
     private val articles: Flow<List<ArticleUiModel>> = combine(query, gameFilter) { q, game -> q to game }
@@ -71,6 +75,7 @@ class ArticleListViewModel @Inject constructor(
             isPremium = isPremium,
         )
     }.combine(snackbar) { state, message -> state.copy(snackbar = message) }
+        .combine(edit) { state, e -> state.copy(isSavingEdit = e.saving, editSaveError = e.error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ArticleListUiState(isLoading = true))
 
     fun onQueryChange(text: String) {
@@ -81,7 +86,40 @@ class ArticleListViewModel @Inject constructor(
         gameFilter.value = gameId
     }
 
+    init {
+        // Game yang jadi kosong (artikelnya dipindah) ikut hilang; filter yang menunjuknya kembali ke "Semua Game".
+        viewModelScope.launch {
+            getGames().catch { emit(emptyList()) }.collect { games ->
+                val selected = gameFilter.value
+                if (selected != null && games.none { it.id == selected }) gameFilter.value = null
+            }
+        }
+    }
+
     fun onScrapingArticleTapped() = showSnackbar(R.string.article_list_snackbar_scraping)
+
+    /**
+     * Menyimpan hasil Edit Article Sheet. [onSaved] dipanggil hanya bila sukses (pemanggil menutup popup);
+     * bila gagal sheet tetap terbuka dengan pesan error.
+     */
+    fun updateArticle(articleId: Long, payload: EditArticlePayload, onSaved: () -> Unit) {
+        if (edit.value.saving) return
+        edit.value = EditState(saving = true)
+        viewModelScope.launch {
+            updateArticleUseCase(articleId, payload.title, payload.gameId, payload.newGameName)
+                .onSuccess {
+                    edit.value = EditState()
+                    showSnackbar(R.string.article_list_snackbar_updated)
+                    onSaved()
+                }
+                .onFailure { edit.value = EditState(error = true) }
+        }
+    }
+
+    /** Sheet ditutup tanpa menyimpan: hapus sisa status error. */
+    fun onEditDismissed() {
+        edit.value = EditState()
+    }
 
     fun deleteArticle(articleId: Long) {
         viewModelScope.launch {
@@ -107,6 +145,8 @@ class ArticleListViewModel @Inject constructor(
             snackbar.value = null
         }
     }
+
+    private data class EditState(val saving: Boolean = false, val error: Boolean = false)
 
     private companion object {
         const val SNACKBAR_DURATION_MS = 2_600L

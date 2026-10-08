@@ -3,6 +3,7 @@ package com.rds.questlog.domain
 import com.rds.questlog.domain.model.Article
 import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.Game
+import com.rds.questlog.domain.model.GameTarget
 import com.rds.questlog.domain.model.PageFailure
 import com.rds.questlog.domain.model.PurchaseQuery
 import com.rds.questlog.domain.model.PurchaseResult
@@ -12,6 +13,7 @@ import com.rds.questlog.domain.model.ScrapedNode
 import com.rds.questlog.domain.model.SourcePage
 import com.rds.questlog.domain.model.SourcePageStatus
 import com.rds.questlog.domain.repository.AppConfigRepository
+import com.rds.questlog.domain.repository.ArticleManagementRepository
 import com.rds.questlog.domain.repository.ArticleRepository
 import com.rds.questlog.domain.repository.BillingService
 import com.rds.questlog.domain.repository.GameRepository
@@ -22,6 +24,7 @@ import com.rds.questlog.domain.scraper.ScrapingResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 
 fun page(id: Long, url: String = "https://example.com/$id", status: SourcePageStatus = SourcePageStatus.PENDING) =
     SourcePage(id = id, url = url, order = id.toInt(), status = status)
@@ -37,15 +40,20 @@ class FakeGameRepository(
     private val failWith: Throwable? = null,
     private val existing: Map<String, Long> = emptyMap(),
     private val gameCount: Int = 0,
+    private val games: List<Game> = emptyList(),
 ) : GameRepository {
     val created = mutableListOf<String>()
-    override fun observeGames(): Flow<List<Game>> = emptyFlow()
+    val emptyChecked = mutableListOf<Long>()
+    override fun observeGames(): Flow<List<Game>> = flowOf(games)
     override suspend fun findIdByName(name: String): Long? = existing[name]
     override suspend fun count(): Int = gameCount
     override suspend fun findOrCreate(name: String): Long {
         failWith?.let { throw it }
         created += name
         return 7L
+    }
+    override suspend fun deleteIfEmpty(gameId: Long) {
+        emptyChecked += gameId
     }
 }
 
@@ -54,6 +62,7 @@ class FakeArticleRepository(
     private val resetCount: Int = 0,
     private val articleCount: Int = 0,
     private val stored: Set<String> = emptySet(),
+    private val article: Article? = null,
 ) : ArticleRepository {
     val appended = mutableListOf<Pair<Long, List<String>>>()
     val inserted = mutableListOf<Triple<Long, String, List<String>>>()
@@ -64,7 +73,7 @@ class FakeArticleRepository(
         inserted += Triple(gameId, title, urls)
         return 42L
     }
-    override fun observeArticle(articleId: Long): Flow<Article?> = emptyFlow()
+    override fun observeArticle(articleId: Long): Flow<Article?> = flowOf(article)
     override fun observeContent(articleId: Long): Flow<List<ContentNode>> = emptyFlow()
     val readModes = mutableMapOf<Long, ReadMode>()
     override suspend fun setReadMode(articleId: Long, mode: ReadMode) {
@@ -84,6 +93,14 @@ class FakeArticleRepository(
     override suspend fun retryFailedPages(articleId: Long): Int {
         failWith?.let { throw it }
         return resetCount
+    }
+}
+
+class FakeArticleManagementRepository(private val failWith: Throwable? = null) : ArticleManagementRepository {
+    val updates = mutableListOf<Triple<Long, String, GameTarget>>()
+    override suspend fun updateDetails(articleId: Long, title: String, target: GameTarget) {
+        failWith?.let { throw it }
+        updates += Triple(articleId, title, target)
     }
 }
 

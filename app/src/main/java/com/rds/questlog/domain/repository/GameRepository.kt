@@ -16,4 +16,7 @@ interface GameRepository {
 
     /** Mengembalikan id game bernama [name] (case-insensitive); membuatnya bila belum ada. */
     suspend fun findOrCreate(name: String): Long
+
+    /** Menghapus game [gameId] hanya bila tidak punya artikel lagi; no-op bila masih berisi. */
+    suspend fun deleteIfEmpty(gameId: Long)
 }

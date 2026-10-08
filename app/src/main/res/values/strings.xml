@@ -46,6 +46,7 @@
     <string name="article_list_empty_nomatch_body">Coba kata kunci lain atau tampilkan semua game.</string>
     <string name="article_list_snackbar_scraping">Artikel masih diproses, harap tunggu</string>
     <string name="article_list_snackbar_deleted">Artikel dihapus</string>
+    <string name="article_list_snackbar_updated">Artikel diperbarui</string>
     <string name="article_list_snackbar_retrying">Mengulang halaman yang gagal…</string>
     <string name="article_list_snackbar_delete_failed">Gagal menghapus artikel. Coba lagi.</string>
     <string name="article_list_snackbar_retry_failed">Gagal mengulang halaman. Coba lagi.</string>
