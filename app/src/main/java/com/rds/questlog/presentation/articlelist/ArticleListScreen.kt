@@ -150,7 +150,7 @@ private fun ArticleManagementPopups(
             )
         }
         is Popup.ManagePages, is Popup.DeletePage -> uiState.articleById(activePopup.managedArticleId())?.let {
-            ManagePagesPopups(it, activePopup.deletingPageId(), onShowPopup, onDismissPopup)
+            ManagePagesPopups(it, activePopup.deletingPageId(), viewModel, onShowPopup, onDismissPopup)
         }
         is Popup.RefreshArticle -> uiState.articleById(activePopup.articleId)?.let { article ->
             RefreshArticleDialog(

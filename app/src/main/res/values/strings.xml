@@ -47,6 +47,11 @@
     <string name="article_list_snackbar_scraping">Artikel masih diproses, harap tunggu</string>
     <string name="article_list_snackbar_deleted">Artikel dihapus</string>
     <string name="article_list_snackbar_updated">Artikel diperbarui</string>
+    <string name="article_list_snackbar_page_deleted">Halaman dihapus</string>
+    <string name="article_list_snackbar_page_delete_failed">Gagal menghapus halaman. Coba lagi.</string>
+    <string name="article_list_snackbar_last_page">Halaman terakhir tidak bisa dihapus.</string>
+    <string name="article_list_snackbar_page_busy">Halaman sedang diunduh. Coba lagi nanti.</string>
+    <string name="article_list_snackbar_reorder_failed">Gagal menyimpan urutan halaman. Coba lagi.</string>
     <string name="article_list_snackbar_retrying">Mengulang halaman yang gagal…</string>
     <string name="article_list_snackbar_delete_failed">Gagal menghapus artikel. Coba lagi.</string>
     <string name="article_list_snackbar_retry_failed">Gagal mengulang halaman. Coba lagi.</string>

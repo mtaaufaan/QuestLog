@@ -10,6 +10,7 @@ import com.rds.questlog.data.local.dao.CheckpointDao
 import com.rds.questlog.data.local.dao.ContentNodeDao
 import com.rds.questlog.data.local.dao.GameDao
 import com.rds.questlog.data.local.dao.ImageDao
+import com.rds.questlog.data.local.dao.PageLayoutDao
 import com.rds.questlog.data.local.dao.SourcePageDao
 import com.rds.questlog.data.local.entity.AppConfigEntity
 import com.rds.questlog.data.local.entity.ArticleEntity
@@ -37,6 +38,8 @@ abstract class QuestLogDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
     abstract fun articleDao(): ArticleDao
     abstract fun sourcePageDao(): SourcePageDao
+
+    abstract fun pageLayoutDao(): PageLayoutDao
     abstract fun contentNodeDao(): ContentNodeDao
     abstract fun imageDao(): ImageDao
     abstract fun checkpointDao(): CheckpointDao
