@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,6 +42,7 @@ private fun QlButton(
     pressedColor: Color,
     border: BorderStroke?,
     icon: ImageVector? = null,
+    loading: Boolean = false,
 ) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
@@ -62,14 +64,16 @@ private fun QlButton(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (icon != null) {
+        if (loading) {
+            CircularProgressIndicator(Modifier.size(13.dp), color = contentColor, strokeWidth = 1.5.dp)
+        } else if (icon != null) {
             Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(16.dp))
         }
         Text(text, color = contentColor, style = MaterialTheme.typography.labelLarge)
     }
 }
 
-/** Tombol primer: border aksen, latar transparan (design.md §3.4). [icon] opsional di kiri teks. */
+/** Tombol primer: border aksen, latar transparan (design.md §3.4). [icon] di kiri teks; [loading] = spinner. */
 @Composable
 fun QlOutlineButton(
     text: String,
@@ -77,9 +81,11 @@ fun QlOutlineButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: ImageVector? = null,
+    loading: Boolean = false,
 ) {
     val c = QuestLogTheme.colors
-    QlButton(text, onClick, modifier, enabled, c.accentText, c.accentTintActive, BorderStroke(1.dp, c.accentLine), icon)
+    val border = BorderStroke(1.dp, c.accentLine)
+    QlButton(text, onClick, modifier, enabled, c.accentText, c.accentTintActive, border, icon, loading)
 }
 
 /** Tombol teks tanpa border. */

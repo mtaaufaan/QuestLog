@@ -80,8 +80,10 @@ object PreviewData {
         ),
     )
 
+    private var nextPageId = 1L
+
     private fun pages(base: String, count: Int, status: (Int) -> PageStatus = { PageStatus.DONE }) =
-        List(count) { PageUiModel(url = base + (it + 1), status = status(it)) }
+        List(count) { PageUiModel(id = nextPageId++, url = base + (it + 1), status = status(it)) }
 
     private fun article(
         id: Long,

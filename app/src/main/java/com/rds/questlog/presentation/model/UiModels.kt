@@ -22,6 +22,8 @@ data class GameFilterOption(
 )
 
 data class PageUiModel(
+    /** Id halaman sumber; dipakai Page Manager untuk memetakan baris ke halaman (0 = belum diketahui). */
+    val id: Long = 0,
     val url: String,
     val status: PageStatus,
     /** Alasan gagal, mis. "HTTP 404 — halaman tidak ditemukan". */

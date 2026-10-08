@@ -38,6 +38,7 @@ class ArticleUiMapper @Inject constructor(private val failures: PageFailureForma
     )
 
     private fun toUi(page: SourcePage) = PageUiModel(
+        id = page.id,
         url = page.url,
         status = when (page.status) {
             SourcePageStatus.PENDING, SourcePageStatus.IN_PROGRESS -> PageStatus.PENDING

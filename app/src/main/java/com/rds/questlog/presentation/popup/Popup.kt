@@ -9,4 +9,10 @@ sealed interface Popup {
     data object Unlock : Popup
     data object GameFilter : Popup
     data object DisplaySettings : Popup
+
+    // Sprint 5 — pengelolaan artikel (S1)
+    data class EditArticle(val articleId: Long) : Popup
+    data class ManagePages(val articleId: Long) : Popup
+    data class DeletePage(val articleId: Long, val pageId: Long) : Popup
+    data class RefreshArticle(val articleId: Long) : Popup
 }
