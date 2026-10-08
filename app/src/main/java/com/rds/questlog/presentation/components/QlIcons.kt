@@ -65,6 +65,17 @@ object QlIcons {
     )
 
     val ChevronLeft = lineIcon("ChevronLeft", 1.8f, "m15 18-6-6 6-6")
+    val Pencil = lineIcon("Pencil", 1.7f, "M12 20h9", "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z")
+    val ListBullets = lineIcon(
+        "ListBullets",
+        1.7f,
+        "M8 6h13",
+        "M8 12h13",
+        "M8 18h13",
+        "M3 6h.01",
+        "M3 12h.01",
+        "M3 18h.01",
+    )
     val Sliders = lineIcon(
         "Sliders",
         1.7f,

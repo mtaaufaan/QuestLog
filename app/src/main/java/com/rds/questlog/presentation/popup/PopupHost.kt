@@ -26,7 +26,8 @@ import com.rds.questlog.presentation.unlock.UnlockSheetHost
 fun PopupHost(popup: Popup?, onDismiss: () -> Unit) {
     when (popup) {
         null, Popup.GameFilter, Popup.ScrapeMode, Popup.DisplaySettings, is Popup.ArticleActions,
-        is Popup.DeleteArticle, is Popup.ScrapeError,
+        is Popup.DeleteArticle, is Popup.ScrapeError, is Popup.EditArticle, is Popup.ManagePages,
+        is Popup.DeletePage, is Popup.RefreshArticle,
         -> Unit
         Popup.Unlock -> UnlockSheetHost(onClose = onDismiss)
         else -> QlBottomSheet(onDismiss) { PlaceholderBody(popup.nameRes(), onDismiss) }
@@ -53,4 +54,8 @@ private fun Popup.nameRes(): Int = when (this) {
     Popup.Unlock -> R.string.popup_unlock
     Popup.GameFilter -> R.string.popup_game_filter
     Popup.DisplaySettings -> R.string.popup_display_settings
+    is Popup.EditArticle -> R.string.popup_edit_article
+    is Popup.ManagePages -> R.string.popup_manage_pages
+    is Popup.DeletePage -> R.string.popup_delete_page
+    is Popup.RefreshArticle -> R.string.popup_refresh_article
 }
