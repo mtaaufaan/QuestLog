@@ -33,6 +33,15 @@ interface ArticleDao {
     @Insert
     suspend fun insert(article: ArticleEntity): Long
 
+    @Query("SELECT game_id FROM articles WHERE id = :articleId")
+    suspend fun gameIdOf(articleId: Long): Long?
+
+    @Query("UPDATE articles SET title = :title WHERE id = :articleId")
+    suspend fun setTitle(articleId: Long, title: String)
+
+    @Query("UPDATE articles SET game_id = :gameId WHERE id = :articleId")
+    suspend fun setGame(articleId: Long, gameId: Long)
+
     @Query("SELECT COUNT(*) FROM articles WHERE game_id = :gameId")
     suspend fun countByGame(gameId: Long): Int
 

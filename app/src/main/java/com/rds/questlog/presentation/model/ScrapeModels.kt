@@ -28,7 +28,10 @@ data class AddArticlePayload(
  * Pekerjaan scraping yang baru dijadwalkan. [skipPages] = jumlah halaman yang sudah ada sebelumnya (mode Lengkapi),
  * agar progres notifikasi hanya menghitung halaman yang baru ditambahkan.
  */
-data class ScrapeJob(val articleId: Long, val skipPages: Int)
+data class ScrapeJob(val articleId: Long, val skipPages: Int, val pageIds: Set<Long>? = null) {
+    /** Unduh ulang halaman yang sudah ada ([pageIds] terisi), bukan penyimpanan artikel baru. */
+    val isRefresh: Boolean get() = pageIds != null
+}
 
 /** Empat varian Scrape Notification (component-contract.md §8). */
 enum class ScrapeNotificationKind { PROGRESS, DONE, PARTIAL, ERROR }
@@ -41,4 +44,6 @@ data class ScrapeNotificationUi(
     val total: Int,
     val failedCount: Int = 0,
     val articleId: Long = 0,
+    /** Hasil unduh ulang: judul dan teks memakai kata "diperbarui" dan menegaskan isi lama aman. */
+    val isRefresh: Boolean = false,
 )

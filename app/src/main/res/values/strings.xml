@@ -19,6 +19,10 @@
     <string name="popup_unlock">Unlock Sheet</string>
     <string name="popup_game_filter">Game Filter Sheet</string>
     <string name="popup_display_settings">Display Settings Sheet</string>
+    <string name="popup_edit_article">Edit Article Sheet</string>
+    <string name="popup_manage_pages">Page Manager Sheet</string>
+    <string name="popup_delete_page">Delete Page Dialog</string>
+    <string name="popup_refresh_article">Refresh Article Dialog</string>
 
     <!-- S1 Article List -->
     <string name="article_list_subtitle">%1$d walkthrough · tersedia offline</string>
@@ -42,6 +46,15 @@
     <string name="article_list_empty_nomatch_body">Coba kata kunci lain atau tampilkan semua game.</string>
     <string name="article_list_snackbar_scraping">Artikel masih diproses, harap tunggu</string>
     <string name="article_list_snackbar_deleted">Artikel dihapus</string>
+    <string name="article_list_snackbar_updated">Artikel diperbarui</string>
+    <string name="article_list_snackbar_page_deleted">Halaman dihapus</string>
+    <string name="article_list_snackbar_refresh_all">Mengunduh ulang semua halaman…</string>
+    <string name="article_list_snackbar_refresh_page">Halaman %1$d diunduh ulang di latar belakang</string>
+    <string name="article_list_snackbar_refresh_failed">Gagal mengunduh ulang. Coba lagi.</string>
+    <string name="article_list_snackbar_page_delete_failed">Gagal menghapus halaman. Coba lagi.</string>
+    <string name="article_list_snackbar_last_page">Halaman terakhir tidak bisa dihapus.</string>
+    <string name="article_list_snackbar_page_busy">Halaman sedang diunduh. Coba lagi nanti.</string>
+    <string name="article_list_snackbar_reorder_failed">Gagal menyimpan urutan halaman. Coba lagi.</string>
     <string name="article_list_snackbar_retrying">Mengulang halaman yang gagal…</string>
     <string name="article_list_snackbar_delete_failed">Gagal menghapus artikel. Coba lagi.</string>
     <string name="article_list_snackbar_retry_failed">Gagal mengulang halaman. Coba lagi.</string>
@@ -65,6 +78,11 @@
     <string name="article_actions_open">Buka artikel</string>
     <string name="article_actions_append">Tambah halaman</string>
     <string name="article_actions_append_hint">Ditambahkan di akhir artikel</string>
+    <string name="article_actions_edit">Ubah judul &amp; game</string>
+    <string name="article_actions_pages">Kelola halaman</string>
+    <string name="article_actions_pages_hint">Hapus &amp; urutkan ulang halaman</string>
+    <string name="article_actions_pages_busy">Tidak tersedia selama diproses</string>
+    <string name="article_actions_refresh">Unduh ulang artikel</string>
     <string name="article_actions_delete">Hapus artikel</string>
 
     <!-- Delete Article Dialog -->
@@ -72,6 +90,44 @@
     <string name="delete_article_body">Semua konten yang sudah diunduh akan ikut terhapus, termasuk checkpoint.</string>
     <string name="delete_article_cancel">Batal</string>
     <string name="delete_article_confirm">Hapus</string>
+
+    <!-- Sprint 5: Edit Article Sheet -->
+    <string name="edit_article_kicker">Ubah artikel</string>
+    <string name="edit_article_title">Judul &amp; game</string>
+    <string name="edit_article_label_title">Judul artikel</string>
+    <string name="edit_article_error_title">Judul artikel tidak boleh kosong</string>
+    <string name="edit_article_hint_same">Halaman, checkpoint, dan posisi baca tidak berubah.</string>
+    <string name="edit_article_hint_new">Game baru dibuat saat disimpan.</string>
+    <string name="edit_article_hint_old_empty">Game lama akan kosong dan dihapus otomatis.</string>
+    <string name="edit_article_limit_game">Limit gratis: maks. 2 game.</string>
+    <string name="edit_article_limit_articles">Game tujuan sudah berisi 5 artikel (limit gratis).</string>
+    <string name="edit_article_error_save">Gagal menyimpan. Coba lagi.</string>
+    <string name="edit_article_cancel">Batal</string>
+    <string name="edit_article_save">Simpan</string>
+
+    <!-- Sprint 5: Page Manager Sheet -->
+    <string name="page_manager_kicker">Kelola halaman</string>
+    <string name="page_manager_summary">%1$d halaman</string>
+    <string name="page_manager_summary_failed">%1$d halaman · %2$d gagal</string>
+    <string name="page_manager_status_saved">Tersimpan</string>
+    <string name="page_manager_status_failed">Gagal — %1$s</string>
+    <string name="page_manager_status_failed_unknown">tidak dapat diunduh</string>
+    <string name="page_manager_status_refreshing">Mengunduh ulang…</string>
+    <string name="page_manager_footnote">Urutan langsung tersimpan. Checkpoint tetap menunjuk elemen yang sama.</string>
+    <string name="page_manager_footnote_last">Halaman terakhir tidak bisa dihapus — gunakan “Hapus artikel”.</string>
+    <string name="page_manager_done">Selesai</string>
+    <string name="page_manager_move_up">Naikkan</string>
+    <string name="page_manager_move_down">Turunkan</string>
+    <string name="page_manager_refresh_page">Unduh ulang halaman</string>
+    <string name="page_manager_delete_page">Hapus halaman</string>
+
+    <!-- Sprint 5: Delete Page Dialog + Refresh Article Dialog -->
+    <string name="delete_page_title">Hapus halaman %1$d?</string>
+    <string name="delete_page_body">Konten halaman ini akan dihapus dan nomor halaman dirapikan. Checkpoint di halaman ini dipindah ke elemen terdekat.</string>
+    <string name="refresh_article_title">Unduh ulang artikel?</string>
+    <string name="refresh_article_meta">“%1$s” · %2$d halaman</string>
+    <string name="refresh_article_body">Semua halaman diunduh ulang dengan ekstraksi terbaru. Isi lama tetap bisa dibaca sampai selesai; halaman yang gagal mempertahankan isi lamanya. Checkpoint dan urutan tidak berubah.</string>
+    <string name="refresh_article_confirm">Unduh ulang</string>
 
     <!-- Scrape Error Dialog -->
     <string name="scrape_error_kicker_all">Gagal diunduh</string>
@@ -157,6 +213,11 @@
     <string name="notification_partial_text">%1$d halaman gagal dimuat. Tap untuk retry.</string>
     <string name="notification_error_title">Gagal mengunduh %1$s</string>
     <string name="notification_error_text">Tap untuk retry.</string>
+    <string name="notification_refresh_done_title">%1$s diperbarui</string>
+    <string name="notification_refresh_done_text">Semua halaman diperbarui.</string>
+    <string name="notification_refresh_partial_text">%1$d halaman gagal diperbarui. Isi lama tetap tersimpan.</string>
+    <string name="notification_refresh_error_title">Gagal memperbarui %1$s</string>
+    <string name="notification_refresh_error_text">Isi lama tetap tersimpan. Tap untuk retry.</string>
 
     <!-- S3 Reader -->
     <string name="reader_back">Kembali</string>

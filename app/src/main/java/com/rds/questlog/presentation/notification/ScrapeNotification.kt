@@ -68,19 +68,24 @@ fun ScrapeNotification(
     failedCount: Int,
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
+    isRefresh: Boolean = false,
 ) {
-    val (title, text) = when (kind) {
-        ScrapeNotificationKind.PROGRESS ->
-            articleTitle to stringResource(R.string.notification_progress_text, current, total)
-        ScrapeNotificationKind.DONE ->
-            stringResource(R.string.notification_done_title, articleTitle) to
-                stringResource(R.string.notification_done_text)
-        ScrapeNotificationKind.PARTIAL ->
-            stringResource(R.string.notification_partial_title, articleTitle) to
-                stringResource(R.string.notification_partial_text, failedCount)
-        ScrapeNotificationKind.ERROR ->
-            stringResource(R.string.notification_error_title, articleTitle) to
-                stringResource(R.string.notification_error_text)
+    val (title, text) = if (isRefresh) {
+        refreshTexts(kind, articleTitle, current, total, failedCount)
+    } else {
+        when (kind) {
+            ScrapeNotificationKind.PROGRESS ->
+                articleTitle to stringResource(R.string.notification_progress_text, current, total)
+            ScrapeNotificationKind.DONE ->
+                stringResource(R.string.notification_done_title, articleTitle) to
+                    stringResource(R.string.notification_done_text)
+            ScrapeNotificationKind.PARTIAL ->
+                stringResource(R.string.notification_partial_title, articleTitle) to
+                    stringResource(R.string.notification_partial_text, failedCount)
+            ScrapeNotificationKind.ERROR ->
+                stringResource(R.string.notification_error_title, articleTitle) to
+                    stringResource(R.string.notification_error_text)
+        }
     }
     val shape = RoundedCornerShape(18.dp)
     Row(
@@ -134,6 +139,25 @@ fun ScrapeNotification(
     }
 }
 
+/** Judul dan teks varian unduh ulang (QL-20): isi lama tetap tersimpan bila gagal. */
+@Composable
+private fun refreshTexts(
+    kind: ScrapeNotificationKind,
+    articleTitle: String,
+    current: Int,
+    total: Int,
+    failedCount: Int,
+): Pair<String, String> = when (kind) {
+    ScrapeNotificationKind.PROGRESS ->
+        articleTitle to stringResource(R.string.notification_progress_text, current, total)
+    ScrapeNotificationKind.DONE -> stringResource(R.string.notification_refresh_done_title, articleTitle) to
+        stringResource(R.string.notification_refresh_done_text)
+    ScrapeNotificationKind.PARTIAL -> stringResource(R.string.notification_partial_title, articleTitle) to
+        stringResource(R.string.notification_refresh_partial_text, failedCount)
+    ScrapeNotificationKind.ERROR -> stringResource(R.string.notification_refresh_error_title, articleTitle) to
+        stringResource(R.string.notification_refresh_error_text)
+}
+
 @Composable
 private fun ProgressBar(fraction: Float, modifier: Modifier = Modifier) {
     Box(
@@ -175,6 +199,7 @@ fun ScrapeNotificationHost(
                 current = n.current,
                 total = n.total,
                 failedCount = n.failedCount,
+                isRefresh = n.isRefresh,
                 onTap = { onTap(n) },
                 modifier = Modifier.statusBarsPadding().padding(horizontal = 10.dp, vertical = 4.dp),
             )

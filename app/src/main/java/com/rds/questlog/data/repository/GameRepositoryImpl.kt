@@ -20,4 +20,6 @@ class GameRepositoryImpl @Inject constructor(private val gameDao: GameDao) : Gam
 
     override suspend fun findOrCreate(name: String): Long = gameDao.findByTitle(name)?.id
         ?: gameDao.insert(GameEntity(title = name, createdAt = System.currentTimeMillis()))
+
+    override suspend fun deleteIfEmpty(gameId: Long) = gameDao.deleteIfEmpty(gameId)
 }

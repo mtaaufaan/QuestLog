@@ -15,6 +15,12 @@ data class ArticleListUiState(
     val isLoading: Boolean = false,
     /** Pesan toast yang sedang tampil; dikosongkan ViewModel setelah ±2,6 detik. */
     @StringRes val snackbar: Int? = null,
+    /** Argumen tunggal untuk pesan [snackbar] yang berformat (mis. nomor halaman). */
+    val snackbarArg: Int? = null,
+    /** Edit Article Sheet sedang menyimpan (spinner di tombol Simpan). */
+    val isSavingEdit: Boolean = false,
+    /** Penyimpanan Edit Article Sheet gagal: teks "Gagal menyimpan. Coba lagi." di sheet. */
+    val editSaveError: Boolean = false,
 )
 
 fun ArticleListUiState.articleById(id: Long): ArticleUiModel? = articles.firstOrNull { it.id == id }

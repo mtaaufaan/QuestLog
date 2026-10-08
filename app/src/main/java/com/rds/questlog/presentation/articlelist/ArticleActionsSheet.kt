@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,6 +48,7 @@ import com.rds.questlog.presentation.theme.QuestLogTheme
 fun ArticleActionsSheet(article: ArticleUiModel, onAction: (ArticleAction) -> Unit, onClose: () -> Unit) {
     val c = QuestLogTheme.colors
     val isReady = article.status == ArticleStatus.READY
+    val busy = article.status == ArticleStatus.SCRAPING
     QlBottomSheet(onDismiss = onClose) {
         Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 22.dp)) {
             Column(
@@ -95,6 +97,24 @@ fun ArticleActionsSheet(article: ArticleUiModel, onAction: (ArticleAction) -> Un
                     iconColor = c.textSecondary,
                     hint = stringResource(R.string.article_actions_append_hint),
                 ) { onAction(ArticleAction.APPEND) }
+                ActionRow(QlIcons.Pencil, stringResource(R.string.article_actions_edit), c.textSecondary) {
+                    onAction(ArticleAction.EDIT)
+                }
+                ActionRow(
+                    icon = QlIcons.ListBullets,
+                    label = stringResource(R.string.article_actions_pages),
+                    iconColor = c.textSecondary,
+                    hint = stringResource(
+                        if (busy) R.string.article_actions_pages_busy else R.string.article_actions_pages_hint,
+                    ),
+                    enabled = !busy,
+                ) { onAction(ArticleAction.PAGES) }
+                ActionRow(
+                    icon = QlIcons.Refresh,
+                    label = stringResource(R.string.article_actions_refresh),
+                    iconColor = c.textSecondary,
+                    enabled = !busy,
+                ) { onAction(ArticleAction.REFRESH) }
                 HorizontalDivider(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), color = c.divider)
                 ActionRow(
                     icon = QlIcons.Trash,
@@ -116,6 +136,7 @@ private fun ActionRow(
     textColor: Color = MaterialTheme.colorScheme.onBackground,
     pressedColor: Color = QuestLogTheme.colors.hover,
     hint: String? = null,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     val source = remember { MutableInteractionSource() }
@@ -124,9 +145,16 @@ private fun ActionRow(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
+            .alpha(if (enabled) 1f else 0.4f)
             .clip(RoundedCornerShape(4.dp))
             .background(if (pressed) pressedColor else Color.Transparent)
-            .clickable(interactionSource = source, indication = null, role = Role.Button, onClick = onClick)
+            .clickable(
+                interactionSource = source,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            )
             .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,

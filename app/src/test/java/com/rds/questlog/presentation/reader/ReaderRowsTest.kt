@@ -1,5 +1,7 @@
 package com.rds.questlog.presentation.reader
 
+import com.rds.questlog.presentation.model.ContentNodeType
+import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.preview.ReaderPreviewData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,6 +30,20 @@ class ReaderRowsTest {
         assertTrue(readerRows(article, content, paged = true, pageIndex = 1).none { it !is ReaderRow.Node })
         assertEquals(3, pageNumber(article, 2))
         assertEquals(5, pageNumber(article, 3))
+    }
+
+    @Test
+    fun `halaman yang gagal diperbarui tetap terbaca selama masih menyimpan isi lamanya`() {
+        val old = listOf(ContentNodeUi(id = 450, type = ContentNodeType.P, text = "Isi lama"))
+        val pages = article.pages.mapIndexed { i, p -> if (i == 3) p.copy(hasContent = true) else p }
+        val refreshed = article.copy(pages = pages)
+        val withOld = content.mapIndexed { i, c -> if (i == 3) old else c }
+
+        val rows = readerRows(refreshed, withOld, paged = false, pageIndex = 0)
+
+        assertTrue(rows.none { it is ReaderRow.Missing })
+        assertTrue(rows.any { it.nodeId == 450L })
+        assertEquals(5, okPageIndexes(refreshed).size)
     }
 
     @Test

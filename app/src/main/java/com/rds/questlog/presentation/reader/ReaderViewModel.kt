@@ -86,10 +86,11 @@ class ReaderViewModel @Inject constructor(
     private val screen: Flow<ReaderUiState> = reloads.flatMapLatest {
         getArticleDetail(articleId)
             .map { detail ->
+                val content = detail?.toContentPages().orEmpty()
                 ReaderUiState(
                     viewState = detail.toViewState(),
-                    article = detail?.let { mapper.toUi(it.article) },
-                    content = detail?.toContentPages().orEmpty(),
+                    article = detail?.let { mapper.toUi(it.article).withContent(content) },
+                    content = content,
                     resumeNodeId = detail?.resumeTarget(resumeFrom),
                 )
             }
