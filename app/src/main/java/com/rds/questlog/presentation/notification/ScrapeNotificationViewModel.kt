@@ -41,7 +41,7 @@ class ScrapeNotificationViewModel @Inject constructor(
             getArticles("", null)
                 .map { list -> list.firstOrNull { it.id == job.articleId } }
                 .takeWhile { it != null }
-                .map { it!!.toNotification(job.skipPages) }
+                .map { it!!.toNotification(job.skipPages, job.pageIds) }
                 .transformWhile {
                     emit(it)
                     it.kind == ScrapeNotificationKind.PROGRESS
@@ -65,11 +65,12 @@ class ScrapeNotificationViewModel @Inject constructor(
 }
 
 /**
- * Notifikasi untuk halaman artikel dengan urutan di atas [skipPages] (halaman lama pada mode Lengkapi diabaikan):
+ * Notifikasi untuk halaman artikel dengan urutan di atas [skipPages] (halaman lama pada mode Lengkapi diabaikan);
+ * bila [pageIds] diisi (unduh ulang) hanya halaman itu yang dihitung dan varian memakai teks "diperbarui":
  * masih ada yang diproses → PROGRESS; semua gagal → ERROR; sebagian gagal → PARTIAL; selain itu DONE.
  */
-fun Article.toNotification(skipPages: Int = 0): ScrapeNotificationUi {
-    val mine = pages.filter { it.order > skipPages }
+fun Article.toNotification(skipPages: Int = 0, pageIds: Set<Long>? = null): ScrapeNotificationUi {
+    val mine = pages.filter { it.order > skipPages && (pageIds == null || it.id in pageIds) }
     val failed = mine.count { it.status == SourcePageStatus.FAILED }
     val handled = mine.count { it.status == SourcePageStatus.COMPLETED || it.status == SourcePageStatus.FAILED }
     val kind = when {
@@ -79,5 +80,5 @@ fun Article.toNotification(skipPages: Int = 0): ScrapeNotificationUi {
         failed > 0 -> ScrapeNotificationKind.PARTIAL
         else -> ScrapeNotificationKind.DONE
     }
-    return ScrapeNotificationUi(kind, title, handled, mine.size, failed, id)
+    return ScrapeNotificationUi(kind, title, handled, mine.size, failed, id, isRefresh = pageIds != null)
 }

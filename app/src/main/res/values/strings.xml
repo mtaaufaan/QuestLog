@@ -48,6 +48,9 @@
     <string name="article_list_snackbar_deleted">Artikel dihapus</string>
     <string name="article_list_snackbar_updated">Artikel diperbarui</string>
     <string name="article_list_snackbar_page_deleted">Halaman dihapus</string>
+    <string name="article_list_snackbar_refresh_all">Mengunduh ulang semua halaman…</string>
+    <string name="article_list_snackbar_refresh_page">Halaman %1$d diunduh ulang di latar belakang</string>
+    <string name="article_list_snackbar_refresh_failed">Gagal mengunduh ulang. Coba lagi.</string>
     <string name="article_list_snackbar_page_delete_failed">Gagal menghapus halaman. Coba lagi.</string>
     <string name="article_list_snackbar_last_page">Halaman terakhir tidak bisa dihapus.</string>
     <string name="article_list_snackbar_page_busy">Halaman sedang diunduh. Coba lagi nanti.</string>
@@ -210,6 +213,11 @@
     <string name="notification_partial_text">%1$d halaman gagal dimuat. Tap untuk retry.</string>
     <string name="notification_error_title">Gagal mengunduh %1$s</string>
     <string name="notification_error_text">Tap untuk retry.</string>
+    <string name="notification_refresh_done_title">%1$s diperbarui</string>
+    <string name="notification_refresh_done_text">Semua halaman diperbarui.</string>
+    <string name="notification_refresh_partial_text">%1$d halaman gagal diperbarui. Isi lama tetap tersimpan.</string>
+    <string name="notification_refresh_error_title">Gagal memperbarui %1$s</string>
+    <string name="notification_refresh_error_text">Isi lama tetap tersimpan. Tap untuk retry.</string>
 
     <!-- S3 Reader -->
     <string name="reader_back">Kembali</string>

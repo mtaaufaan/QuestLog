@@ -26,6 +26,8 @@ data class PageUiModel(
     val id: Long = 0,
     val url: String,
     val status: PageStatus,
+    /** Halaman masih menyimpan isi (mis. isi lama saat diunduh ulang atau gagal diperbarui); diisi Reader. */
+    val hasContent: Boolean = false,
     /** Alasan gagal, mis. "HTTP 404 — halaman tidak ditemukan". */
     val reason: String? = null,
 )

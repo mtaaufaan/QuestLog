@@ -17,4 +17,12 @@ interface PageLayoutDao {
 
     @Query("DELETE FROM source_pages WHERE id = :pageId")
     suspend fun delete(pageId: Long)
+
+    /** Unduh ulang semua halaman artikel: PENDING lagi, konten lama tidak disentuh. */
+    @Query("UPDATE source_pages SET status = 'PENDING', failure_reason = NULL WHERE article_id = :articleId")
+    suspend fun markAllPending(articleId: Long)
+
+    /** Unduh ulang satu halaman: PENDING lagi, konten lama tidak disentuh. */
+    @Query("UPDATE source_pages SET status = 'PENDING', failure_reason = NULL WHERE id = :pageId")
+    suspend fun markPending(pageId: Long)
 }

@@ -5,6 +5,7 @@ import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.NodeType
 import com.rds.questlog.domain.model.SourcePageStatus
 import com.rds.questlog.domain.model.resolveAnchor
+import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.ContentNodeType
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.ReaderViewState
@@ -15,6 +16,11 @@ fun ArticleDetail.toContentPages(): List<List<ContentNodeUi>> {
     val byPage = nodes.groupBy { it.sourcePageId }
     return article.pages.map { page -> byPage[page.id].orEmpty().map(ContentNode::toUi) }
 }
+
+/** Menandai halaman yang masih punya konten tersimpan, termasuk yang sedang atau gagal diunduh ulang. */
+fun ArticleUiModel.withContent(content: List<List<ContentNodeUi>>) = copy(
+    pages = pages.mapIndexed { i, page -> page.copy(hasContent = content.getOrNull(i).orEmpty().isNotEmpty()) },
+)
 
 fun ContentNode.toUi() = ContentNodeUi(
     id = id,

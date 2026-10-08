@@ -31,4 +31,11 @@ interface ArticleManagementRepository {
      * @throws com.rds.questlog.domain.error.QuestLogError.ArticleError.PageNotFound bila daftar tidak cocok
      */
     suspend fun reorderPages(articleId: Long, orderedPageIds: List<Long>)
+
+    /**
+     * QL-20. Menandai halaman PENDING untuk diunduh ulang tanpa menyentuh node lama (isi lama tetap tersimpan dan
+     * baru diganti saat unduhan sukses). [pageId] null = semua halaman artikel; artikel kembali SCRAPING.
+     * @throws com.rds.questlog.domain.error.QuestLogError.ArticleError.PageNotFound bila [pageId] bukan milik artikel
+     */
+    suspend fun markPagesForRefresh(articleId: Long, pageId: Long? = null)
 }
