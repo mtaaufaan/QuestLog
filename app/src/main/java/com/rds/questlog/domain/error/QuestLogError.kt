@@ -27,6 +27,18 @@ sealed class QuestLogError(message: String? = null, cause: Throwable? = null) : 
         data class UrlAlreadySaved(val url: String) : ValidationError()
     }
 
+    /** Pengelolaan halaman artikel (QL-19/QL-20). */
+    sealed class ArticleError : QuestLogError() {
+        /** Halaman sedang diunduh (PENDING/IN_PROGRESS); tidak boleh dihapus. */
+        data object Busy : ArticleError()
+
+        /** Halaman terakhir artikel tidak boleh dihapus; hapus artikelnya. */
+        data object LastPage : ArticleError()
+
+        /** Halaman (atau daftar halaman) tidak cocok dengan artikel; mis. sudah terhapus lebih dulu. */
+        data object PageNotFound : ArticleError()
+    }
+
     /** Batas tier gratis (QL-12): maks. 2 game dan 5 artikel per game. */
     sealed class TierError : QuestLogError() {
         data object GameLimitReached : TierError()

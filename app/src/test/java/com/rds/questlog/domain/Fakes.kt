@@ -98,6 +98,16 @@ class FakeArticleRepository(
 
 class FakeArticleManagementRepository(private val failWith: Throwable? = null) : ArticleManagementRepository {
     val updates = mutableListOf<Triple<Long, String, GameTarget>>()
+    val deletedPages = mutableListOf<Pair<Long, Long>>()
+    val reordered = mutableListOf<Pair<Long, List<Long>>>()
+    override suspend fun deletePage(articleId: Long, pageId: Long) {
+        failWith?.let { throw it }
+        deletedPages += articleId to pageId
+    }
+    override suspend fun reorderPages(articleId: Long, orderedPageIds: List<Long>) {
+        failWith?.let { throw it }
+        reordered += articleId to orderedPageIds
+    }
     override suspend fun updateDetails(articleId: Long, title: String, target: GameTarget) {
         failWith?.let { throw it }
         updates += Triple(articleId, title, target)

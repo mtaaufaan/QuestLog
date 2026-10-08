@@ -4,8 +4,11 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rds.questlog.R
+import com.rds.questlog.domain.error.QuestLogError.ArticleError
 import com.rds.questlog.domain.usecase.article.DeleteArticleUseCase
+import com.rds.questlog.domain.usecase.article.DeletePageUseCase
 import com.rds.questlog.domain.usecase.article.GetArticlesUseCase
+import com.rds.questlog.domain.usecase.article.ReorderPagesUseCase
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.article.UpdateArticleUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
@@ -41,6 +44,8 @@ class ArticleListViewModel @Inject constructor(
     private val deleteArticleUseCase: DeleteArticleUseCase,
     private val retryFailedPagesUseCase: RetryFailedPagesUseCase,
     private val updateArticleUseCase: UpdateArticleUseCase,
+    private val reorderPagesUseCase: ReorderPagesUseCase,
+    private val deletePageUseCase: DeletePageUseCase,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
 
@@ -116,6 +121,26 @@ class ArticleListViewModel @Inject constructor(
         }
     }
 
+    /** Menggeser halaman ke [index] + [dir] (−1 naik, +1 turun); langsung tersimpan, Reader ikut berubah. */
+    fun movePage(article: ArticleUiModel, index: Int, dir: Int) {
+        val ids = article.pages.map { it.id }.toMutableList()
+        if (index !in ids.indices || index + dir !in ids.indices) return
+        ids.add(index + dir, ids.removeAt(index))
+        viewModelScope.launch {
+            reorderPagesUseCase(article.id, ids)
+                .onFailure { showSnackbar(R.string.article_list_snackbar_reorder_failed) }
+        }
+    }
+
+    /** Menghapus halaman [pageId] setelah konfirmasi; pesan menyesuaikan penyebab bila ditolak. */
+    fun deletePage(articleId: Long, pageId: Long) {
+        viewModelScope.launch {
+            deletePageUseCase(articleId, pageId)
+                .onSuccess { showSnackbar(R.string.article_list_snackbar_page_deleted) }
+                .onFailure { showSnackbar(it.toPageDeleteMessage()) }
+        }
+    }
+
     /** Sheet ditutup tanpa menyimpan: hapus sisa status error. */
     fun onEditDismissed() {
         edit.value = EditState()
@@ -144,6 +169,13 @@ class ArticleListViewModel @Inject constructor(
             delay(SNACKBAR_DURATION_MS)
             snackbar.value = null
         }
+    }
+
+    @StringRes
+    private fun Throwable.toPageDeleteMessage(): Int = when (this) {
+        ArticleError.LastPage -> R.string.article_list_snackbar_last_page
+        ArticleError.Busy -> R.string.article_list_snackbar_page_busy
+        else -> R.string.article_list_snackbar_page_delete_failed
     }
 
     private data class EditState(val saving: Boolean = false, val error: Boolean = false)
