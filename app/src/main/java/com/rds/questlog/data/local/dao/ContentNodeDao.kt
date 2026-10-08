@@ -27,6 +27,10 @@ interface ContentNodeDao {
     @Query("SELECT COUNT(*) FROM content_nodes WHERE article_id = :articleId")
     suspend fun countByArticle(articleId: Long): Int
 
+    /** Seluruh node satu halaman berurutan; dipakai mencocokkan ulang checkpoint saat halaman diunduh ulang. */
+    @Query("SELECT * FROM content_nodes WHERE source_page_id = :pageId ORDER BY display_order")
+    suspend fun getByPage(pageId: Long): List<ContentNodeEntity>
+
     /** Menggeser display_order seluruh node satu halaman sebesar [delta] (halaman pindah slot). */
     @Query("UPDATE content_nodes SET display_order = display_order + :delta WHERE source_page_id = :pageId")
     suspend fun shiftOrder(pageId: Long, delta: Int)

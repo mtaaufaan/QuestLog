@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,12 +27,13 @@ import com.rds.questlog.presentation.notification.ScrapeNotificationHost
 import com.rds.questlog.presentation.notification.ScrapeNotificationViewModel
 import com.rds.questlog.presentation.popup.Popup
 import com.rds.questlog.presentation.popup.PopupHost
+import com.rds.questlog.presentation.popup.PopupSaver
 import com.rds.questlog.presentation.reader.ReaderScreen
 
 @Composable
 fun QuestLogNavHost() {
     val navController = rememberNavController()
-    var activePopup by remember { mutableStateOf<Popup?>(null) }
+    var activePopup by rememberSaveable(stateSaver = PopupSaver) { mutableStateOf<Popup?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val notificationViewModel: ScrapeNotificationViewModel = hiltViewModel()
     val notification by notificationViewModel.notification.collectAsStateWithLifecycle()
@@ -44,6 +46,7 @@ fun QuestLogNavHost() {
                     activePopup = activePopup,
                     onShowPopup = { activePopup = it },
                     onDismissPopup = { activePopup = null },
+                    onScrapeStarted = notificationViewModel::track,
                 )
             }
             composable<AddArticle> { entry ->

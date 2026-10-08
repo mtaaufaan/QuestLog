@@ -26,7 +26,14 @@ class TestEnvironment(timeoutSeconds: Long = 3) {
         ArticleRepositoryImpl(db, db.articleDao(), db.sourcePageDao(), db.imageDao(), imageStore, db.contentNodeDao())
     val management = ArticleManagementRepositoryImpl(db, db.articleDao(), db.gameDao())
     val checkpoints = CheckpointRepositoryImpl(db, db.checkpointDao(), db.contentNodeDao())
-    val pages = SourcePageRepositoryImpl(db, db.sourcePageDao(), db.contentNodeDao(), db.imageDao(), db.articleDao())
+    val pages = SourcePageRepositoryImpl(
+        db,
+        db.sourcePageDao(),
+        db.contentNodeDao(),
+        db.imageDao(),
+        db.articleDao(),
+        db.checkpointDao(),
+    )
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)

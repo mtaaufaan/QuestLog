@@ -62,6 +62,16 @@ class ArticleManagementRepositoryImpl @Inject constructor(
         renumber(articleId, orderedPageIds.map { byId.getValue(it) })
     }
 
+    override suspend fun markPagesForRefresh(articleId: Long, pageId: Long?) = db.withTransaction {
+        if (pageId == null) {
+            pageDao.markAllPending(articleId)
+        } else {
+            if (pageDao.getByArticle(articleId).none { it.id == pageId }) throw ArticleError.PageNotFound
+            pageDao.markPending(pageId)
+        }
+        articleDao.setScrapingDone(articleId, false)
+    }
+
     /** Memberi nomor ulang halaman [ordered] (urutan 1..n, slot kelipatan 1000), menggeser node-nya, lalu fallback. */
     private suspend fun renumber(articleId: Long, ordered: List<SourcePageEntity>) {
         val slot = ScrapeLimits.MAX_NODES_PER_PAGE

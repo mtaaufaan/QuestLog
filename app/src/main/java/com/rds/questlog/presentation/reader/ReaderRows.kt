@@ -3,6 +3,7 @@ package com.rds.questlog.presentation.reader
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PageStatus
+import com.rds.questlog.presentation.model.PageUiModel
 import java.net.URI
 
 /** Satu baris daftar baca: blok konten, pemisah antar-halaman, atau placeholder halaman yang gagal dimuat. */
@@ -17,9 +18,11 @@ val ReaderRow.nodeId: Long? get() = (this as? ReaderRow.Node)?.node?.id
 /** Hasil menerjemahkan id node ke posisinya: [pageIndex] = indeks di antara halaman yang berhasil (DONE). */
 data class NodeHit(val nodeId: Long, val pageIndex: Int)
 
-/** Indeks (0-based) halaman artikel yang berhasil dimuat. */
-fun okPageIndexes(article: ArticleUiModel): List<Int> =
-    article.pages.indices.filter { article.pages[it].status == PageStatus.DONE }
+/** Halaman bisa dibaca bila selesai, atau masih menyimpan isi lamanya (unduh ulang berjalan atau gagal). */
+private val PageUiModel.readable: Boolean get() = status == PageStatus.DONE || hasContent
+
+/** Indeks (0-based) halaman artikel yang bisa dibaca. */
+fun okPageIndexes(article: ArticleUiModel): List<Int> = article.pages.indices.filter { article.pages[it].readable }
 
 /**
  * Baris untuk mode Seamless (semua halaman disambung pemisah; halaman gagal jadi placeholder) atau Per Halaman
@@ -37,7 +40,7 @@ fun readerRows(
     return article.pages.indices.flatMap { i ->
         val page = article.pages[i]
         buildList {
-            if (page.status != PageStatus.DONE) {
+            if (!page.readable) {
                 add(ReaderRow.Missing(i + 1))
             } else {
                 if (i > 0) add(ReaderRow.Break(i + 1, hostOf(page.url)))

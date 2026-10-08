@@ -8,12 +8,15 @@ import com.rds.questlog.domain.error.QuestLogError.ArticleError
 import com.rds.questlog.domain.usecase.article.DeleteArticleUseCase
 import com.rds.questlog.domain.usecase.article.DeletePageUseCase
 import com.rds.questlog.domain.usecase.article.GetArticlesUseCase
+import com.rds.questlog.domain.usecase.article.RefreshArticleUseCase
+import com.rds.questlog.domain.usecase.article.RefreshPageUseCase
 import com.rds.questlog.domain.usecase.article.ReorderPagesUseCase
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.article.UpdateArticleUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
 import com.rds.questlog.domain.usecase.premium.ObservePremiumStatusUseCase
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.ScrapeJob
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,12 +49,14 @@ class ArticleListViewModel @Inject constructor(
     private val updateArticleUseCase: UpdateArticleUseCase,
     private val reorderPagesUseCase: ReorderPagesUseCase,
     private val deletePageUseCase: DeletePageUseCase,
+    private val refreshArticleUseCase: RefreshArticleUseCase,
+    private val refreshPageUseCase: RefreshPageUseCase,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
     private val gameFilter = MutableStateFlow<Long?>(null)
-    private val snackbar = MutableStateFlow<Int?>(null)
+    private val snackbar = MutableStateFlow<SnackbarMessage?>(null)
     private val edit = MutableStateFlow(EditState())
     private var snackbarJob: Job? = null
 
@@ -79,7 +84,7 @@ class ArticleListViewModel @Inject constructor(
             query = q,
             isPremium = isPremium,
         )
-    }.combine(snackbar) { state, message -> state.copy(snackbar = message) }
+    }.combine(snackbar) { state, message -> state.copy(snackbar = message?.res, snackbarArg = message?.arg) }
         .combine(edit) { state, e -> state.copy(isSavingEdit = e.saving, editSaveError = e.error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ArticleListUiState(isLoading = true))
 
@@ -141,6 +146,31 @@ class ArticleListViewModel @Inject constructor(
         }
     }
 
+    /** Mengunduh ulang semua halaman [article]; [onStarted] menerima pekerjaan untuk notifikasi progres. */
+    fun refreshArticle(article: ArticleUiModel, onStarted: (ScrapeJob) -> Unit) {
+        viewModelScope.launch {
+            refreshArticleUseCase(article.id)
+                .onSuccess {
+                    showSnackbar(R.string.article_list_snackbar_refresh_all)
+                    onStarted(ScrapeJob(article.id, skipPages = 0, pageIds = article.pages.map { it.id }.toSet()))
+                }
+                .onFailure { showSnackbar(it.toRefreshMessage()) }
+        }
+    }
+
+    /** Mengunduh ulang halaman ke-[index] (tombol ⟳ di Page Manager). */
+    fun refreshPage(article: ArticleUiModel, index: Int, onStarted: (ScrapeJob) -> Unit) {
+        val page = article.pages.getOrNull(index) ?: return
+        viewModelScope.launch {
+            refreshPageUseCase(article.id, page.id)
+                .onSuccess {
+                    showSnackbar(R.string.article_list_snackbar_refresh_page, index + 1)
+                    onStarted(ScrapeJob(article.id, skipPages = 0, pageIds = setOf(page.id)))
+                }
+                .onFailure { showSnackbar(it.toRefreshMessage()) }
+        }
+    }
+
     /** Sheet ditutup tanpa menyimpan: hapus sisa status error. */
     fun onEditDismissed() {
         edit.value = EditState()
@@ -162,13 +192,19 @@ class ArticleListViewModel @Inject constructor(
         }
     }
 
-    private fun showSnackbar(@StringRes message: Int) {
+    private fun showSnackbar(@StringRes message: Int, arg: Int? = null) {
         snackbarJob?.cancel()
-        snackbar.value = message
+        snackbar.value = SnackbarMessage(message, arg)
         snackbarJob = viewModelScope.launch {
             delay(SNACKBAR_DURATION_MS)
             snackbar.value = null
         }
+    }
+
+    @StringRes
+    private fun Throwable.toRefreshMessage(): Int = when (this) {
+        ArticleError.Busy -> R.string.article_list_snackbar_scraping
+        else -> R.string.article_list_snackbar_refresh_failed
     }
 
     @StringRes
@@ -177,6 +213,8 @@ class ArticleListViewModel @Inject constructor(
         ArticleError.Busy -> R.string.article_list_snackbar_page_busy
         else -> R.string.article_list_snackbar_page_delete_failed
     }
+
+    private data class SnackbarMessage(@StringRes val res: Int, val arg: Int? = null)
 
     private data class EditState(val saving: Boolean = false, val error: Boolean = false)
 

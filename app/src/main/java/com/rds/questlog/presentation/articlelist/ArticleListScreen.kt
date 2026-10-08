@@ -10,6 +10,7 @@ import androidx.navigation.NavController
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.GameFilterOption
+import com.rds.questlog.presentation.model.ScrapeJob
 import com.rds.questlog.presentation.navigation.AddArticle
 import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
@@ -25,6 +26,7 @@ fun ArticleListScreen(
     activePopup: Popup?,
     onShowPopup: (Popup) -> Unit,
     onDismissPopup: () -> Unit,
+    onScrapeStarted: (ScrapeJob) -> Unit,
     viewModel: ArticleListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -35,7 +37,9 @@ fun ArticleListScreen(
         isPremium = uiState.isPremium,
         query = uiState.query,
         filterGameId = uiState.selectedGameFilter,
-        snackbar = uiState.snackbar?.let { stringResource(it) },
+        snackbar = uiState.snackbar?.let { res ->
+            uiState.snackbarArg?.let { stringResource(res, it) } ?: stringResource(res)
+        },
         onQuery = viewModel::onQueryChange,
         onOpenFilter = { onShowPopup(Popup.GameFilter) },
         onArticleTap = { article ->
@@ -51,7 +55,7 @@ fun ArticleListScreen(
         onOpenUnlock = { onShowPopup(Popup.Unlock) },
     )
 
-    ArticleListPopups(activePopup, uiState, viewModel, navController, onShowPopup, onDismissPopup)
+    ArticleListPopups(activePopup, uiState, viewModel, navController, onShowPopup, onDismissPopup, onScrapeStarted)
 }
 
 @Composable
@@ -62,6 +66,7 @@ private fun ArticleListPopups(
     navController: NavController,
     onShowPopup: (Popup) -> Unit,
     onDismissPopup: () -> Unit,
+    onScrapeStarted: (ScrapeJob) -> Unit,
 ) {
     when (activePopup) {
         Popup.GameFilter -> {
@@ -117,7 +122,7 @@ private fun ArticleListPopups(
                 onClose = onDismissPopup,
             )
         }
-        else -> ArticleManagementPopups(activePopup, uiState, viewModel, onShowPopup, onDismissPopup)
+        else -> ArticleManagementPopups(activePopup, uiState, viewModel, onShowPopup, onDismissPopup, onScrapeStarted)
     }
 }
 
@@ -129,6 +134,7 @@ private fun ArticleManagementPopups(
     viewModel: ArticleListViewModel,
     onShowPopup: (Popup) -> Unit,
     onDismissPopup: () -> Unit,
+    onScrapeStarted: (ScrapeJob) -> Unit,
 ) {
     when (activePopup) {
         is Popup.EditArticle -> uiState.articleById(activePopup.articleId)?.let { article ->
@@ -150,13 +156,16 @@ private fun ArticleManagementPopups(
             )
         }
         is Popup.ManagePages, is Popup.DeletePage -> uiState.articleById(activePopup.managedArticleId())?.let {
-            ManagePagesPopups(it, activePopup.deletingPageId(), viewModel, onShowPopup, onDismissPopup)
+            ManagePagesPopups(it, activePopup.deletingPageId(), viewModel, onShowPopup, onDismissPopup, onScrapeStarted)
         }
         is Popup.RefreshArticle -> uiState.articleById(activePopup.articleId)?.let { article ->
             RefreshArticleDialog(
                 articleTitle = article.title,
                 pageCount = article.totalPageCount,
-                onConfirm = onDismissPopup,
+                onConfirm = {
+                    viewModel.refreshArticle(article, onScrapeStarted)
+                    onDismissPopup()
+                },
                 onClose = onDismissPopup,
             )
         }

@@ -100,6 +100,11 @@ class FakeArticleManagementRepository(private val failWith: Throwable? = null) :
     val updates = mutableListOf<Triple<Long, String, GameTarget>>()
     val deletedPages = mutableListOf<Pair<Long, Long>>()
     val reordered = mutableListOf<Pair<Long, List<Long>>>()
+    val refreshed = mutableListOf<Pair<Long, Long?>>()
+    override suspend fun markPagesForRefresh(articleId: Long, pageId: Long?) {
+        failWith?.let { throw it }
+        refreshed += articleId to pageId
+    }
     override suspend fun deletePage(articleId: Long, pageId: Long) {
         failWith?.let { throw it }
         deletedPages += articleId to pageId

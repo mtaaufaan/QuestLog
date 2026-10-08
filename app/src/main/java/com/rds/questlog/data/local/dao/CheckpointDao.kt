@@ -31,6 +31,14 @@ interface CheckpointDao {
     )
     suspend fun moveLastVisited(articleId: Long, pageId: Long, nodeId: Long?)
 
+    /** Mengarahkan anchor checkpoint manual ke [nodeId] dengan cadangan [order] (setelah node diganti). */
+    @Query("UPDATE checkpoints SET anchor_node_id = :nodeId, fallback_order = :order WHERE article_id = :articleId")
+    suspend fun setAnchor(articleId: Long, nodeId: Long, order: Int)
+
+    /** Mengarahkan posisi baca terakhir ke [nodeId] (setelah node diganti). */
+    @Query("UPDATE checkpoints SET last_visited_node_id = :nodeId WHERE article_id = :articleId")
+    suspend fun setLastVisited(articleId: Long, nodeId: Long)
+
     /** Menghitung ulang fallback_order dari posisi anchor sekarang (setelah display_order bergeser). */
     @Query(
         "UPDATE checkpoints SET fallback_order = " +

@@ -43,6 +43,21 @@ class ScrapeNotificationMappingTest {
     }
 
     @Test
+    fun `unduh ulang hanya menghitung halaman yang dipilih dan menandai varian unduh ulang`() {
+        val one = article(COMPLETED, PENDING, COMPLETED).toNotification(pageIds = setOf(2L))
+        assertEquals(ScrapeNotificationKind.PROGRESS, one.kind)
+        assertEquals(0, one.current)
+        assertEquals(1, one.total)
+        assertEquals(true, one.isRefresh)
+
+        val both = setOf(1L, 2L)
+        assertEquals(ScrapeNotificationKind.DONE, article(COMPLETED, COMPLETED).toNotification(pageIds = both).kind)
+        assertEquals(ScrapeNotificationKind.ERROR, article(COMPLETED, FAILED).toNotification(pageIds = setOf(2L)).kind)
+        assertEquals(ScrapeNotificationKind.PARTIAL, article(COMPLETED, FAILED).toNotification(pageIds = both).kind)
+        assertEquals(false, article(COMPLETED).toNotification().isRefresh)
+    }
+
+    @Test
     fun `mode lengkapi hanya menghitung halaman baru`() {
         val n = article(COMPLETED, COMPLETED, COMPLETED, PENDING).toNotification(skipPages = 3)
         assertEquals(ScrapeNotificationKind.PROGRESS, n.kind)
