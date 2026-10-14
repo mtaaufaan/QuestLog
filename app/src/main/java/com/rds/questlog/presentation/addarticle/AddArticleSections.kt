@@ -245,6 +245,7 @@ internal fun UrlSection(
     showSharedBanner: Boolean = false,
     pasteOutcome: PasteOutcome? = null,
     onPaste: () -> Unit = {},
+    trailing: @Composable () -> Unit = {},
 ) {
     val c = QuestLogTheme.colors
     val isAppend = form.mode == com.rds.questlog.presentation.model.ScrapeMode.APPEND
@@ -298,6 +299,7 @@ internal fun UrlSection(
             color = c.textTertiary,
             style = MaterialTheme.typography.bodySmall,
         )
+        trailing()
     }
 }
 
