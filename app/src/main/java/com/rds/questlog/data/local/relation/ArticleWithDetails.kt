@@ -3,6 +3,8 @@ package com.rds.questlog.data.local.relation
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.rds.questlog.data.local.entity.ArticleEntity
+import com.rds.questlog.data.local.entity.ArticleNoteEntity
+import com.rds.questlog.data.local.entity.BookmarkEntity
 import com.rds.questlog.data.local.entity.CheckpointEntity
 import com.rds.questlog.data.local.entity.GameEntity
 import com.rds.questlog.data.local.entity.SourcePageEntity
@@ -13,4 +15,6 @@ data class ArticleWithDetails(
     @Relation(parentColumn = "game_id", entityColumn = "id") val game: GameEntity,
     @Relation(parentColumn = "id", entityColumn = "article_id") val pages: List<SourcePageEntity>,
     @Relation(parentColumn = "id", entityColumn = "article_id") val checkpoint: CheckpointEntity?,
+    @Relation(parentColumn = "id", entityColumn = "article_id") val bookmarks: List<BookmarkEntity>,
+    @Relation(parentColumn = "id", entityColumn = "article_id") val note: ArticleNoteEntity?,
 )

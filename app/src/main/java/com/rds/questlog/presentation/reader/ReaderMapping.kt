@@ -56,9 +56,13 @@ fun ArticleDetail?.toViewState(): ReaderViewState = when {
  * Node tujuan auto-scroll saat Reader dibuka. resumeFrom "checkpoint" -> anchor checkpoint manual (dengan cadangan
  * display_order bila anchor hilang), selain itu posisi baca terakhir. Checkpoint kosong jatuh ke posisi terakhir.
  */
-fun ArticleDetail.resumeTarget(resumeFrom: String): Long? {
+fun ArticleDetail.resumeTarget(resumeFrom: String, startNodeId: Long = 0L): Long? {
     val article = article
     val checkpoint = nodes.resolveAnchor(article.checkpointNodeId, article.checkpointFallbackOrder)
     val last = nodes.resolveAnchor(article.lastVisitedNodeId, null)
-    return if (resumeFrom == "checkpoint") checkpoint ?: last else last
+    return when (resumeFrom) {
+        "checkpoint" -> checkpoint ?: last
+        "bookmark" -> nodes.resolveAnchor(startNodeId.takeIf { it > 0 }, null) ?: last
+        else -> last
+    }
 }

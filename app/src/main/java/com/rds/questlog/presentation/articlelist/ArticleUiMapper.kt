@@ -35,6 +35,8 @@ class ArticleUiMapper @Inject constructor(private val failures: PageFailureForma
         // Label "dibaca 2 jam lalu" diisi saat Reader (Sprint 3) mulai menulis checkpoints.last_read_at.
         lastRead = null,
         readMode = article.readMode?.let { if (it == DomainReadMode.PAGED) ReadMode.PAGED else ReadMode.SEAMLESS },
+        bookmarkCount = article.bookmarkCount,
+        hasNote = article.hasNote,
     )
 
     private fun toUi(page: SourcePage) = PageUiModel(

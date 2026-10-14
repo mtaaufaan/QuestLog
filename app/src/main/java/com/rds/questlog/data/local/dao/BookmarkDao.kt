@@ -4,10 +4,23 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.rds.questlog.data.local.entity.BookmarkEntity
+import com.rds.questlog.data.local.relation.BookmarkRow
+import kotlinx.coroutines.flow.Flow
 
-/** Akses bookmark; UseCase dan UI bookmark menyusul di Sprint 7. Di sini yang dibutuhkan pemulihan anchor. */
+/** Akses bookmark: daftar per game, ubah/hapus, dan operasi pemulihan anchor saat halaman berubah. */
 @Dao
 interface BookmarkDao {
+
+    /** Semua bookmark di game [gameId]: artikel terbaru dulu, lalu urutan dibuat. */
+    @Query(
+        "SELECT b.id, b.article_id, a.title AS article_title, b.node_id, b.label, b.snippet, b.created_at " +
+            "FROM bookmarks b JOIN articles a ON a.id = b.article_id WHERE a.game_id = :gameId " +
+            "ORDER BY a.created_at DESC, a.id DESC, b.created_at, b.id",
+    )
+    fun observeByGame(gameId: Long): Flow<List<BookmarkRow>>
+
+    @Query("UPDATE bookmarks SET label = :label WHERE id = :id")
+    suspend fun updateLabel(id: Long, label: String)
 
     @Insert
     suspend fun insert(bookmark: BookmarkEntity): Long

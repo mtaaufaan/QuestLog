@@ -358,10 +358,10 @@ private fun rememberReaderState(
     LaunchedEffect(state, active) {
         val target = resumeNodeId ?: article.lastNodeId
         if (active && target != null) {
-            val message = if (resumeFrom == "checkpoint") {
-                R.string.reader_snackbar_resume_checkpoint
-            } else {
-                R.string.reader_snackbar_resume_last
+            val message = when (resumeFrom) {
+                "checkpoint" -> R.string.reader_snackbar_resume_checkpoint
+                "bookmark" -> R.string.reader_snackbar_resume_bookmark
+                else -> R.string.reader_snackbar_resume_last
             }
             state.jump = Jump(target, message)
         }
