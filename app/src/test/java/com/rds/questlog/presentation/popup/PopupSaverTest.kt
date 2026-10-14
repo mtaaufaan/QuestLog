@@ -19,6 +19,11 @@ class PopupSaverTest {
         Popup.ManagePages(11),
         Popup.DeletePage(11, 42),
         Popup.RefreshArticle(12),
+        Popup.ReaderTools,
+        Popup.BookmarkPanel,
+        Popup.BookmarkLabel(null, fromPanel = true),
+        Popup.BookmarkLabel(5, fromPanel = false),
+        Popup.NotePanel,
     )
 
     private fun save(popup: Popup?): Any? = with(PopupSaver) { SaverScope { true }.save(popup) }

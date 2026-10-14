@@ -38,6 +38,8 @@ object PreviewData {
             checkpointNodeId = 302,
             lastNodeId = 204,
             lastRead = "dibaca 2 jam lalu",
+            bookmarkCount = 3,
+            hasNote = true,
         ),
         article(
             id = 2,
@@ -50,6 +52,7 @@ object PreviewData {
                 if (i == 2) page.copy(reason = "Timeout — server tidak merespons") else page
             },
             lastRead = "dibaca kemarin",
+            bookmarkCount = 1,
         ),
         article(
             id = 4,
@@ -102,6 +105,8 @@ object PreviewData {
         checkpointNodeId: Long? = null,
         lastNodeId: Long? = null,
         lastRead: String? = null,
+        bookmarkCount: Int = 0,
+        hasNote: Boolean = false,
     ) = ArticleUiModel(
         id = id,
         gameId = gameId,
@@ -112,5 +117,7 @@ object PreviewData {
         checkpointNodeId = checkpointNodeId,
         lastNodeId = lastNodeId,
         lastRead = lastRead,
+        bookmarkCount = bookmarkCount,
+        hasNote = hasNote,
     )
 }

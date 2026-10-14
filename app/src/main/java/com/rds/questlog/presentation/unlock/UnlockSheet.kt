@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -81,7 +83,12 @@ fun UnlockSheetContent(
     onRestore: () -> Unit,
     onClose: () -> Unit,
 ) {
-    Column(Modifier.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, bottom = 26.dp, top = 12.dp)) {
+    Column(
+        Modifier
+            .verticalScroll(rememberScrollState())
+            .navigationBarsPadding()
+            .padding(start = 24.dp, end = 24.dp, bottom = 26.dp, top = 12.dp),
+    ) {
         if (phase == UnlockPhase.DONE) {
             DoneBody(onClose)
         } else {
@@ -163,6 +170,10 @@ private fun ComparisonTable(gamesUsed: Int) {
             unlimited = INFINITY,
         )
         TableRow(stringResource(R.string.unlock_row_articles), "5", INFINITY)
+        TableRow(stringResource(R.string.unlock_row_bookmark), DASH, CHECK)
+        TableRow(stringResource(R.string.unlock_row_note), DASH, CHECK)
+        TableRow(stringResource(R.string.unlock_row_binder), DASH, CHECK)
+        TableRow(stringResource(R.string.unlock_row_autodetect), DASH, CHECK)
         TableRow(stringResource(R.string.unlock_row_offline), CHECK, CHECK)
     }
 }
@@ -179,7 +190,11 @@ private fun TableRow(first: String, free: String, unlimited: String, header: Boo
             Text(first, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f), style = bodyStyle)
             Text(
                 text = if (header) free.uppercase() else free,
-                color = if (header) c.textSecondary else MaterialTheme.colorScheme.onSurface,
+                color = when {
+                    header -> c.textSecondary
+                    free == DASH -> c.textTertiary
+                    else -> MaterialTheme.colorScheme.onSurface
+                },
                 textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(min = 72.dp, max = 72.dp),
                 style = if (header) headerStyle else bodyStyle,
@@ -317,6 +332,7 @@ private fun DoneBody(onClose: () -> Unit) {
 private const val MAX_GAMES = 2
 private const val INFINITY = "∞"
 private const val CHECK = "✓"
+private const val DASH = "—"
 
 @Preview(showBackground = true, widthDp = 390)
 @Composable

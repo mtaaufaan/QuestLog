@@ -46,6 +46,10 @@ data class ArticleUiModel(
     /** Label relatif, mis. "dibaca 2 jam lalu". */
     val lastRead: String? = null,
     val readMode: ReadMode? = null,
+    /** Jumlah bookmark artikel ini (indikator di baris artikel); 0 = tidak tampil. */
+    val bookmarkCount: Int = 0,
+    /** Artikel punya catatan umum (indikator "Catatan" di baris artikel). */
+    val hasNote: Boolean = false,
 ) {
     val totalPageCount: Int get() = pages.size
     val failedPageCount: Int get() = pages.count { it.status == PageStatus.FAILED }

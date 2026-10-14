@@ -149,6 +149,7 @@ fun ArticleRow(
                     textColor = c.danger,
                 )
             }
+            if (isReady && (article.bookmarkCount > 0 || article.hasNote)) ArticleExtras(article)
             if (isReady && article.checkpointNodeId != null) {
                 ResumeButton(onResume, Modifier.padding(top = 5.dp).align(Alignment.Start))
             }
@@ -168,6 +169,24 @@ fun ArticleRow(
                 )
             }
         }
+    }
+}
+
+/** Indikator kecil di bawah meta: jumlah bookmark dan penanda "Catatan"; tampil hanya bila ada. */
+@Composable
+private fun ArticleExtras(article: ArticleUiModel) {
+    val c = QuestLogTheme.colors
+    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (article.bookmarkCount > 0) ExtraItem(QlIcons.Bookmark, article.bookmarkCount.toString(), c.textSecondary)
+        if (article.hasNote) ExtraItem(QlIcons.Note, stringResource(R.string.article_row_note), c.textSecondary)
+    }
+}
+
+@Composable
+private fun ExtraItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String, color: Color) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(13.dp))
+        Text(text, color = color, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp))
     }
 }
 
