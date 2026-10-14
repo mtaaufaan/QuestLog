@@ -16,7 +16,7 @@ import com.rds.questlog.presentation.scrapemode.ScrapeModeSheet
 
 /**
  * S0 Game List (home). Popup yang menempel padanya (Scrape Mode Sheet, Delete Game Dialog) dirender di sini;
- * [activePopup] tetap satu state bersama di NavHost. Menghapus game belum terhubung (tahap wiring).
+ * [activePopup] tetap satu state bersama di NavHost.
  */
 @Composable
 fun GameListScreen(
@@ -68,8 +68,15 @@ fun GameListScreen(
             onClose = onDismissPopup,
         )
         is Popup.DeleteGame -> state.games.firstOrNull { it.id == activePopup.gameId }?.let { game ->
-            // Konfirmasi baru menutup dialog; penghapusan sungguhan (DeleteGameUseCase) menyusul di tahap wiring.
-            DeleteGameDialog(game.name, game.articleCount, onConfirm = onDismissPopup, onClose = onDismissPopup)
+            DeleteGameDialog(
+                gameName = game.name,
+                articleCount = game.articleCount,
+                onConfirm = {
+                    viewModel.deleteGame(game.id)
+                    onDismissPopup()
+                },
+                onClose = onDismissPopup,
+            )
         }
         else -> Unit
     }

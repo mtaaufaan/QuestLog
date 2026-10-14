@@ -55,4 +55,11 @@ internal fun ArticleWithDetails.toDomain() = Article(
     hasNote = note?.content?.isNotEmpty() == true,
 )
 
-internal fun GameWithCount.toDomain() = Game(id = id, name = name, createdAt = createdAt, articleCount = articleCount)
+internal fun GameWithCount.toDomain() = Game(
+    id = id,
+    name = name,
+    createdAt = createdAt,
+    articleCount = articleCount,
+    lastArticleTitle = lastTitle,
+    lastReadAt = lastReadAt,
+)

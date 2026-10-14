@@ -44,6 +44,8 @@ data class ScrapeNotificationUi(
     val total: Int,
     val failedCount: Int = 0,
     val articleId: Long = 0,
+    /** Game artikel ini; tujuan Halaman Game saat notifikasi ERROR diketuk. */
+    val gameId: Long = 0,
     /** Hasil unduh ulang: judul dan teks memakai kata "diperbarui" dan menegaskan isi lama aman. */
     val isRefresh: Boolean = false,
 )

@@ -80,5 +80,5 @@ fun Article.toNotification(skipPages: Int = 0, pageIds: Set<Long>? = null): Scra
         failed > 0 -> ScrapeNotificationKind.PARTIAL
         else -> ScrapeNotificationKind.DONE
     }
-    return ScrapeNotificationUi(kind, title, handled, mine.size, failed, id, isRefresh = pageIds != null)
+    return ScrapeNotificationUi(kind, title, handled, mine.size, failed, id, gameId, isRefresh = pageIds != null)
 }

@@ -15,12 +15,15 @@ import com.rds.questlog.data.local.dao.ImageDao
 import com.rds.questlog.data.local.dao.PageLayoutDao
 import com.rds.questlog.data.local.dao.SourcePageDao
 import com.rds.questlog.data.local.entity.AppConfigEntity
+import com.rds.questlog.data.local.entity.ArticleBinderEntity
 import com.rds.questlog.data.local.entity.ArticleEntity
 import com.rds.questlog.data.local.entity.ArticleNoteEntity
+import com.rds.questlog.data.local.entity.BinderCategoryEntity
 import com.rds.questlog.data.local.entity.BookmarkEntity
 import com.rds.questlog.data.local.entity.CheckpointEntity
 import com.rds.questlog.data.local.entity.ContentNodeEntity
 import com.rds.questlog.data.local.entity.GameEntity
+import com.rds.questlog.data.local.entity.GameProgressEntity
 import com.rds.questlog.data.local.entity.ImageEntity
 import com.rds.questlog.data.local.entity.SourcePageEntity
 
@@ -36,8 +39,11 @@ import com.rds.questlog.data.local.entity.SourcePageEntity
         AppConfigEntity::class,
         BookmarkEntity::class,
         ArticleNoteEntity::class,
+        GameProgressEntity::class,
+        BinderCategoryEntity::class,
+        ArticleBinderEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class QuestLogDatabase : RoomDatabase() {
@@ -111,5 +117,40 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
                 "PRIMARY KEY(article_id), " +
                 "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
         )
+    }
+}
+
+/**
+ * v4 -> v5 (v1.1): HANYA menambah tabel `game_progress` (artikel utama per game, tanpa anchor), `binder_categories`
+ * (kategori per game; nama unik tanpa peduli huruf besar-kecil) dan `article_binder` (relasi M:N). Tidak ada tabel atau
+ * kolom lama yang diubah atau dihapus, jadi seluruh data v1.0 utuh. Semua kunci asing CASCADE: hapus game menghapus
+ * penanda artikel utama dan kategorinya, hapus artikel utama menghapus barisnya, hapus kategori hanya mencabut relasi.
+ */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS game_progress (" +
+                "game_id INTEGER NOT NULL, article_id INTEGER NOT NULL, PRIMARY KEY(game_id), " +
+                "FOREIGN KEY(game_id) REFERENCES games(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_game_progress_article ON game_progress (article_id)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS binder_categories (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, game_id INTEGER NOT NULL, " +
+                "name TEXT NOT NULL COLLATE NOCASE, position INTEGER NOT NULL, created_at INTEGER NOT NULL, " +
+                "FOREIGN KEY(game_id) REFERENCES games(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_binder_categories_game ON binder_categories (game_id)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_binder_categories_game_name ON binder_categories (game_id, name)",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS article_binder (" +
+                "article_id INTEGER NOT NULL, category_id INTEGER NOT NULL, PRIMARY KEY(article_id, category_id), " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(category_id) REFERENCES binder_categories(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_article_binder_category ON article_binder (category_id)")
     }
 }

@@ -145,10 +145,92 @@ class MigrationTest {
     }
 
     @Test
-    fun migrasiPenuhDariSkemaPertamaSampaiV4Valid() {
+    fun migrate4To5HanyaMenambahTabelV11DanDataV10Utuh() {
+        helper.createDatabase(DB_NAME, 4).apply {
+            execSQL("INSERT INTO games (id, title, created_at) VALUES (1, 'Dragon Quest VII', 0)")
+            execSQL("INSERT INTO games (id, title, created_at) VALUES (2, 'Game Kosong Lama', 0)")
+            execSQL("INSERT INTO articles (id, game_id, title, created_at) VALUES (1, 1, 'Walkthrough', 5)")
+            execSQL(
+                "INSERT INTO source_pages (id, article_id, source_url, page_order, status, order_start, order_end) " +
+                    "VALUES (1, 1, 'https://example.com/1', 1, 'COMPLETED', 1, 1000)",
+            )
+            execSQL(
+                "INSERT INTO content_nodes (id, article_id, source_page_id, node_type, display_order, text_content) " +
+                    "VALUES (5, 1, 1, 'p', 7, 'Paragraf')",
+            )
+            execSQL(
+                "INSERT INTO checkpoints " +
+                    "(article_id, anchor_node_id, fallback_order, last_visited_node_id, updated_at) " +
+                    "VALUES (1, 5, 7, 5, 100)",
+            )
+            execSQL(
+                "INSERT INTO bookmarks (article_id, node_id, fallback_order, label, snippet, created_at) " +
+                    "VALUES (1, 5, 7, 'Boss', 'cuplikan', 1)",
+            )
+            execSQL("INSERT INTO article_notes (article_id, content, updated_at) VALUES (1, 'catatan', 1)")
+            execSQL("INSERT INTO app_config (`key`, value) VALUES ('is_premium', '1')")
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(DB_NAME, 5, true, MIGRATION_4_5)
+
+        // Data v1.0 utuh (termasuk game kosong lama: migrasi tidak menghapus apa pun).
+        assertEquals("2", migrated.text("SELECT COUNT(*) FROM games"))
+        assertEquals("Walkthrough", migrated.text("SELECT title FROM articles WHERE id = 1"))
+        assertEquals("Paragraf", migrated.text("SELECT text_content FROM content_nodes WHERE id = 5"))
+        assertEquals("5", migrated.text("SELECT anchor_node_id FROM checkpoints WHERE article_id = 1"))
+        assertEquals("Boss", migrated.text("SELECT label FROM bookmarks WHERE article_id = 1"))
+        assertEquals("catatan", migrated.text("SELECT content FROM article_notes WHERE article_id = 1"))
+        assertEquals("1", migrated.text("SELECT value FROM app_config WHERE `key` = 'is_premium'"))
+        // Tabel baru ada, kosong, lengkap dengan indeksnya.
+        listOf("game_progress", "binder_categories", "article_binder").forEach {
+            assertEquals("0", migrated.text("SELECT COUNT(*) FROM $it"))
+        }
+        assertEquals(
+            "idx_article_binder_category,idx_binder_categories_game,idx_binder_categories_game_name," +
+                "idx_game_progress_article",
+            migrated.text(
+                "SELECT group_concat(name) FROM (SELECT name FROM sqlite_master " +
+                    "WHERE type = 'index' AND name LIKE 'idx_%' AND tbl_name IN " +
+                    "('game_progress', 'binder_categories', 'article_binder') ORDER BY name)",
+            ),
+        )
+
+        migrated.execSQL("PRAGMA foreign_keys = ON")
+        migrated.execSQL("INSERT INTO game_progress (game_id, article_id) VALUES (1, 1)")
+        migrated.execSQL(
+            "INSERT INTO binder_categories (id, game_id, name, position, created_at) VALUES (1, 1, 'Koleksi', 1, 1)",
+        )
+        migrated.execSQL("INSERT INTO article_binder (article_id, category_id) VALUES (1, 1)")
+        // Nama kategori unik per game tanpa peduli huruf besar-kecil.
+        val duplicate = runCatching {
+            migrated.execSQL(
+                "INSERT INTO binder_categories (game_id, name, position, created_at) VALUES (1, 'KOLEKSI', 2, 2)",
+            )
+        }
+        assertTrue(duplicate.isFailure)
+        migrated.execSQL(
+            "INSERT INTO binder_categories (game_id, name, position, created_at) VALUES (2, 'koleksi', 1, 2)",
+        )
+        // Hanya satu artikel utama per game.
+        assertTrue(
+            runCatching { migrated.execSQL("INSERT INTO game_progress (game_id, article_id) VALUES (1, 1)") }.isFailure,
+        )
+    }
+
+    @Test
+    fun migrasiPenuhDariSkemaPertamaSampaiV5Valid() {
         helper.createDatabase(DB_NAME, 1).close()
 
-        helper.runMigrationsAndValidate(DB_NAME, 4, true, MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+        helper.runMigrationsAndValidate(
+            DB_NAME,
+            5,
+            true,
+            MIGRATION_1_2,
+            MIGRATION_2_3,
+            MIGRATION_3_4,
+            MIGRATION_4_5,
+        )
     }
 
     private fun androidx.sqlite.db.SupportSQLiteDatabase.text(sql: String): String = query(sql).use {

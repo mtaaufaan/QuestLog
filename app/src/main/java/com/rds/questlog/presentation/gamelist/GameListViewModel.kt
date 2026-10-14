@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rds.questlog.R
 import com.rds.questlog.domain.usecase.article.GetArticlesUseCase
+import com.rds.questlog.domain.usecase.game.DeleteGameUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
 import com.rds.questlog.domain.usecase.premium.PremiumGuard
 import com.rds.questlog.presentation.articlelist.ArticleUiMapper
@@ -41,7 +42,7 @@ data class GameListUiState(
 
 /**
  * S0 Game List: mengamati game, jumlah artikel, dan hasil pencarian lintas game dari use case yang sudah ada.
- * "Terakhir", artikel utama (Lanjutkan Game), dan hapus game menyusul di tahap wiring.
+ * Artikel utama (Lanjutkan Game) dan Binder menyusul di Sprint 9.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -49,6 +50,7 @@ class GameListViewModel @Inject constructor(
     getGames: GetGamesUseCase,
     getArticles: GetArticlesUseCase,
     premiumGuard: PremiumGuard,
+    private val deleteGameUseCase: DeleteGameUseCase,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
 
@@ -97,6 +99,15 @@ class GameListViewModel @Inject constructor(
     }
 
     fun onScrapingArticleTapped() = showSnackbar(R.string.article_list_snackbar_scraping)
+
+    /** Menghapus game beserta seluruh artikel dan data turunannya setelah konfirmasi di Delete Game Dialog. */
+    fun deleteGame(gameId: Long) {
+        viewModelScope.launch {
+            deleteGameUseCase(gameId)
+                .onSuccess { showSnackbar(R.string.game_list_snackbar_deleted) }
+                .onFailure { showSnackbar(R.string.game_list_snackbar_delete_failed) }
+        }
+    }
 
     /** Game Binder belum dibangun (Sprint 9); ketukan pengguna premium hanya memberi tahu. */
     fun onBinderTapped() = showSnackbar(R.string.binder_coming_soon)

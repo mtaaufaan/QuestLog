@@ -35,6 +35,8 @@ class ArticleManagementRepositoryImpl @Inject constructor(
         }
         if (targetId != origin) {
             articleDao.setGame(articleId, targetId)
+            gameDao.clearMainArticle(origin, articleId)
+            gameDao.clearForeignCategories(articleId, targetId)
             gameDao.deleteIfEmpty(origin)
         }
     }

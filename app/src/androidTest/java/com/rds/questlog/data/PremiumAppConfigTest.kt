@@ -77,8 +77,9 @@ class PremiumAppConfigTest {
             override fun schedule(articleId: Long) = Unit
         }
         val save = SaveArticleUseCase(env.games, env.articles, scheduler, ObservePremiumStatusUseCase(config))
-        env.games.findOrCreate("Game A")
-        env.games.findOrCreate("Game B")
+        // Game selalu berisi artikel (game kosong tidak dihitung ke batas tier).
+        env.articles.insertArticle(env.games.findOrCreate("Game A"), "A", listOf("https://x.com/a"))
+        env.articles.insertArticle(env.games.findOrCreate("Game B"), "B", listOf("https://x.com/b"))
 
         assertEquals(TierError.GameLimitReached, save("Game C", "Judul", listOf("https://x.com/1")).exceptionOrNull())
 

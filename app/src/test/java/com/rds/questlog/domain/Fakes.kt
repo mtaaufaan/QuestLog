@@ -57,6 +57,11 @@ class FakeGameRepository(
     override suspend fun deleteIfEmpty(gameId: Long) {
         emptyChecked += gameId
     }
+    val deletedGames = mutableListOf<Long>()
+    override suspend fun deleteGame(gameId: Long) {
+        failWith?.let { throw it }
+        deletedGames += gameId
+    }
 }
 
 class FakeArticleRepository(

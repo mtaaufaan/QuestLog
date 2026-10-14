@@ -28,7 +28,6 @@ import com.rds.questlog.presentation.addarticle.AddArticleScreen
 import com.rds.questlog.presentation.articlelist.ArticleListScreen
 import com.rds.questlog.presentation.components.QlSnackbarHost
 import com.rds.questlog.presentation.gamelist.GameListScreen
-import com.rds.questlog.presentation.model.ScrapeNotificationKind
 import com.rds.questlog.presentation.model.ScrapeNotificationUi
 import com.rds.questlog.presentation.notification.ScrapeNotificationHost
 import com.rds.questlog.presentation.notification.ScrapeNotificationViewModel
@@ -104,6 +103,7 @@ fun QuestLogNavHost() {
                     onShowPopup = { activePopup = it },
                     onSaved = notificationViewModel::track,
                     sharedUrl = route.sharedUrl,
+                    gameId = route.gameId,
                     incomingSharedUrl = incomingSharedUrl,
                     onIncomingHandled = { incomingSharedUrl = null },
                 )
@@ -133,10 +133,12 @@ fun QuestLogNavHost() {
 }
 
 private fun NavController.onNotificationTap(n: ScrapeNotificationUi, onShowPopup: (Popup) -> Unit) {
-    when (n.kind) {
-        ScrapeNotificationKind.DONE, ScrapeNotificationKind.PARTIAL ->
-            navigate(Reader(articleId = n.articleId, resumeFrom = "last"))
-        ScrapeNotificationKind.ERROR -> onShowPopup(Popup.ScrapeError(n.articleId))
-        ScrapeNotificationKind.PROGRESS -> Unit
+    when (val target = notificationTarget(n)) {
+        is NotificationTarget.OpenReader -> navigate(Reader(articleId = target.articleId, resumeFrom = "last"))
+        is NotificationTarget.OpenGameWithError -> {
+            showGamePage(target.gameId)
+            onShowPopup(Popup.ScrapeError(target.articleId))
+        }
+        NotificationTarget.None -> Unit
     }
 }

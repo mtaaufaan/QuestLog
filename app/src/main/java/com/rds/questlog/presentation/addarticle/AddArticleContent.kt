@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -82,6 +83,7 @@ fun AddArticleContent(
     modifier: Modifier = Modifier,
     submitError: String? = null,
     sharedUrl: String? = null,
+    initialGameId: Long? = null,
     readClipboard: suspend () -> String? = { null },
     incomingSharedUrl: String? = null,
     onIncomingHandled: () -> Unit = {},
@@ -94,6 +96,9 @@ fun AddArticleContent(
                 urls = listOfNotNull(sharedUrl).ifEmpty { listOf("") },
             ),
         )
+    }
+    PrefillGame(initialGameId, games, canPrefill = form.gameInput.isBlank() && mode == ScrapeMode.NEW) {
+        form = form.withPickedGame(it.id, it.name)
     }
     var pasteOutcome by remember { mutableStateOf<PasteOutcome?>(null) }
     // URL dari "Bagikan" yang jadi penanda Hal. 1, dan URL yang menunggu konfirmasi karena daftar sudah berisi.
@@ -447,5 +452,24 @@ private fun PreviewContent(
             onOpenUnlock = {},
             sharedUrl = sharedUrl,
         )
+    }
+}
+
+/** Dari Halaman Game, game-nya terisi otomatis sekali saat daftar game sudah termuat (bila isian masih kosong). */
+@Composable
+private fun PrefillGame(
+    initialGameId: Long?,
+    games: List<GameUiModel>,
+    canPrefill: Boolean,
+    onPick: (GameUiModel) -> Unit,
+) {
+    var done by rememberSaveable { mutableStateOf(initialGameId == null) }
+    val prefill by rememberUpdatedState(canPrefill)
+    LaunchedEffect(games) {
+        val game = games.firstOrNull { it.id == initialGameId }
+        if (!done && game != null) {
+            if (prefill) onPick(game)
+            done = true
+        }
     }
 }
