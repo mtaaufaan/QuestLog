@@ -219,6 +219,66 @@ class MigrationTest {
     }
 
     @Test
+    fun dataMvpV3NaikLangsungKeV5MelaluiDuaMigrasiDanBisaDipakaiFiturV1() {
+        helper.createDatabase(DB_NAME, 3).apply {
+            execSQL("INSERT INTO games (id, title, created_at) VALUES (1, 'Dragon Quest VII', 0)")
+            execSQL(
+                "INSERT INTO articles (id, game_id, title, created_at, read_mode) " +
+                    "VALUES (1, 1, 'Walkthrough', 5, 'PAGED')",
+            )
+            execSQL(
+                "INSERT INTO source_pages (id, article_id, source_url, page_order, status, order_start, order_end) " +
+                    "VALUES (1, 1, 'https://example.com/1', 1, 'COMPLETED', 1, 1000)",
+            )
+            execSQL(
+                "INSERT INTO content_nodes (id, article_id, source_page_id, node_type, display_order, text_content) " +
+                    "VALUES (5, 1, 1, 'p', 7, 'Paragraf')",
+            )
+            execSQL(
+                "INSERT INTO checkpoints " +
+                    "(article_id, anchor_node_id, fallback_order, last_visited_node_id, updated_at) " +
+                    "VALUES (1, 5, 7, 5, 100)",
+            )
+            execSQL("INSERT INTO app_config (`key`, value) VALUES ('is_premium', '1')")
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(DB_NAME, 5, true, MIGRATION_3_4, MIGRATION_4_5)
+
+        assertEquals("Dragon Quest VII", migrated.text("SELECT title FROM games WHERE id = 1"))
+        assertEquals("PAGED", migrated.text("SELECT read_mode FROM articles WHERE id = 1"))
+        assertEquals("Paragraf", migrated.text("SELECT text_content FROM content_nodes WHERE id = 5"))
+        assertEquals("5", migrated.text("SELECT anchor_node_id FROM checkpoints WHERE article_id = 1"))
+        assertEquals("1", migrated.text("SELECT value FROM app_config WHERE `key` = 'is_premium'"))
+        listOf("bookmarks", "article_notes", "game_progress", "binder_categories", "article_binder").forEach {
+            assertEquals("0", migrated.text("SELECT COUNT(*) FROM $it"))
+        }
+        // Fitur v1.0 dan v1.1 langsung bisa dipakai di atas data MVP, dan hapus game membersihkan semuanya.
+        migrated.execSQL("PRAGMA foreign_keys = ON")
+        migrated.execSQL(
+            "INSERT INTO bookmarks (article_id, node_id, fallback_order, label, created_at) " +
+                "VALUES (1, 5, 7, 'Boss', 1)",
+        )
+        migrated.execSQL("INSERT INTO article_notes (article_id, content, updated_at) VALUES (1, 'catatan', 1)")
+        migrated.execSQL("INSERT INTO game_progress (game_id, article_id) VALUES (1, 1)")
+        migrated.execSQL(
+            "INSERT INTO binder_categories (id, game_id, name, position, created_at) VALUES (1, 1, 'Utama', 1, 1)",
+        )
+        migrated.execSQL("INSERT INTO article_binder (article_id, category_id) VALUES (1, 1)")
+        migrated.execSQL("DELETE FROM games WHERE id = 1")
+        listOf(
+            "articles",
+            "bookmarks",
+            "article_notes",
+            "game_progress",
+            "binder_categories",
+            "article_binder",
+        ).forEach {
+            assertEquals("0", migrated.text("SELECT COUNT(*) FROM $it"))
+        }
+    }
+
+    @Test
     fun migrasiPenuhDariSkemaPertamaSampaiV5Valid() {
         helper.createDatabase(DB_NAME, 1).close()
 

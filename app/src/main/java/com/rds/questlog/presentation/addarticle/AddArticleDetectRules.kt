@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -31,10 +32,16 @@ sealed interface DetectState {
     data class Added(val count: Int) : DetectState
 }
 
-/** Hasil pemeriksaan dari sumber (dummy di Tahap 1, jaringan nyata di Tahap 2). */
+/** Permintaan pemeriksaan: [base] = URL pertama, [slots] = sisa slot, [taken] = URL yang sudah ada (form, artikel). */
+class DetectRequest(val base: String, val slots: Int, val taken: Set<String>)
+
+/** Hasil pemeriksaan dari sumber: usulan URL, gagal (tidak menghalangi simpan manual), atau fitur terkunci. */
 sealed interface DetectOutcome {
     data class Urls(val urls: List<String>) : DetectOutcome
     data object Failed : DetectOutcome
+
+    /** Gratis atau premium hilang; UI membuka Unlock Sheet. */
+    data object Locked : DetectOutcome
 }
 
 private val VALID_BASE = Regex("^https://\\S+\\.\\S+")
@@ -84,15 +91,19 @@ fun dummyContinuationUrls(base: String): List<String> {
     return (1..DUMMY_RESULTS).map { prefix + (start + it) + suffix }
 }
 
-/** Sumber default: menunggu sebentar lalu mengembalikan hasil dummy. Tahap 2 menggantinya dengan pemeriksaan nyata. */
-suspend fun dummyDetect(base: String): DetectOutcome {
+/** Sumber dummy untuk pratinjau: menunggu sebentar lalu memberi hasil dummy (aplikasi memakai `DetectViewModel`). */
+suspend fun dummyDetect(request: DetectRequest): DetectOutcome {
     delay(DUMMY_DELAY_MS)
-    return DetectOutcome.Urls(dummyContinuationUrls(base))
+    return DetectOutcome.Urls(dummyContinuationUrls(request.base))
 }
 
 /** Pemegang state pencarian: menjalankan [source] di [scope] dan menyimpan hasilnya sebagai [DetectState]. */
 @Stable
-class Detector(private val scope: CoroutineScope, private val source: suspend (String) -> DetectOutcome) {
+class Detector(
+    private val scope: CoroutineScope,
+    private val source: suspend (DetectRequest) -> DetectOutcome,
+    private val onLocked: () -> Unit,
+) {
     var state by mutableStateOf<DetectState>(DetectState.Idle)
         private set
 
@@ -100,9 +111,13 @@ class Detector(private val scope: CoroutineScope, private val source: suspend (S
         if (state == DetectState.Loading) return
         state = DetectState.Loading
         scope.launch {
-            state = when (val outcome = source(base)) {
+            state = when (val outcome = source(DetectRequest(base, slots, known))) {
                 is DetectOutcome.Urls -> foundState(outcome.urls, known, slots)
                 DetectOutcome.Failed -> DetectState.Failed
+                DetectOutcome.Locked -> {
+                    onLocked()
+                    DetectState.Idle
+                }
             }
         }
     }
@@ -122,9 +137,10 @@ class Detector(private val scope: CoroutineScope, private val source: suspend (S
 }
 
 @Composable
-fun rememberDetector(source: suspend (String) -> DetectOutcome): Detector {
+fun rememberDetector(source: suspend (DetectRequest) -> DetectOutcome, onLocked: () -> Unit): Detector {
     val scope = rememberCoroutineScope()
-    return remember(scope) { Detector(scope, source) }
+    val currentOnLocked by rememberUpdatedState(onLocked)
+    return remember(scope, source) { Detector(scope, source) { currentOnLocked() } }
 }
 
 /** Aksi pengguna di bagian "Halaman lanjutan". */

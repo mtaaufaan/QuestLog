@@ -11,6 +11,7 @@ import com.rds.questlog.data.repository.GameProgressRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
 import com.rds.questlog.data.repository.NoteRepositoryImpl
 import com.rds.questlog.data.repository.SourcePageRepositoryImpl
+import com.rds.questlog.data.scraper.KsoupPaginationDetector
 import com.rds.questlog.data.scraper.KsoupScraperEngine
 import com.rds.questlog.data.worker.WorkManagerScrapeScheduler
 import com.rds.questlog.domain.repository.AppConfigRepository
@@ -24,6 +25,7 @@ import com.rds.questlog.domain.repository.GameRepository
 import com.rds.questlog.domain.repository.NoteRepository
 import com.rds.questlog.domain.repository.SourcePageRepository
 import com.rds.questlog.domain.repository.UserPreferencesRepository
+import com.rds.questlog.domain.scraper.PaginationDetector
 import com.rds.questlog.domain.scraper.ScrapeScheduler
 import com.rds.questlog.domain.scraper.ScraperEngine
 import dagger.Binds
@@ -79,6 +81,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindScraperEngine(impl: KsoupScraperEngine): ScraperEngine
+
+    @Binds
+    @Singleton
+    abstract fun bindPaginationDetector(impl: KsoupPaginationDetector): PaginationDetector
 
     @Binds
     @Singleton

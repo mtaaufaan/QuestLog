@@ -31,6 +31,7 @@ fun AddArticleScreen(
     incomingSharedUrl: String? = null,
     onIncomingHandled: () -> Unit = {},
     viewModel: AddArticleViewModel = hiltViewModel(),
+    detectViewModel: DetectViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val submitError by viewModel.submitError.collectAsStateWithLifecycle()
@@ -54,6 +55,7 @@ fun AddArticleScreen(
         submitError = submitError?.let { stringResource(it) },
         sharedUrl = sharedUrl,
         initialGameId = gameId,
+        detectSource = detectViewModel::detect,
         incomingSharedUrl = incomingSharedUrl,
         onIncomingHandled = onIncomingHandled,
         // Clipboard dibaca HANYA saat Tempel diketuk (QL-22); tidak pernah otomatis saat layar dibuka.
