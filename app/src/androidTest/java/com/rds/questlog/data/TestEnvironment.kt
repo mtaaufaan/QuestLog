@@ -7,6 +7,7 @@ import com.rds.questlog.data.local.QuestLogDatabase
 import com.rds.questlog.data.repository.ArticleManagementRepositoryImpl
 import com.rds.questlog.data.repository.ArticleRepositoryImpl
 import com.rds.questlog.data.repository.CheckpointRepositoryImpl
+import com.rds.questlog.data.repository.GameLogoRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
 import com.rds.questlog.data.repository.SourcePageRepositoryImpl
 import com.rds.questlog.data.scraper.HtmlContentParser
@@ -22,9 +23,10 @@ class TestEnvironment(timeoutSeconds: Long = 3) {
     val db: QuestLogDatabase = Room.inMemoryDatabaseBuilder(context, QuestLogDatabase::class.java).build()
     val imageStore = ImageStore(context)
     val games = GameRepositoryImpl(db, db.gameDao(), db.imageDao(), imageStore)
+    val logos = GameLogoRepositoryImpl(context, db.gameDao(), imageStore)
     val articles =
         ArticleRepositoryImpl(db, db.articleDao(), db.sourcePageDao(), db.imageDao(), imageStore, db.contentNodeDao())
-    val management = ArticleManagementRepositoryImpl(db, db.articleDao(), db.gameDao())
+    val management = ArticleManagementRepositoryImpl(db, db.articleDao(), db.gameDao(), imageStore)
     val checkpoints = CheckpointRepositoryImpl(db, db.checkpointDao(), db.contentNodeDao())
     val pages = SourcePageRepositoryImpl(
         db,

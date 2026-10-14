@@ -7,6 +7,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.rds.questlog.presentation.gamelogo.GameLogoHost
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.navigation.AddArticle
@@ -58,15 +59,18 @@ fun GameListScreen(
         onOpenUnlock = { onShowPopup(Popup.Unlock) },
     )
 
-    GameListContent(
-        games = state.games,
-        results = state.results,
-        totalArticles = state.totalArticles,
-        premium = state.premium,
-        query = state.query,
-        snackbar = state.snackbar?.let { stringResource(it) },
-        actions = actions,
-    )
+    GameLogoHost { logo ->
+        GameListContent(
+            games = state.games,
+            results = state.results,
+            totalArticles = state.totalArticles,
+            premium = state.premium,
+            query = state.query,
+            snackbar = state.snackbar?.let { stringResource(it) },
+            actions = actions,
+            logo = logo,
+        )
+    }
 
     when (activePopup) {
         Popup.ScrapeMode -> ScrapeModeSheet(

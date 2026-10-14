@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -43,10 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.presentation.components.GameLogo
 import com.rds.questlog.presentation.components.QlAddFab
 import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.components.QlSearchField
 import com.rds.questlog.presentation.components.QlToast
+import com.rds.questlog.presentation.gamelogo.GameLogoControls
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.preview.PreviewData
@@ -75,6 +79,9 @@ fun ArticleListContent(
     onOpenActions: (ArticleUiModel) -> Unit,
     onAdd: () -> Unit,
     modifier: Modifier = Modifier,
+    gameId: Long = 0,
+    logoPath: String? = null,
+    logo: GameLogoControls = GameLogoControls.None,
 ) {
     val uncategorized = stringResource(R.string.article_list_uncategorized)
     val sections = remember(articles, premium, query, uncategorized) {
@@ -84,6 +91,7 @@ fun ArticleListContent(
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             GamePageHeader(
                 gameName = gameName,
+                logo = GameLogoSlot(gameId, logoPath, logo),
                 subtitle = gameSubtitle(totalArticles, sections),
                 premium = premium,
                 query = query,
@@ -120,6 +128,9 @@ fun ArticleListContent(
     }
 }
 
+/** Logo game di header S1: id, path, dan kendali ketuk/spinner. */
+private class GameLogoSlot(val gameId: Long, val path: String?, val controls: GameLogoControls)
+
 @Composable
 private fun gameSubtitle(totalArticles: Int, sections: List<ArticleSection>): String {
     val uncategorized = stringResource(R.string.article_list_uncategorized)
@@ -134,6 +145,7 @@ private fun gameSubtitle(totalArticles: Int, sections: List<ArticleSection>): St
 @Composable
 private fun GamePageHeader(
     gameName: String,
+    logo: GameLogoSlot,
     subtitle: String,
     premium: PremiumUiState,
     query: String,
@@ -169,23 +181,34 @@ private fun GamePageHeader(
                 )
             }
         }
-        Column(Modifier.padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = gameName,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = TextStyle(
-                    fontFamily = CormorantGaramond,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 34.sp,
-                    lineHeight = 36.sp,
-                    letterSpacing = (-0.015).em,
-                ),
+        Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            GameLogo(
+                name = gameName,
+                logoPath = logo.path,
+                size = 64.dp,
+                cornerRadius = 8.dp,
+                onClick = { logo.controls.onTap(logo.gameId, logo.path != null) },
+                busy = logo.controls.busyGameId == logo.gameId,
             )
-            Text(
-                text = subtitle,
-                color = c.textSecondary,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, fontStyle = FontStyle.Italic),
-            )
+            Spacer(Modifier.width(14.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = gameName,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = TextStyle(
+                        fontFamily = CormorantGaramond,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 34.sp,
+                        lineHeight = 36.sp,
+                        letterSpacing = (-0.015).em,
+                    ),
+                )
+                Text(
+                    text = subtitle,
+                    color = c.textSecondary,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, fontStyle = FontStyle.Italic),
+                )
+            }
         }
         QlSearchField(
             query,

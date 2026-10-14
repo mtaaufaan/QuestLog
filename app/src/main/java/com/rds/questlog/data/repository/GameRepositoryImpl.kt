@@ -30,12 +30,15 @@ class GameRepositoryImpl @Inject constructor(
     override suspend fun findOrCreate(name: String): Long = gameDao.findByTitle(name)?.id
         ?: gameDao.insert(GameEntity(title = name, createdAt = System.currentTimeMillis()))
 
-    override suspend fun deleteIfEmpty(gameId: Long) = gameDao.deleteIfEmpty(gameId)
+    override suspend fun deleteIfEmpty(gameId: Long) {
+        if (gameDao.deleteIfEmpty(gameId) > 0) imageStore.deleteLogos(gameId)
+    }
 
     override suspend fun deleteGame(gameId: Long) {
         val filenames = imageDao.filenamesOfGame(gameId)
         db.withTransaction { gameDao.delete(gameId) }
         // File dibagi antar artikel lewat dedup MD5; hapus hanya bila sudah tidak ada yang merujuk.
         filenames.filter { imageDao.countByFilename(it) == 0 }.forEach(imageStore::delete)
+        imageStore.deleteLogos(gameId)
     }
 }

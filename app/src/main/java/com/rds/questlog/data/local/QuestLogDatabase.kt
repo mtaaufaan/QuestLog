@@ -46,7 +46,7 @@ import com.rds.questlog.data.local.entity.SourcePageEntity
         BinderCategoryEntity::class,
         ArticleBinderEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class QuestLogDatabase : RoomDatabase() {
@@ -158,5 +158,15 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
                 "FOREIGN KEY(category_id) REFERENCES binder_categories(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
         )
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_article_binder_category ON article_binder (category_id)")
+    }
+}
+
+/**
+ * v5 -> v6 (v1.1, QL-38): HANYA menambah kolom `games.logo_path` (nullable; path logo kustom relatif ke `filesDir`).
+ * Tidak ada tabel atau kolom lama yang diubah, jadi seluruh data utuh; game lama tampil dengan inisial.
+ */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE games ADD COLUMN logo_path TEXT")
     }
 }

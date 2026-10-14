@@ -7,6 +7,7 @@ import com.rds.questlog.data.repository.ArticleRepositoryImpl
 import com.rds.questlog.data.repository.BinderRepositoryImpl
 import com.rds.questlog.data.repository.BookmarkRepositoryImpl
 import com.rds.questlog.data.repository.CheckpointRepositoryImpl
+import com.rds.questlog.data.repository.GameLogoRepositoryImpl
 import com.rds.questlog.data.repository.GameProgressRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
 import com.rds.questlog.data.repository.NoteRepositoryImpl
@@ -20,6 +21,7 @@ import com.rds.questlog.domain.repository.ArticleRepository
 import com.rds.questlog.domain.repository.BinderRepository
 import com.rds.questlog.domain.repository.BookmarkRepository
 import com.rds.questlog.domain.repository.CheckpointRepository
+import com.rds.questlog.domain.repository.GameLogoRepository
 import com.rds.questlog.domain.repository.GameProgressRepository
 import com.rds.questlog.domain.repository.GameRepository
 import com.rds.questlog.domain.repository.NoteRepository
@@ -35,6 +37,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /** Binding interface domain → implementasi data (coding_convention.md §5: `@Binds`, bukan `@Provides`). */
+@Suppress("TooManyFunctions") // satu @Binds per repository
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
@@ -42,6 +45,9 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGameRepository(impl: GameRepositoryImpl): GameRepository
+
+    @Binds
+    abstract fun bindGameLogoRepository(impl: GameLogoRepositoryImpl): GameLogoRepository
 
     @Binds
     @Singleton

@@ -59,6 +59,18 @@ sealed class QuestLogError(message: String? = null, cause: Throwable? = null) : 
         data object PageNotFound : ArticleError()
     }
 
+    /** Logo kustom game (QL-38). */
+    sealed class ImageError : QuestLogError() {
+        /** File bukan gambar yang bisa didecode. */
+        data object InvalidImage : ImageError()
+
+        /** File lebih dari 10 MB (ditolak sebelum decode). */
+        data object TooLarge : ImageError()
+
+        /** Gagal membaca sumber atau menulis berkas logo. */
+        data object IoError : ImageError()
+    }
+
     /** Deteksi halaman lanjutan gagal mengambil halaman (QL-34); tidak menghalangi penyimpanan manual. */
     data class DetectionFailed(val failure: com.rds.questlog.domain.model.PageFailure) : QuestLogError()
 
