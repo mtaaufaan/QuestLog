@@ -13,4 +13,7 @@ interface UserPreferencesRepository {
 
     /** Menyimpan mode gelap Reader. */
     suspend fun setDarkMode(enabled: Boolean)
+
+    /** true tepat sekali per instalasi (tip bookmark Reader); sesudahnya false. */
+    suspend fun consumeReaderTip(): Boolean
 }

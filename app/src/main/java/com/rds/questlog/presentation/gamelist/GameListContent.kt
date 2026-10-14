@@ -47,6 +47,7 @@ import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.components.QlOutlineButton
 import com.rds.questlog.presentation.components.QlSearchField
 import com.rds.questlog.presentation.components.QlToast
+import com.rds.questlog.presentation.gamelogo.GameLogoControls
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.GameUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
@@ -68,6 +69,7 @@ fun GameListContent(
     snackbar: String?,
     actions: GameListActions,
     modifier: Modifier = Modifier,
+    logo: GameLogoControls = GameLogoControls.None,
 ) {
     val searching = query.isNotBlank()
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -78,7 +80,7 @@ fun GameListContent(
                     searching && results.isEmpty() -> item { NoResults(query.trim()) }
                     searching -> items(results, key = { it.id }) { ResultRow(it) { actions.onResultTap(it) } }
                     games.isEmpty() -> item { EmptyState(actions.onAdd) }
-                    else -> items(games, key = { it.id }) { game -> GameRow(game, premium, actions) }
+                    else -> items(games, key = { it.id }) { game -> GameRow(game, premium, actions, logo) }
                 }
             }
         }

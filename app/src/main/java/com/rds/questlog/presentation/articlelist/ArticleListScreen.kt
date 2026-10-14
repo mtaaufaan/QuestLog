@@ -7,6 +7,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rds.questlog.presentation.binder.AssignCategorySheet
+import com.rds.questlog.presentation.gamelogo.GameLogoHost
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
@@ -35,35 +36,40 @@ fun ArticleListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val game = uiState.games.firstOrNull { it.id == uiState.selectedGameFilter }
-    ArticleListContent(
-        gameName = game?.name.orEmpty(),
-        articles = uiState.articles,
-        totalArticles = game?.articleCount ?: 0,
-        premium = uiState.premium,
-        query = uiState.query,
-        snackbar = uiState.snackbar?.let { res ->
-            uiState.snackbarArg?.let { stringResource(res, it) } ?: stringResource(res)
-        },
-        onBack = { navController.popBackStack<GameList>(inclusive = false) },
-        onQuery = viewModel::onQueryChange,
-        onOpenBinder = {
-            if (uiState.premium == PremiumUiState.FREE) {
-                onShowPopup(Popup.Unlock)
-            } else {
-                game?.let { navController.navigate(Binder(it.id)) }
-            }
-        },
-        onArticleTap = { article ->
-            when (article.status) {
-                ArticleStatus.READY -> navController.openReader(article, resumeFrom = "last")
-                ArticleStatus.SCRAPING -> viewModel.onScrapingArticleTapped()
-                ArticleStatus.ERROR -> onShowPopup(Popup.ScrapeError(article.id))
-            }
-        },
-        onResume = { navController.openReader(it, resumeFrom = "checkpoint") },
-        onOpenActions = { onShowPopup(Popup.ArticleActions(it.id)) },
-        onAdd = { onShowPopup(Popup.ScrapeMode) },
-    )
+    GameLogoHost { logo ->
+        ArticleListContent(
+            gameName = game?.name.orEmpty(),
+            gameId = game?.id ?: 0,
+            logoPath = game?.logoPath,
+            logo = logo,
+            articles = uiState.articles,
+            totalArticles = game?.articleCount ?: 0,
+            premium = uiState.premium,
+            query = uiState.query,
+            snackbar = uiState.snackbar?.let { res ->
+                uiState.snackbarArg?.let { stringResource(res, it) } ?: stringResource(res)
+            },
+            onBack = { navController.popBackStack<GameList>(inclusive = false) },
+            onQuery = viewModel::onQueryChange,
+            onOpenBinder = {
+                if (uiState.premium == PremiumUiState.FREE) {
+                    onShowPopup(Popup.Unlock)
+                } else {
+                    game?.let { navController.navigate(Binder(it.id)) }
+                }
+            },
+            onArticleTap = { article ->
+                when (article.status) {
+                    ArticleStatus.READY -> navController.openReader(article, resumeFrom = "last")
+                    ArticleStatus.SCRAPING -> viewModel.onScrapingArticleTapped()
+                    ArticleStatus.ERROR -> onShowPopup(Popup.ScrapeError(article.id))
+                }
+            },
+            onResume = { navController.openReader(it, resumeFrom = "checkpoint") },
+            onOpenActions = { onShowPopup(Popup.ArticleActions(it.id)) },
+            onAdd = { onShowPopup(Popup.ScrapeMode) },
+        )
+    }
 
     ArticleListPopups(
         activePopup,

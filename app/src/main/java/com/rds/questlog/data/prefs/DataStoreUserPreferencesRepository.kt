@@ -36,7 +36,17 @@ class DataStoreUserPreferencesRepository @Inject constructor(
         dataStore.edit { it[DARK_MODE] = enabled }
     }
 
+    override suspend fun consumeReaderTip(): Boolean {
+        var first = false
+        dataStore.edit {
+            first = it[READER_TIP_SEEN] != true
+            it[READER_TIP_SEEN] = true
+        }
+        return first
+    }
+
     private companion object {
+        val READER_TIP_SEEN = booleanPreferencesKey("reader_tip_seen")
         val FONT_SIZE = intPreferencesKey("font_size_sp")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
     }

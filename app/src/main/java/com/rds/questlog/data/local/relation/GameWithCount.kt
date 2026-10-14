@@ -12,4 +12,5 @@ data class GameWithCount(
     /** Artikel utama game ini dan judulnya; null bila belum ada. */
     val mainArticleId: Long? = null,
     val mainArticleTitle: String? = null,
+    val logoPath: String? = null,
 )

@@ -47,7 +47,6 @@ import com.rds.questlog.presentation.theme.QuestLogTheme
  * Bookmark Label Dialog (P12a): label wajib (maks [MAX_BOOKMARK_LABEL]), cuplikan teks posisi, chip saran.
  * [recent] = label terbaru pengguna (terbaru dulu) untuk chip ↺.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookmarkLabelDialog(
     mode: BookmarkLabelMode,
@@ -119,17 +118,9 @@ fun BookmarkLabelDialog(
             },
             errorText = if (showError) stringResource(R.string.bookmark_label_error) else null,
         )
-        FlowRow(
-            Modifier.padding(top = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            labelSuggestions(recent, label).forEach { s ->
-                SuggestionChip(s) {
-                    label = applySuggestion(s, label, recent)
-                    showError = false
-                }
-            }
+        LabelSuggestionChips(recent, label, Modifier.padding(top = 12.dp)) {
+            label = it
+            showError = false
         }
         Row(
             Modifier.fillMaxWidth().padding(top = 18.dp),
@@ -137,6 +128,26 @@ fun BookmarkLabelDialog(
         ) {
             QlGhostButton(stringResource(R.string.bookmark_label_cancel), onDismiss, Modifier.height(44.dp))
             QlOutlineButton(stringResource(R.string.bookmark_label_save), submit, Modifier.height(44.dp))
+        }
+    }
+}
+
+/** Chip saran label (terbaru + preset); mengetuk chip memanggil [onLabel] dengan isian baru. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun LabelSuggestionChips(
+    recent: List<String>,
+    label: String,
+    modifier: Modifier = Modifier,
+    onLabel: (String) -> Unit,
+) {
+    FlowRow(
+        modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        labelSuggestions(recent, label).forEach { s ->
+            SuggestionChip(s) { onLabel(applySuggestion(s, label, recent)) }
         }
     }
 }

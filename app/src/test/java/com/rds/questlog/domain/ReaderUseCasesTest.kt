@@ -41,6 +41,7 @@ private class FakePrefsRepository : UserPreferencesRepository {
         fontSize = sizeSp
     }
     override suspend fun setDarkMode(enabled: Boolean) = Unit
+    override suspend fun consumeReaderTip() = true
 }
 
 class ReaderUseCasesTest {

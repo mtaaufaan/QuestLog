@@ -148,7 +148,7 @@ fun ArticleActionsSheet(
 }
 
 @Composable
-private fun ActionRow(
+internal fun ActionRow(
     icon: ImageVector,
     label: String,
     iconColor: Color,

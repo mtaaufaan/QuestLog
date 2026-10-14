@@ -279,17 +279,38 @@ class MigrationTest {
     }
 
     @Test
-    fun migrasiPenuhDariSkemaPertamaSampaiV5Valid() {
+    fun migrate5To6HanyaMenambahKolomLogoDanDataLamaUtuh() {
+        helper.createDatabase(DB_NAME, 5).apply {
+            execSQL("INSERT INTO games (id, title, created_at) VALUES (1, 'Dragon Quest VII', 0)")
+            execSQL("INSERT INTO articles (id, game_id, title, created_at) VALUES (1, 1, 'Walkthrough', 0)")
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(DB_NAME, 6, true, MIGRATION_5_6)
+
+        assertEquals("Dragon Quest VII", migrated.text("SELECT title FROM games WHERE id = 1"))
+        assertEquals("Walkthrough", migrated.text("SELECT title FROM articles WHERE id = 1"))
+        migrated.query("SELECT logo_path FROM games WHERE id = 1").use {
+            it.moveToFirst()
+            assertTrue(it.isNull(0))
+        }
+        migrated.execSQL("UPDATE games SET logo_path = 'game_logos/1.webp' WHERE id = 1")
+        assertEquals("game_logos/1.webp", migrated.text("SELECT logo_path FROM games WHERE id = 1"))
+    }
+
+    @Test
+    fun migrasiPenuhDariSkemaPertamaSampaiV6Valid() {
         helper.createDatabase(DB_NAME, 1).close()
 
         helper.runMigrationsAndValidate(
             DB_NAME,
-            5,
+            6,
             true,
             MIGRATION_1_2,
             MIGRATION_2_3,
             MIGRATION_3_4,
             MIGRATION_4_5,
+            MIGRATION_5_6,
         )
     }
 

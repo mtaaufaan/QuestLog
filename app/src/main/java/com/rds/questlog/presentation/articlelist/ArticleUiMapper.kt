@@ -28,6 +28,7 @@ class ArticleUiMapper @Inject constructor(
         lastWhen = game.lastReadAt?.let(time::format),
         mainArticleTitle = game.mainArticleTitle,
         mainArticleId = game.mainArticleId,
+        logoPath = game.logoPath,
     )
 
     fun toUi(article: Article) = ArticleUiModel(
