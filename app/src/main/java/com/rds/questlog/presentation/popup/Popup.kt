@@ -7,7 +7,6 @@ sealed interface Popup {
     data class DeleteArticle(val articleId: Long) : Popup
     data class ScrapeError(val articleId: Long) : Popup
     data object Unlock : Popup
-    data object GameFilter : Popup
     data object DisplaySettings : Popup
 
     // Sprint 5 — pengelolaan artikel (S1)
@@ -23,4 +22,7 @@ sealed interface Popup {
     /** [bookmarkId] null = tambah di posisi ini; [fromPanel] = kembali ke Bookmark Panel setelah ditutup. */
     data class BookmarkLabel(val bookmarkId: Long?, val fromPanel: Boolean) : Popup
     data object NotePanel : Popup
+
+    // Sprint 8 — S0 Game List
+    data class DeleteGame(val gameId: Long) : Popup
 }

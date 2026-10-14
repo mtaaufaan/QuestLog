@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -105,15 +106,19 @@ fun ArticleRow(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(
-                text = article.gameName.uppercase(),
-                color = c.accentText,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.26.sp,
-                ),
-            )
+            if (article.isMainArticle) {
+                MainArticleLabel()
+            } else {
+                Text(
+                    text = article.gameName.uppercase(),
+                    color = c.accentText,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.26.sp,
+                    ),
+                )
+            }
             Text(
                 text = article.title,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -169,6 +174,23 @@ fun ArticleRow(
                 )
             }
         }
+    }
+}
+
+/** Label "Artikel utama" (bintang emas) menggantikan nama game pada artikel utama game. */
+@Composable
+private fun MainArticleLabel() {
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+        Image(QlIcons.StarGold, contentDescription = null, modifier = Modifier.size(11.dp))
+        Text(
+            text = stringResource(R.string.article_list_main).uppercase(),
+            color = QuestLogTheme.colors.accentText,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.26.sp,
+            ),
+        )
     }
 }
 
