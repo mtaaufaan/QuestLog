@@ -85,6 +85,7 @@ fun AddArticleContent(
     sharedUrl: String? = null,
     initialGameId: Long? = null,
     readClipboard: suspend () -> String? = { null },
+    detectSource: suspend (String) -> DetectOutcome = ::dummyDetect,
     incomingSharedUrl: String? = null,
     onIncomingHandled: () -> Unit = {},
 ) {
@@ -105,6 +106,7 @@ fun AddArticleContent(
     var sharedMarker by rememberSaveable { mutableStateOf(sharedUrl) }
     var confirmShared by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val detector = rememberDetector(detectSource)
     LaunchedEffect(pasteOutcome) {
         if (pasteOutcome != null) {
             delay(PASTE_MESSAGE_MS)
@@ -184,6 +186,7 @@ fun AddArticleContent(
                         pasteOutcome = outcome
                     }
                 },
+                trailing = { DetectBlock(form, articles, isPremium, detector, { form = it }, onOpenUnlock) },
             )
         }
         confirmShared?.let { url ->
@@ -472,4 +475,41 @@ private fun PrefillGame(
             done = true
         }
     }
+}
+
+/** Bagian "Halaman lanjutan" yang terhubung ke form: sumber, slot, dan penambahan hasil ke daftar URL. */
+@Composable
+private fun DetectBlock(
+    form: AddArticleForm,
+    articles: List<ArticleUiModel>,
+    isPremium: Boolean,
+    detector: Detector,
+    onForm: (AddArticleForm) -> Unit,
+    onOpenUnlock: () -> Unit,
+) {
+    DetectSection(
+        premium = isPremium,
+        state = detector.state,
+        base = detectBaseUrl(form.urls),
+        slots = detectSlots(form),
+        filled = form.filledUrlCount,
+        actions = DetectActions(
+            onDetect = {
+                detector.search(
+                    base = checkNotNull(detectBaseUrl(form.urls)),
+                    slots = detectSlots(form),
+                    known = urlScope(form, articles).let { it.stored + it.existing + form.urls },
+                )
+            },
+            onToggle = { detector.toggle(it, detectSlots(form)) },
+            onApply = {
+                (detector.state as? DetectState.Found)?.let {
+                    onForm(applyDetected(form, it))
+                    detector.applied(it.selected.size)
+                }
+            },
+            onDismiss = detector::dismiss,
+            onOpenUnlock = onOpenUnlock,
+        ),
+    )
 }
