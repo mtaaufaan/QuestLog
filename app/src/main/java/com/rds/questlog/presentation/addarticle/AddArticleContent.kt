@@ -85,7 +85,7 @@ fun AddArticleContent(
     sharedUrl: String? = null,
     initialGameId: Long? = null,
     readClipboard: suspend () -> String? = { null },
-    detectSource: suspend (String) -> DetectOutcome = ::dummyDetect,
+    detectSource: suspend (DetectRequest) -> DetectOutcome = ::dummyDetect,
     incomingSharedUrl: String? = null,
     onIncomingHandled: () -> Unit = {},
 ) {
@@ -106,7 +106,7 @@ fun AddArticleContent(
     var sharedMarker by rememberSaveable { mutableStateOf(sharedUrl) }
     var confirmShared by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val detector = rememberDetector(detectSource)
+    val detector = rememberDetector(detectSource, onOpenUnlock)
     LaunchedEffect(pasteOutcome) {
         if (pasteOutcome != null) {
             delay(PASTE_MESSAGE_MS)

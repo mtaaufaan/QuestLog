@@ -59,6 +59,9 @@ sealed class QuestLogError(message: String? = null, cause: Throwable? = null) : 
         data object PageNotFound : ArticleError()
     }
 
+    /** Deteksi halaman lanjutan gagal mengambil halaman (QL-34); tidak menghalangi penyimpanan manual. */
+    data class DetectionFailed(val failure: com.rds.questlog.domain.model.PageFailure) : QuestLogError()
+
     /** Penguncian fitur premium (QL-26). */
     sealed class PremiumError : QuestLogError() {
         /** Pengguna gratis: fitur terkunci, tampilkan ajakan upgrade (Unlock Sheet) tanpa mengubah data. */
