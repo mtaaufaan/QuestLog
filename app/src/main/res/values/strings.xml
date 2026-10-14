@@ -221,7 +221,7 @@
 
     <!-- S3 Reader -->
     <string name="reader_back">Kembali</string>
-    <string name="reader_checkpoint">Tandai checkpoint</string>
+    <string name="reader_checkpoint">Pasang anchor checkpoint</string>
     <string name="reader_settings">Pengaturan tampilan</string>
     <string name="reader_mode_seamless">Seamless</string>
     <string name="reader_mode_paged">Per Halaman</string>
