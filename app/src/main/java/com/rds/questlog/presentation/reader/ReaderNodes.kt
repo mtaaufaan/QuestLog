@@ -324,7 +324,7 @@ private fun CheckpointMarker() {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(QlIcons.BookmarkSolid, null, tint = c.accentLine, modifier = Modifier.size(12.dp))
+        Icon(QlIcons.AnchorBold, null, tint = c.accentLine, modifier = Modifier.size(12.dp))
         Text(
             stringResource(R.string.reader_checkpoint_label).uppercase(),
             color = c.accentText,
