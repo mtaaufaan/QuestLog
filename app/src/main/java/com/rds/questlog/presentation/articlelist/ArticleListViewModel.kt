@@ -1,8 +1,10 @@
 package com.rds.questlog.presentation.articlelist
 
 import androidx.annotation.StringRes
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.rds.questlog.R
 import com.rds.questlog.domain.error.QuestLogError.ArticleError
 import com.rds.questlog.domain.usecase.article.DeleteArticleUseCase
@@ -14,9 +16,11 @@ import com.rds.questlog.domain.usecase.article.ReorderPagesUseCase
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.article.UpdateArticleUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
-import com.rds.questlog.domain.usecase.premium.ObservePremiumStatusUseCase
+import com.rds.questlog.domain.usecase.premium.PremiumGuard
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ScrapeJob
+import com.rds.questlog.presentation.navigation.ArticleList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,9 +45,10 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 @Suppress("LongParameterList") // satu use case per aksi S1; digabung hanya menambah lapisan
 class ArticleListViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     getArticles: GetArticlesUseCase,
     getGames: GetGamesUseCase,
-    observePremiumStatus: ObservePremiumStatusUseCase,
+    premiumGuard: PremiumGuard,
     private val deleteArticleUseCase: DeleteArticleUseCase,
     private val retryFailedPagesUseCase: RetryFailedPagesUseCase,
     private val updateArticleUseCase: UpdateArticleUseCase,
@@ -55,7 +60,7 @@ class ArticleListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
-    private val gameFilter = MutableStateFlow<Long?>(null)
+    private val gameFilter = MutableStateFlow<Long?>(savedStateHandle.toRoute<ArticleList>().gameId)
     private val snackbar = MutableStateFlow<SnackbarMessage?>(null)
     private val edit = MutableStateFlow(EditState())
     private var snackbarJob: Job? = null
@@ -75,14 +80,14 @@ class ArticleListViewModel @Inject constructor(
         gameFilter,
         articles,
         getGames().map { list -> list.map(mapper::toUi) }.catch { emit(emptyList()) },
-        observePremiumStatus().catch { emit(false) },
-    ) { q, game, articleList, games, isPremium ->
+        premiumGuard.state().map { PremiumUiState.valueOf(it.name) }.catch { emit(PremiumUiState.FREE) },
+    ) { q, game, articleList, games, premium ->
         ArticleListUiState(
             games = games,
             articles = articleList,
             selectedGameFilter = game,
             query = q,
-            isPremium = isPremium,
+            premium = premium,
         )
     }.combine(snackbar) { state, message -> state.copy(snackbar = message?.res, snackbarArg = message?.arg) }
         .combine(edit) { state, e -> state.copy(isSavingEdit = e.saving, editSaveError = e.error) }
@@ -92,21 +97,10 @@ class ArticleListViewModel @Inject constructor(
         query.value = text
     }
 
-    fun onSelectFilter(gameId: Long?) {
-        gameFilter.value = gameId
-    }
-
-    init {
-        // Game yang jadi kosong (artikelnya dipindah) ikut hilang; filter yang menunjuknya kembali ke "Semua Game".
-        viewModelScope.launch {
-            getGames().catch { emit(emptyList()) }.collect { games ->
-                val selected = gameFilter.value
-                if (selected != null && games.none { it.id == selected }) gameFilter.value = null
-            }
-        }
-    }
-
     fun onScrapingArticleTapped() = showSnackbar(R.string.article_list_snackbar_scraping)
+
+    /** Game Binder belum dibangun (Sprint 9); ketukan pengguna premium hanya memberi tahu. */
+    fun onBinderTapped() = showSnackbar(R.string.binder_coming_soon)
 
     /**
      * Menyimpan hasil Edit Article Sheet. [onSaved] dipanggil hanya bila sukses (pemanggil menutup popup);

@@ -16,7 +16,6 @@ private const val ARTICLE_ACTIONS = 1L
 private const val DELETE_ARTICLE = 2L
 private const val SCRAPE_ERROR = 3L
 private const val UNLOCK = 4L
-private const val GAME_FILTER = 5L
 private const val DISPLAY_SETTINGS = 6L
 private const val EDIT_ARTICLE = 7L
 private const val MANAGE_PAGES = 8L
@@ -26,6 +25,7 @@ private const val READER_TOOLS = 11L
 private const val BOOKMARK_PANEL = 12L
 private const val BOOKMARK_LABEL = 13L
 private const val NOTE_PANEL = 14L
+private const val DELETE_GAME = 15L
 private const val NO_BOOKMARK = -1L
 
 private fun encode(popup: Popup): ArrayList<Long> = when (popup) {
@@ -34,12 +34,12 @@ private fun encode(popup: Popup): ArrayList<Long> = when (popup) {
     is Popup.DeleteArticle -> arrayListOf(DELETE_ARTICLE, popup.articleId)
     is Popup.ScrapeError -> arrayListOf(SCRAPE_ERROR, popup.articleId)
     Popup.Unlock -> arrayListOf(UNLOCK)
-    Popup.GameFilter -> arrayListOf(GAME_FILTER)
     Popup.DisplaySettings -> arrayListOf(DISPLAY_SETTINGS)
     is Popup.EditArticle -> arrayListOf(EDIT_ARTICLE, popup.articleId)
     is Popup.ManagePages -> arrayListOf(MANAGE_PAGES, popup.articleId)
     is Popup.DeletePage -> arrayListOf(DELETE_PAGE, popup.articleId, popup.pageId)
     is Popup.RefreshArticle -> arrayListOf(REFRESH_ARTICLE, popup.articleId)
+    is Popup.DeleteGame -> arrayListOf(DELETE_GAME, popup.gameId)
     Popup.ReaderTools, Popup.BookmarkPanel, is Popup.BookmarkLabel, Popup.NotePanel -> encodeReader(popup)
 }
 
@@ -62,7 +62,6 @@ private fun decode(values: List<Long>): Popup? {
     return when (values.firstOrNull()) {
         SCRAPE_MODE -> Popup.ScrapeMode
         UNLOCK -> Popup.Unlock
-        GAME_FILTER -> Popup.GameFilter
         DISPLAY_SETTINGS -> Popup.DisplaySettings
         READER_TOOLS, BOOKMARK_PANEL, NOTE_PANEL, BOOKMARK_LABEL -> decodeReader(values)
         DELETE_PAGE -> values.getOrNull(2)?.let { page -> id?.let { Popup.DeletePage(it, page) } }
@@ -86,5 +85,6 @@ private fun withArticle(code: Long, articleId: Long): Popup? = when (code) {
     EDIT_ARTICLE -> Popup.EditArticle(articleId)
     MANAGE_PAGES -> Popup.ManagePages(articleId)
     REFRESH_ARTICLE -> Popup.RefreshArticle(articleId)
+    DELETE_GAME -> Popup.DeleteGame(articleId)
     else -> null
 }

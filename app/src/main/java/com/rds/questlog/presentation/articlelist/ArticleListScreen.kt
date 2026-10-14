@@ -2,22 +2,22 @@ package com.rds.questlog.presentation.articlelist
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
-import com.rds.questlog.presentation.model.GameFilterOption
+import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ScrapeJob
 import com.rds.questlog.presentation.navigation.AddArticle
+import com.rds.questlog.presentation.navigation.GameList
 import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
 import com.rds.questlog.presentation.scrapemode.ScrapeModeSheet
 
 /**
- * S1. Popup yang menempel padanya (GameFilter, ArticleActions, DeleteArticle, ScrapeError) dirender di sini;
+ * S1 Halaman Game. Popup yang menempel padanya (ArticleActions, DeleteArticle, ScrapeError, dst.) dirender di sini;
  * [activePopup] tetap satu state bersama di NavHost (screen_flow.md §4).
  */
 @Composable
@@ -32,17 +32,21 @@ fun ArticleListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val game = uiState.games.firstOrNull { it.id == uiState.selectedGameFilter }
     ArticleListContent(
-        games = uiState.games,
+        gameName = game?.name.orEmpty(),
         articles = uiState.articles,
-        isPremium = uiState.isPremium,
+        totalArticles = game?.articleCount ?: 0,
+        premium = uiState.premium,
         query = uiState.query,
-        filterGameId = uiState.selectedGameFilter,
         snackbar = uiState.snackbar?.let { res ->
             uiState.snackbarArg?.let { stringResource(res, it) } ?: stringResource(res)
         },
+        onBack = { navController.popBackStack<GameList>(inclusive = false) },
         onQuery = viewModel::onQueryChange,
-        onOpenFilter = { onShowPopup(Popup.GameFilter) },
+        onOpenBinder = {
+            if (uiState.premium == PremiumUiState.FREE) onShowPopup(Popup.Unlock) else viewModel.onBinderTapped()
+        },
         onArticleTap = { article ->
             when (article.status) {
                 ArticleStatus.READY -> navController.openReader(article, resumeFrom = "last")
@@ -53,7 +57,6 @@ fun ArticleListScreen(
         onResume = { navController.openReader(it, resumeFrom = "checkpoint") },
         onOpenActions = { onShowPopup(Popup.ArticleActions(it.id)) },
         onAdd = { onShowPopup(Popup.ScrapeMode) },
-        onOpenUnlock = { onShowPopup(Popup.Unlock) },
     )
 
     ArticleListPopups(
@@ -80,20 +83,6 @@ private fun ArticleListPopups(
     pendingSharedUrl: String?,
 ) {
     when (activePopup) {
-        Popup.GameFilter -> {
-            val options = remember(uiState.games) {
-                uiState.games.map { GameFilterOption(it.id, it.name, it.articleCount) }
-            }
-            GameFilterSheet(
-                games = options,
-                selectedId = uiState.selectedGameFilter,
-                onSelect = {
-                    viewModel.onSelectFilter(it)
-                    onDismissPopup()
-                },
-                onClose = onDismissPopup,
-            )
-        }
         Popup.ScrapeMode -> ScrapeModeSheet(
             hasArticles = uiState.games.sumOf { it.articleCount } > 0,
             onPick = {

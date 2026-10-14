@@ -27,6 +27,7 @@ import com.rds.questlog.R
 import com.rds.questlog.presentation.addarticle.AddArticleScreen
 import com.rds.questlog.presentation.articlelist.ArticleListScreen
 import com.rds.questlog.presentation.components.QlSnackbarHost
+import com.rds.questlog.presentation.gamelist.GameListScreen
 import com.rds.questlog.presentation.model.ScrapeNotificationKind
 import com.rds.questlog.presentation.model.ScrapeNotificationUi
 import com.rds.questlog.presentation.notification.ScrapeNotificationHost
@@ -64,7 +65,7 @@ fun QuestLogNavHost() {
             is ShareEvent.Url -> if (onAddArticle) {
                 incomingSharedUrl = event.url
             } else {
-                navController.popBackStack<ArticleList>(inclusive = false)
+                navController.popBackStack<GameList>(inclusive = false)
                 pendingSharedUrl = event.url
                 activePopup = Popup.ScrapeMode
             }
@@ -74,7 +75,16 @@ fun QuestLogNavHost() {
     LaunchedEffect(activePopup) { if (activePopup != Popup.ScrapeMode) pendingSharedUrl = null }
 
     Box {
-        NavHost(navController = navController, startDestination = ArticleList) {
+        NavHost(navController = navController, startDestination = GameList) {
+            composable<GameList> {
+                GameListScreen(
+                    navController = navController,
+                    activePopup = activePopup,
+                    onShowPopup = { activePopup = it },
+                    onDismissPopup = { activePopup = null },
+                    pendingSharedUrl = pendingSharedUrl,
+                )
+            }
             composable<ArticleList> {
                 ArticleListScreen(
                     navController = navController,

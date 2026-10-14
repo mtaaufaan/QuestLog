@@ -50,14 +50,7 @@ object QlIcons {
     )
 
     /** Artikel utama game (bintang). */
-    val Star = lineIcon(
-        "Star",
-        1.7f,
-        "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 " +
-            ".294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 " +
-            "2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 " +
-            "9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z",
-    )
+    val Star = lineIcon("Star", 1.7f, STAR_PATH)
 
     /** Catatan (berkas bergaris). */
     val Note = lineIcon(
@@ -105,6 +98,15 @@ object QlIcons {
         "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20",
         "M12 7v6",
         "M9 10h6",
+    )
+
+    /** Game Binder: buku bergaris. */
+    val Binder = lineIcon(
+        "Binder",
+        1.6f,
+        "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20",
+        "M8 7h8",
+        "M8 11h6",
     )
     val Trash = lineIcon(
         "Trash",
@@ -169,6 +171,17 @@ object QlIcons {
         "M12 17h.01",
     )
 
+    /** Bintang berwarna tetap (emas) untuk label "Artikel utama"; tampilkan dengan `Image`, bukan `Icon`. */
+    val StarGold = ImageVector.Builder("StarGold", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            pathData = PathParser().parsePathString(STAR_PATH).toNodes(),
+            fill = SolidColor(Color(0xFFE1AD66)),
+            stroke = SolidColor(Color(0xFFA06F24)),
+            strokeLineWidth = 1.6f,
+            strokeLineJoin = StrokeJoin.Round,
+        )
+    }.build()
+
     /** Bookmark berwarna tetap (emas) untuk baris di Bookmark Panel; tampilkan dengan `Image`, bukan `Icon`. */
     val BookmarkGold = ImageVector.Builder("BookmarkGold", 24.dp, 24.dp, 24f, 24f).apply {
         addPath(
@@ -205,3 +218,9 @@ private fun lineIcon(name: String, strokeWidth: Float, vararg paths: String): Im
             )
         }
     }.build()
+
+private const val STAR_PATH =
+    "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 " +
+        ".294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 " +
+        "2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 " +
+        "9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
