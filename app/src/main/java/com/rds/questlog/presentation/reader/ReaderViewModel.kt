@@ -6,9 +6,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.rds.questlog.R
+import com.rds.questlog.domain.error.QuestLogError.PremiumError
+import com.rds.questlog.domain.model.Bookmark
 import com.rds.questlog.domain.model.DisplayPreferences
 import com.rds.questlog.domain.model.ReadMode as DomainReadMode
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
+import com.rds.questlog.domain.usecase.bookmark.AddBookmarkUseCase
+import com.rds.questlog.domain.usecase.bookmark.DeleteBookmarkUseCase
+import com.rds.questlog.domain.usecase.bookmark.ObserveGameBookmarksUseCase
+import com.rds.questlog.domain.usecase.bookmark.UpdateBookmarkLabelUseCase
+import com.rds.questlog.domain.usecase.note.DeleteNoteUseCase
+import com.rds.questlog.domain.usecase.note.ObserveNoteUseCase
+import com.rds.questlog.domain.usecase.note.SaveNoteUseCase
 import com.rds.questlog.domain.usecase.prefs.ObserveDisplayPreferencesUseCase
 import com.rds.questlog.domain.usecase.prefs.SetDarkModeUseCase
 import com.rds.questlog.domain.usecase.prefs.SetFontSizeUseCase
@@ -19,6 +28,7 @@ import com.rds.questlog.domain.usecase.reader.SetCheckpointUseCase
 import com.rds.questlog.domain.usecase.reader.SetReadModeUseCase
 import com.rds.questlog.presentation.articlelist.ArticleUiMapper
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.BookmarkUi
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ReadMode
@@ -28,6 +38,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,8 +46,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -48,6 +62,28 @@ class ReaderActions @Inject constructor(
     val retryFailed: RetryFailedPagesUseCase,
     val setFontSize: SetFontSizeUseCase,
     val setDarkMode: SetDarkModeUseCase,
+)
+
+/** Use case bookmark Reader. */
+class BookmarkActions @Inject constructor(
+    val observe: ObserveGameBookmarksUseCase,
+    val add: AddBookmarkUseCase,
+    val rename: UpdateBookmarkLabelUseCase,
+    val delete: DeleteBookmarkUseCase,
+)
+
+/** Use case catatan Reader. */
+class NoteActions @Inject constructor(
+    val observe: ObserveNoteUseCase,
+    val save: SaveNoteUseCase,
+    val delete: DeleteNoteUseCase,
+)
+
+/** Alat baca premium: bookmark, catatan, dan status premium untuk mengunci UI. */
+class ReaderToolsActions @Inject constructor(
+    val bookmarks: BookmarkActions,
+    val notes: NoteActions,
+    val premium: PremiumGuard,
 )
 
 data class ReaderUiState(
@@ -66,14 +102,15 @@ data class ReaderUiState(
  * S3: menyajikan artikel + konten dari database dan meneruskan aksi pengguna ke use case (checkpoint, posisi baca,
  * mode baca, retry, preferensi tampilan). Tidak menyentuh Room/DataStore langsung.
  */
+@Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getArticleDetail: GetArticleDetailUseCase,
     observeDisplayPreferences: ObserveDisplayPreferencesUseCase,
-    premiumGuard: PremiumGuard,
     private val actions: ReaderActions,
+    private val tools: ReaderToolsActions,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
 
@@ -95,13 +132,13 @@ class ReaderViewModel @Inject constructor(
                     viewState = detail.toViewState(),
                     article = detail?.let { mapper.toUi(it.article).withContent(content) },
                     content = content,
-                    resumeNodeId = detail?.resumeTarget(resumeFrom),
+                    resumeNodeId = detail?.resumeTarget(resumeFrom, route.startNodeId),
                 )
             }
             .catch { emit(ReaderUiState(viewState = ReaderViewState.DB_ERROR)) }
     }
 
-    private val premium: Flow<PremiumUiState> = premiumGuard.state()
+    private val premium: Flow<PremiumUiState> = tools.premium.state()
         .map { PremiumUiState.valueOf(it.name) }
         .catch { emit(PremiumUiState.FREE) }
 
@@ -113,6 +150,27 @@ class ReaderViewModel @Inject constructor(
     ) { state, prefs, message, premiumState ->
         state.copy(fontSize = prefs.fontSizeSp, darkMode = prefs.darkMode, snackbar = message, premium = premiumState)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ReaderUiState())
+
+    /** Bookmark semua artikel di game artikel ini (dikelompokkan per artikel oleh UI); selalu terbaca. */
+    val bookmarks: StateFlow<List<BookmarkUi>> = uiState.map { it.article?.gameId }.distinctUntilChanged()
+        .flatMapLatest { gameId ->
+            if (gameId == null) {
+                flowOf(emptyList())
+            } else {
+                tools.bookmarks.observe(gameId).map { list -> list.map(::toUi) }.catch { emit(emptyList()) }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
+
+    /** Isi catatan artikel; null = belum dimuat (panel baru dibuka setelah terisi agar tidak menimpa catatan). */
+    val note: StateFlow<String?> = tools.notes.observe(articleId).map<String, String?> { it }
+        .catch { emit("") }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+    private val unlockEvents = Channel<Unit>(Channel.CONFLATED)
+
+    /** Pengguna gratis menulis lewat UseCase: UI membuka Unlock Sheet (data tidak berubah). */
+    val unlockRequests: Flow<Unit> = unlockEvents.receiveAsFlow()
 
     /** Memuat ulang data (tombol "Coba Lagi" di state db_error). */
     fun reload() {
@@ -132,13 +190,39 @@ class ReaderViewModel @Inject constructor(
     /** Mengulang hanya halaman FAILED artikel ini; halaman yang sudah selesai tidak disentuh. */
     fun retryFailed() = launchWrite { actions.retryFailed(articleId).map { } }
 
+    fun addBookmark(nodeId: Long, label: String, snippet: String) =
+        launchWrite { tools.bookmarks.add(articleId, nodeId, label, snippet).map { } }
+
+    fun renameBookmark(id: Long, label: String) = launchWrite { tools.bookmarks.rename(id, label) }
+
+    fun deleteBookmark(id: Long) = launchWrite { tools.bookmarks.delete(id) }
+
+    /** Menyimpan catatan (autosave); true bila tersimpan, supaya panel baru menampilkan "Tersimpan" setelahnya. */
+    suspend fun saveNote(content: String): Boolean = tools.notes.save(articleId, content).onFailure(::report).isSuccess
+
+    /** Menyimpan sisa ketikan saat panel catatan ditutup. */
+    fun flushNote(content: String) {
+        viewModelScope.launch { saveNote(content) }
+    }
+
+    fun deleteNote() = launchWrite { tools.notes.delete(articleId) }
+
     fun setFontSize(sizeSp: Int) = launchWrite { actions.setFontSize(sizeSp) }
 
     fun setDarkMode(enabled: Boolean) = launchWrite { actions.setDarkMode(enabled) }
 
     private fun launchWrite(block: suspend () -> Result<Unit>) {
         viewModelScope.launch {
-            block().onFailure { showSnackbar(R.string.reader_snackbar_save_failed) }
+            block().onFailure(::report)
+        }
+    }
+
+    /** Gratis -> Unlock Sheet; premium hilang -> pesan hanya-baca; selain itu gagal simpan biasa. */
+    private fun report(error: Throwable) {
+        when (error) {
+            is PremiumError.Locked -> unlockEvents.trySend(Unit)
+            is PremiumError.ReadOnly -> showSnackbar(R.string.reader_snackbar_read_only)
+            else -> showSnackbar(R.string.reader_snackbar_save_failed)
         }
     }
 
@@ -156,3 +240,12 @@ class ReaderViewModel @Inject constructor(
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }
+
+private fun toUi(bookmark: Bookmark) = BookmarkUi(
+    id = bookmark.id,
+    articleId = bookmark.articleId,
+    articleTitle = bookmark.articleTitle,
+    label = bookmark.label,
+    snippet = bookmark.snippet,
+    nodeId = bookmark.nodeId,
+)

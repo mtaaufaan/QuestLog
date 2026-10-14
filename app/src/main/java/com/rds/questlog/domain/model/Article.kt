@@ -18,6 +18,10 @@ data class Article(
     val checkpointFallbackOrder: Int? = null,
     /** Mode baca terakhir artikel ini; null = belum pernah dipilih (anggap SEAMLESS). */
     val readMode: ReadMode? = null,
+    /** Jumlah bookmark artikel ini (indikator di daftar artikel). */
+    val bookmarkCount: Int = 0,
+    /** Artikel punya catatan umum yang tidak kosong. */
+    val hasNote: Boolean = false,
 ) {
     val status: ScrapingStatus get() = pages.toScrapingStatus()
 }

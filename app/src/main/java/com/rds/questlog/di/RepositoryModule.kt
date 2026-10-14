@@ -4,16 +4,20 @@ import com.rds.questlog.data.prefs.DataStoreUserPreferencesRepository
 import com.rds.questlog.data.repository.AppConfigRepositoryImpl
 import com.rds.questlog.data.repository.ArticleManagementRepositoryImpl
 import com.rds.questlog.data.repository.ArticleRepositoryImpl
+import com.rds.questlog.data.repository.BookmarkRepositoryImpl
 import com.rds.questlog.data.repository.CheckpointRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
+import com.rds.questlog.data.repository.NoteRepositoryImpl
 import com.rds.questlog.data.repository.SourcePageRepositoryImpl
 import com.rds.questlog.data.scraper.KsoupScraperEngine
 import com.rds.questlog.data.worker.WorkManagerScrapeScheduler
 import com.rds.questlog.domain.repository.AppConfigRepository
 import com.rds.questlog.domain.repository.ArticleManagementRepository
 import com.rds.questlog.domain.repository.ArticleRepository
+import com.rds.questlog.domain.repository.BookmarkRepository
 import com.rds.questlog.domain.repository.CheckpointRepository
 import com.rds.questlog.domain.repository.GameRepository
+import com.rds.questlog.domain.repository.NoteRepository
 import com.rds.questlog.domain.repository.SourcePageRepository
 import com.rds.questlog.domain.repository.UserPreferencesRepository
 import com.rds.questlog.domain.scraper.ScrapeScheduler
@@ -51,6 +55,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCheckpointRepository(impl: CheckpointRepositoryImpl): CheckpointRepository
+
+    @Binds
+    abstract fun bindBookmarkRepository(impl: BookmarkRepositoryImpl): BookmarkRepository
+
+    @Binds
+    abstract fun bindNoteRepository(impl: NoteRepositoryImpl): NoteRepository
 
     @Binds
     @Singleton

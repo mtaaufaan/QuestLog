@@ -22,6 +22,12 @@ sealed class QuestLogError(message: String? = null, cause: Throwable? = null) : 
         data object TooManyUrls : ValidationError()
         data object NoUrlsProvided : ValidationError()
 
+        /** Label bookmark kosong (wajib diisi). */
+        data object EmptyBookmarkLabel : ValidationError()
+
+        /** Label bookmark lebih dari 60 karakter. */
+        data object BookmarkLabelTooLong : ValidationError()
+
         /** [url] muncul lebih dari sekali dalam input yang sama. */
         data class DuplicateUrl(val url: String) : ValidationError()
 

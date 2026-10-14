@@ -51,37 +51,49 @@ private const val SHEET_HEIGHT = 0.92f
 private const val AUTOSAVE_MS = 1_000L
 
 /**
- * Note Panel (P13): satu catatan umum per artikel. Simpan otomatis [AUTOSAVE_MS] setelah mengetik berhenti dan
- * langsung saat panel ditutup; [onSave] menerima teks terbaru. [readOnly] = premium tidak aktif.
+ * Simpan otomatis catatan: menunggu [debounceMs] setelah mengetik berhenti, lalu memanggil [save]; mengembalikan teks
+ * yang berhasil disimpan (atau [saved] bila gagal, sehingga status tetap "Menyimpan…" dan dicoba lagi di ketikan
+ * berikutnya). Dibatalkan otomatis bila teks berubah lagi.
+ */
+suspend fun autosaveNote(text: String, saved: String, debounceMs: Long, save: suspend (String) -> Boolean): String {
+    if (text == saved) return saved
+    delay(debounceMs)
+    return if (save(text)) text else saved
+}
+
+/**
+ * Note Panel (P13): satu catatan umum per artikel. Simpan otomatis [AUTOSAVE_MS] setelah mengetik berhenti lewat
+ * [onSave] (status "Menyimpan…" → "Tersimpan" menunggu hasilnya) dan sisa ketikan disimpan lewat [onFlush] saat panel
+ * ditutup. [readOnly] = premium tidak aktif.
  */
 @Composable
 fun NotePanel(
     articleTitle: String,
     initialText: String,
     readOnly: Boolean,
-    onSave: (String) -> Unit,
+    onSave: suspend (String) -> Boolean,
+    onFlush: (String) -> Unit,
+    onDelete: () -> Unit,
     onClose: () -> Unit,
 ) {
     var text by rememberSaveable { mutableStateOf(initialText) }
     var saved by rememberSaveable { mutableStateOf(initialText) }
-    val currentSave by rememberUpdatedState(onSave)
     val latest by rememberUpdatedState(text)
     val savedNow by rememberUpdatedState(saved)
+    val currentFlush by rememberUpdatedState(onFlush)
 
     LaunchedEffect(text) {
-        if (text != saved && !readOnly) {
-            delay(AUTOSAVE_MS)
-            currentSave(text)
-            saved = text
-        }
+        if (!readOnly) saved = autosaveNote(text, saved, AUTOSAVE_MS, onSave)
     }
     // Simpan sisa ketikan yang belum sempat tersimpan saat panel ditutup.
-    DisposableEffect(Unit) { onDispose { if (!readOnly && latest != savedNow) currentSave(latest) } }
+    DisposableEffect(Unit) { onDispose { if (!readOnly && latest != savedNow) currentFlush(latest) } }
 
     QlBottomSheet(onDismiss = onClose) {
         Column(Modifier.fillMaxHeight(SHEET_HEIGHT).navigationBarsPadding().imePadding()) {
             NoteHeader(articleTitle, saving = text != saved, canDelete = !readOnly && text.isNotEmpty()) {
                 text = ""
+                saved = ""
+                onDelete()
             }
             if (readOnly) ReadOnlyLine()
             NoteField(text, readOnly, { text = it }, Modifier.weight(1f))
@@ -198,7 +210,9 @@ private fun NoteFooter(chars: Int) {
 
 @Composable
 private fun NotePreview(text: String, readOnly: Boolean = false) {
-    QuestLogTheme { NotePanel("Walkthrough Lengkap — Disc 1", text, readOnly, onSave = {}, onClose = {}) }
+    QuestLogTheme {
+        NotePanel("Walkthrough Lengkap — Disc 1", text, readOnly, { true }, {}, {}, {})
+    }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 800)
