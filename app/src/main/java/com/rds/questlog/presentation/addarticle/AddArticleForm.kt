@@ -10,6 +10,7 @@ const val MAX_GAME_NAME = 100
 private const val NO_ID = -1L
 private val URL_SEPARATOR = Regex("[\\s,]+")
 private val URL_SCHEME = Regex("https?://")
+private val HTTPS_URL = Regex("https://[^\\s,]+")
 
 /** Isi form S2 beserta operasinya; semuanya murni (tanpa Compose) agar mudah diuji. */
 data class AddArticleForm(
@@ -69,6 +70,35 @@ data class AddArticleForm(
     }
 
     val filledUrlCount: Int get() = urls.count { it.isNotBlank() }
+
+    /**
+     * Menambahkan URL `https://` dari [clipboard] ke akhir daftar (QL-22): URL yang sudah ada dilewati, hasilnya
+     * maksimal [MAX_URLS], dan baris kosong diganti. Mengembalikan form baru beserta hasilnya; form tidak berubah
+     * bila clipboard tanpa URL valid ([PasteOutcome.NoUrls]) atau tidak ada yang baru ([PasteOutcome.NothingNew]).
+     */
+    fun withPasted(clipboard: String?): Pair<AddArticleForm, PasteOutcome> {
+        val found = HTTPS_URL.findAll(clipboard.orEmpty()).map { it.value }.distinct().toList()
+        val current = urls.filter { it.isNotBlank() }
+        val merged = (current + found.filter { it !in current }).take(MAX_URLS)
+        val added = merged.size - current.size
+        return when {
+            found.isEmpty() -> this to PasteOutcome.NoUrls
+            added == 0 -> this to PasteOutcome.NothingNew
+            else -> copy(urls = merged) to PasteOutcome.Added(added)
+        }
+    }
+}
+
+/** Hasil mengetuk Tempel: pesan yang ditampilkan di bawah judul bagian URL. */
+sealed interface PasteOutcome {
+    /** [count] URL baru ditambahkan. */
+    data class Added(val count: Int) : PasteOutcome
+
+    /** Clipboard kosong atau tidak berisi URL `https://` yang valid. */
+    data object NoUrls : PasteOutcome
+
+    /** Semua URL di clipboard sudah ada di daftar, atau daftar sudah penuh. */
+    data object NothingNew : PasteOutcome
 }
 
 /** Menyimpan form saat rotasi layar/proses dimatikan; status `saving` sengaja tidak dipulihkan. */

@@ -437,6 +437,12 @@ private fun ArticleListContentFilteredPreview() {
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
+private fun ArticleListShareNoUrlPreview() {
+    PreviewContent(query = "", filterGameId = null, snackbar = stringResource(R.string.share_no_url))
+}
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
 private fun ArticleListContentEmptyPreview() {
     QuestLogTheme {
         ArticleListContent(

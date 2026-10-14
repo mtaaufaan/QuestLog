@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,8 +60,10 @@ import com.rds.questlog.presentation.preview.PreviewData
 import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.QuestLogTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val SAVE_DELAY_MS = 650L
+private const val PASTE_MESSAGE_MS = 2_600L
 
 /**
  * Form "Simpan Walkthrough" (S2) dengan dua tab. Props dan callback mengikuti component-contract.md §2; state form
@@ -78,10 +81,27 @@ fun AddArticleContent(
     onOpenUnlock: () -> Unit,
     modifier: Modifier = Modifier,
     submitError: String? = null,
+    sharedUrl: String? = null,
+    readClipboard: suspend () -> String? = { null },
 ) {
     var form by rememberSaveable(stateSaver = AddArticleFormSaver) {
-        mutableStateOf(AddArticleForm(mode = mode, targetId = targetArticleId))
+        mutableStateOf(
+            AddArticleForm(
+                mode = mode,
+                targetId = targetArticleId,
+                urls = listOfNotNull(sharedUrl).ifEmpty { listOf("") },
+            ),
+        )
     }
+    var pasteOutcome by remember { mutableStateOf<PasteOutcome?>(null) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(pasteOutcome) {
+        if (pasteOutcome != null) {
+            delay(PASTE_MESSAGE_MS)
+            pasteOutcome = null
+        }
+    }
+
     val target = targetArticle(form, articles)
     val errors = if (form.showErrors) validate(form, articles) else FormErrors()
     val urlErrors = urlErrors(form.urls, urlScope(form, articles), form.showErrors)
@@ -134,6 +154,15 @@ fun AddArticleContent(
                 onAdd = { form = form.withUrlAdded() },
                 onRemove = { form = form.withUrlRemoved(it) },
                 onMove = { index, delta -> form = form.withUrlMoved(index, delta) },
+                showSharedBanner = sharedUrl != null && form.urls.firstOrNull() == sharedUrl,
+                pasteOutcome = pasteOutcome,
+                onPaste = {
+                    scope.launch {
+                        val (next, outcome) = form.withPasted(readClipboard())
+                        form = next
+                        pasteOutcome = outcome
+                    }
+                },
             )
         }
         AddArticleFooter(
@@ -367,8 +396,19 @@ private fun AddArticleAppendPreview() {
     PreviewContent(ScrapeMode.APPEND, 1L, PreviewData.articles)
 }
 
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun PreviewContent(mode: ScrapeMode, target: Long?, articles: List<ArticleUiModel>) {
+private fun AddArticleSharedPreview() {
+    PreviewContent(ScrapeMode.NEW, null, PreviewData.articles, sharedUrl = PreviewData.SHARED_URL)
+}
+
+@Composable
+private fun PreviewContent(
+    mode: ScrapeMode,
+    target: Long?,
+    articles: List<ArticleUiModel>,
+    sharedUrl: String? = null,
+) {
     QuestLogTheme {
         AddArticleContent(
             mode = mode,
@@ -379,6 +419,7 @@ private fun PreviewContent(mode: ScrapeMode, target: Long?, articles: List<Artic
             onBack = {},
             onSave = {},
             onOpenUnlock = {},
+            sharedUrl = sharedUrl,
         )
     }
 }

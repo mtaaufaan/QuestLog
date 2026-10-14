@@ -186,7 +186,13 @@
     <string name="add_article_url_down">Turunkan</string>
     <string name="add_article_url_remove">Hapus URL</string>
     <string name="add_article_add_url">Tambah URL</string>
-    <string name="add_article_paste_hint">Tempel beberapa URL sekaligus — tiap baris jadi satu halaman.</string>
+    <string name="add_article_paste_hint">Teks berisi beberapa URL terpecah per baris. Clipboard hanya dibaca saat Tempel diketuk.</string>
+    <string name="add_article_paste">Tempel</string>
+    <string name="add_article_paste_done">%1$d URL ditempel dari clipboard</string>
+    <string name="add_article_paste_invalid">Clipboard kosong atau tidak berisi URL https:// yang valid</string>
+    <string name="add_article_paste_nothing_new">Tidak ada URL baru: sudah ada di daftar atau daftar sudah penuh</string>
+    <string name="add_article_shared_banner">URL dari browser sudah terisi di Hal. 1</string>
+    <string name="share_no_url">Tidak ada URL https:// yang valid di teks yang dibagikan</string>
     <string name="add_article_limit_article">Limit gratis tercapai (maks. 5 artikel per game).</string>
     <string name="add_article_limit_game">Limit gratis tercapai (maks. 2 game).</string>
     <string name="add_article_save_new">Simpan &amp; Mulai Unduh</string>
