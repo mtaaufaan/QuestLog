@@ -13,6 +13,7 @@ import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.navigation.Reader
+import com.rds.questlog.presentation.navigation.showGamePage
 import com.rds.questlog.presentation.popup.Popup
 
 /**
@@ -48,7 +49,8 @@ fun ReaderScreen(
         snackbar = state.snackbar?.let { stringResource(it) },
         onBack = { nodeId ->
             nodeId?.let(viewModel::saveLastPosition)
-            navController.popBackStack()
+            // Kembali selalu ke Halaman Game artikel ini, juga bila Reader dibuka dari pencarian S0 atau notifikasi.
+            navController.showGamePage(article.gameId)
         },
         onLeave = { nodeId -> nodeId?.let(viewModel::saveLastPosition) },
         onOpenTools = { onShowPopup(Popup.ReaderTools) },

@@ -5,7 +5,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface GameRepository {
 
-    /** Stream semua game (terlama dulu) beserta jumlah artikelnya; emit ulang tiap data berubah. */
+    /**
+     * Stream game yang punya artikel (terlama dulu) beserta jumlah artikel dan artikel terakhir dibaca; emit ulang
+     * tiap data berubah.
+     */
     fun observeGames(): Flow<List<Game>>
 
     /** Id game bernama [name] (case-insensitive), atau null bila belum ada. */
@@ -16,6 +19,12 @@ interface GameRepository {
 
     /** Mengembalikan id game bernama [name] (case-insensitive); membuatnya bila belum ada. */
     suspend fun findOrCreate(name: String): Long
+
+    /**
+     * Menghapus game [gameId] beserta semua artikel, halaman, konten, checkpoint, bookmark, catatan, penanda artikel
+     * utama, kategori, dan file gambar yang tidak dipakai lagi.
+     */
+    suspend fun deleteGame(gameId: Long)
 
     /** Menghapus game [gameId] hanya bila tidak punya artikel lagi; no-op bila masih berisi. */
     suspend fun deleteIfEmpty(gameId: Long)

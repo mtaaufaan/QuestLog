@@ -26,6 +26,11 @@ class ScrapeNotificationMappingTest {
     )
 
     @Test
+    fun `notifikasi membawa id game artikel untuk tujuan Halaman Game`() {
+        assertEquals(1L, article(COMPLETED).toNotification().gameId)
+    }
+
+    @Test
     fun `progres menghitung halaman selesai dan gagal selama masih ada yang diproses`() {
         val n = article(COMPLETED, FAILED, IN_PROGRESS, PENDING).toNotification()
         assertEquals(ScrapeNotificationKind.PROGRESS, n.kind)

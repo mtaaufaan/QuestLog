@@ -15,9 +15,18 @@ import com.rds.questlog.presentation.model.ReadMode
 import javax.inject.Inject
 
 /** Domain → model UI (component-contract.md §0); tidak ada logika bisnis di sini. */
-class ArticleUiMapper @Inject constructor(private val failures: PageFailureFormatter) {
+class ArticleUiMapper @Inject constructor(
+    private val failures: PageFailureFormatter,
+    private val time: RelativeTimeFormatter,
+) {
 
-    fun toUi(game: Game) = GameUiModel(id = game.id, name = game.name, articleCount = game.articleCount)
+    fun toUi(game: Game) = GameUiModel(
+        id = game.id,
+        name = game.name,
+        articleCount = game.articleCount,
+        lastTitle = game.lastArticleTitle,
+        lastWhen = game.lastReadAt?.let(time::format),
+    )
 
     fun toUi(article: Article) = ArticleUiModel(
         id = article.id,
@@ -32,8 +41,7 @@ class ArticleUiMapper @Inject constructor(private val failures: PageFailureForma
         pages = article.pages.map(::toUi),
         checkpointNodeId = article.checkpointNodeId,
         lastNodeId = article.lastVisitedNodeId,
-        // Label "dibaca 2 jam lalu" diisi saat Reader (Sprint 3) mulai menulis checkpoints.last_read_at.
-        lastRead = null,
+        lastRead = article.lastReadAt?.let { time.format(it) },
         readMode = article.readMode?.let { if (it == DomainReadMode.PAGED) ReadMode.PAGED else ReadMode.SEAMLESS },
         bookmarkCount = article.bookmarkCount,
         hasNote = article.hasNote,

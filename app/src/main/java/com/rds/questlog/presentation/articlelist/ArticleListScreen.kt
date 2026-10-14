@@ -87,7 +87,9 @@ private fun ArticleListPopups(
             hasArticles = uiState.games.sumOf { it.articleCount } > 0,
             onPick = {
                 onDismissPopup()
-                navController.navigate(AddArticle(mode = it.route, sharedUrl = pendingSharedUrl))
+                navController.navigate(
+                    AddArticle(mode = it.route, sharedUrl = pendingSharedUrl, gameId = uiState.selectedGameFilter),
+                )
             },
             onClose = onDismissPopup,
         )

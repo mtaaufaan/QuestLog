@@ -86,7 +86,12 @@ class ArticleRepositoryImpl @Inject constructor(
 
     override suspend fun deleteArticle(articleId: Long) {
         val filenames = imageDao.filenamesOf(articleId)
-        db.withTransaction { articleDao.delete(articleId) }
+        db.withTransaction {
+            val gameId = articleDao.gameIdOf(articleId)
+            articleDao.delete(articleId)
+            // Game yang kehilangan artikel terakhirnya ikut terhapus (penanda artikel utama dan kategori via CASCADE).
+            gameId?.let { db.gameDao().deleteIfEmpty(it) }
+        }
         // File dibagi antar artikel lewat dedup MD5; hapus hanya bila sudah tidak ada yang merujuk.
         filenames.filter { imageDao.countByFilename(it) == 0 }.forEach(imageStore::delete)
     }
