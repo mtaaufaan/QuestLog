@@ -100,6 +100,15 @@ object QlIcons {
         "M9 10h6",
     )
 
+    /** Kategori (label tag). */
+    val Tag = lineIcon(
+        "Tag",
+        1.7f,
+        "M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6" +
+            "a2.4 2.4 0 0 0 0-3.4z",
+        circle(7.5f, 7.5f, 1f),
+    )
+
     /** Game Binder: buku bergaris. */
     val Binder = lineIcon(
         "Binder",

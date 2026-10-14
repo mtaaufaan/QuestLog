@@ -6,10 +6,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.rds.questlog.presentation.binder.BinderDummy
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.navigation.AddArticle
 import com.rds.questlog.presentation.navigation.ArticleList
+import com.rds.questlog.presentation.navigation.Binder
 import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
 import com.rds.questlog.presentation.scrapemode.ScrapeModeSheet
@@ -32,10 +34,20 @@ fun GameListScreen(
         onQuery = viewModel::onQueryChange,
         onGameTap = { navController.navigate(ArticleList(it.id)) },
         onGameLongPress = { onShowPopup(Popup.DeleteGame(it.id)) },
-        // Artikel utama (Lanjutkan Game) menyusul di tahap wiring; tombolnya baru tampil bila game punya artikel utama.
-        onResume = {},
+        // Artikel utama masih dari penyimpanan sementara Binder; aturan lengkap (snackbar, checkpoint) di tahap wiring.
+        onResume = { game ->
+            BinderDummy.mainArticles[game.id]?.let {
+                navController.navigate(Reader(articleId = it.articleId, resumeFrom = "checkpoint"))
+            }
+        },
         onOpenBinder = {
-            if (state.premium == PremiumUiState.FREE) onShowPopup(Popup.Unlock) else viewModel.onBinderTapped()
+            if (state.premium == PremiumUiState.FREE) {
+                onShowPopup(
+                    Popup.Unlock,
+                )
+            } else {
+                navController.navigate(Binder(it.id))
+            }
         },
         onResultTap = { article ->
             when (article.status) {
@@ -49,7 +61,7 @@ fun GameListScreen(
     )
 
     GameListContent(
-        games = state.games,
+        games = state.games.map { it.copy(mainArticleTitle = BinderDummy.mainArticles[it.id]?.title) },
         results = state.results,
         totalArticles = state.totalArticles,
         premium = state.premium,

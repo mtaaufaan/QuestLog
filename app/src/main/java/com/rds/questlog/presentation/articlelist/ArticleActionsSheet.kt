@@ -36,16 +36,24 @@ import com.rds.questlog.presentation.components.QlBottomSheet
 import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.preview.PreviewData
 import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.QuestLogTheme
 
 /**
  * Aksi kontekstual satu artikel. "Lanjutkan dari checkpoint" hanya bila READY dan ada checkpoint;
- * "Buka artikel" hanya bila READY.
+ * "Buka artikel" hanya bila READY. "Atur kategori" (Binder, premium): bergembok saat gratis, disembunyikan saat
+ * premium hilang.
  */
 @Composable
-fun ArticleActionsSheet(article: ArticleUiModel, onAction: (ArticleAction) -> Unit, onClose: () -> Unit) {
+fun ArticleActionsSheet(
+    article: ArticleUiModel,
+    premium: PremiumUiState,
+    categoryNames: List<String>,
+    onAction: (ArticleAction) -> Unit,
+    onClose: () -> Unit,
+) {
     val c = QuestLogTheme.colors
     val isReady = article.status == ArticleStatus.READY
     val busy = article.status == ArticleStatus.SCRAPING
@@ -100,6 +108,17 @@ fun ArticleActionsSheet(article: ArticleUiModel, onAction: (ArticleAction) -> Un
                 ActionRow(QlIcons.Pencil, stringResource(R.string.article_actions_edit), c.textSecondary) {
                     onAction(ArticleAction.EDIT)
                 }
+                if (premium != PremiumUiState.LOST) {
+                    ActionRow(
+                        icon = QlIcons.Tag,
+                        label = stringResource(R.string.article_actions_categories),
+                        iconColor = c.textSecondary,
+                        hint = categoryNames.joinToString(", ").ifEmpty {
+                            stringResource(R.string.article_actions_categories_none)
+                        },
+                        locked = premium == PremiumUiState.FREE,
+                    ) { onAction(ArticleAction.CATEGORIES) }
+                }
                 ActionRow(
                     icon = QlIcons.ListBullets,
                     label = stringResource(R.string.article_actions_pages),
@@ -137,6 +156,7 @@ private fun ActionRow(
     pressedColor: Color = QuestLogTheme.colors.hover,
     hint: String? = null,
     enabled: Boolean = true,
+    locked: Boolean = false,
     onClick: () -> Unit,
 ) {
     val source = remember { MutableInteractionSource() }
@@ -160,19 +180,51 @@ private fun ActionRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
             Text(label, color = textColor, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp))
             if (hint != null) {
                 Text(hint, color = QuestLogTheme.colors.textTertiary, style = MaterialTheme.typography.bodySmall)
             }
         }
+        if (locked) {
+            Icon(
+                QlIcons.Lock,
+                contentDescription = null,
+                tint = QuestLogTheme.colors.accentText,
+                modifier = Modifier.size(15.dp),
+            )
+        }
     }
 }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 560)
 @Composable
-private fun ArticleActionsSheetPreview() {
+private fun SheetPreview(premium: PremiumUiState, categories: List<String> = emptyList()) {
     QuestLogTheme {
-        ArticleActionsSheet(PreviewData.articles.first { it.id == 1L }, onAction = {}, onClose = {})
+        ArticleActionsSheet(
+            article = PreviewData.articles.first { it.id == 1L },
+            premium = premium,
+            categoryNames = categories,
+            onAction = {},
+            onClose = {},
+        )
     }
 }
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 620)
+@Composable
+private fun ArticleActionsFreePreview() = SheetPreview(PremiumUiState.FREE)
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 620)
+@Composable
+private fun ArticleActionsPremiumPreview() = SheetPreview(
+    PremiumUiState.PREMIUM,
+    listOf("Walkthrough Utama", "Koleksi"),
+)
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 620)
+@Composable
+private fun ArticleActionsPremiumNoCategoryPreview() = SheetPreview(PremiumUiState.PREMIUM)
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 620)
+@Composable
+private fun ArticleActionsLostPreview() = SheetPreview(PremiumUiState.LOST)

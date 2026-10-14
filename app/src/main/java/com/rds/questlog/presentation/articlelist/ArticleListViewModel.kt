@@ -99,9 +99,6 @@ class ArticleListViewModel @Inject constructor(
 
     fun onScrapingArticleTapped() = showSnackbar(R.string.article_list_snackbar_scraping)
 
-    /** Game Binder belum dibangun (Sprint 9); ketukan pengguna premium hanya memberi tahu. */
-    fun onBinderTapped() = showSnackbar(R.string.binder_coming_soon)
-
     /**
      * Menyimpan hasil Edit Article Sheet. [onSaved] dipanggil hanya bila sukses (pemanggil menutup popup);
      * bila gagal sheet tetap terbuka dengan pesan error.

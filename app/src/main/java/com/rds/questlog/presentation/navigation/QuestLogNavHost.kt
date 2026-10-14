@@ -26,6 +26,7 @@ import androidx.navigation.toRoute
 import com.rds.questlog.R
 import com.rds.questlog.presentation.addarticle.AddArticleScreen
 import com.rds.questlog.presentation.articlelist.ArticleListScreen
+import com.rds.questlog.presentation.binder.BinderScreen
 import com.rds.questlog.presentation.components.QlSnackbarHost
 import com.rds.questlog.presentation.gamelist.GameListScreen
 import com.rds.questlog.presentation.model.ScrapeNotificationUi
@@ -106,6 +107,14 @@ fun QuestLogNavHost() {
                     gameId = route.gameId,
                     incomingSharedUrl = incomingSharedUrl,
                     onIncomingHandled = { incomingSharedUrl = null },
+                )
+            }
+            composable<Binder> {
+                BinderScreen(
+                    navController = navController,
+                    activePopup = activePopup,
+                    onShowPopup = { activePopup = it },
+                    onDismissPopup = { activePopup = null },
                 )
             }
             composable<Reader> { entry ->
