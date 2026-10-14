@@ -13,12 +13,20 @@ class PopupSaverTest {
         Popup.DeleteArticle(8),
         Popup.ScrapeError(9),
         Popup.Unlock,
-        Popup.GameFilter,
         Popup.DisplaySettings,
         Popup.EditArticle(10),
         Popup.ManagePages(11),
         Popup.DeletePage(11, 42),
         Popup.RefreshArticle(12),
+        Popup.ReaderTools,
+        Popup.BookmarkPanel,
+        Popup.BookmarkLabel(null, fromPanel = true),
+        Popup.BookmarkLabel(5, fromPanel = false),
+        Popup.NotePanel,
+        Popup.DeleteGame(13),
+        Popup.CategoryName(null),
+        Popup.CategoryName(4),
+        Popup.AssignCategory(21),
     )
 
     private fun save(popup: Popup?): Any? = with(PopupSaver) { SaverScope { true }.save(popup) }

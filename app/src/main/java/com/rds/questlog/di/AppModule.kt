@@ -10,6 +10,8 @@ import com.rds.questlog.data.billing.FullVersionBillingService
 import com.rds.questlog.data.billing.GooglePlayBillingService
 import com.rds.questlog.data.local.MIGRATION_1_2
 import com.rds.questlog.data.local.MIGRATION_2_3
+import com.rds.questlog.data.local.MIGRATION_3_4
+import com.rds.questlog.data.local.MIGRATION_4_5
 import com.rds.questlog.data.local.QuestLogDatabase
 import com.rds.questlog.data.local.dao.ArticleDao
 import com.rds.questlog.data.local.dao.CheckpointDao
@@ -36,7 +38,7 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): QuestLogDatabase =
         Room.databaseBuilder(context, QuestLogDatabase::class.java, "questlog.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
 
     @Provides

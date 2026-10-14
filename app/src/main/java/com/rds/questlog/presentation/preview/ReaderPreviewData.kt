@@ -2,6 +2,7 @@ package com.rds.questlog.presentation.preview
 
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.BookmarkUi
 import com.rds.questlog.presentation.model.ContentNodeType
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PageStatus
@@ -30,6 +31,31 @@ object ReaderPreviewData {
         checkpointNodeId = 302,
         lastNodeId = 204,
     )
+
+    /** Bookmark contoh (Bookmark Panel): dua artikel di game yang sama; artikel 1 = yang sedang dibaca. */
+    val bookmarks = listOf(
+        BookmarkUi(
+            1,
+            1,
+            "Walkthrough Lengkap — Disc 1",
+            "Boss Dharma",
+            "Pertarungan melawan Dharma di kuil utama.",
+            204,
+        ),
+        BookmarkUi(2, 1, "Walkthrough Lengkap — Disc 1", "Peti kunci", "Peti di ruang bawah tanah barat.", 302),
+        BookmarkUi(
+            3,
+            1,
+            "Walkthrough Lengkap — Disc 1",
+            "Sidequest Fishing",
+            "Nelayan di dermaga menawarkan joran.",
+            102,
+        ),
+        BookmarkUi(4, 2, "Lokasi Semua Mini Medal", "Mini Medal ke-3", "Di balik air terjun, sebelum gerbang timur."),
+    )
+
+    /** Catatan contoh untuk artikel 1. */
+    const val NOTE = "Party: Kiefer, Maribel, Gabo.\nBawa 3 Herb sebelum Dharma.\nSidequest Fishing belum selesai."
 
     /** Blok per halaman (indeks = urutan halaman); halaman gagal kosong. */
     val content: List<List<ContentNodeUi>> = listOf(

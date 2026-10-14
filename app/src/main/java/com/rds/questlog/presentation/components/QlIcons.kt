@@ -35,6 +35,52 @@ object QlIcons {
         "M7 11V7a5 5 0 0 1 10 0v4",
     )
 
+    /** Bookmark (pita): fitur premium, TERPISAH dari checkpoint (jangkar). Beri warna lewat `Icon(tint = ...)`. */
+    val Bookmark = lineIcon("Bookmark", 1.9f, "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z")
+
+    /** Ke checkpoint: jangkar dengan panah kecil (menggulir ke checkpoint). */
+    val AnchorJump = lineIcon(
+        "AnchorJump",
+        1.7f,
+        "M10 21V9",
+        "M4 13H2a8 8 0 0 0 16 0h-2",
+        circle(10f, 5.5f, 2.5f),
+        "M17 3l4 3.5-4 3.5",
+        "M21 6.5h-6",
+    )
+
+    /** Artikel utama game (bintang). */
+    val Star = lineIcon("Star", 1.7f, STAR_PATH)
+
+    /** Catatan (berkas bergaris). */
+    val Note = lineIcon(
+        "Note",
+        1.7f,
+        "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",
+        "M14 2v4a2 2 0 0 0 2 2h4",
+        "M8 13h8",
+        "M8 17h5",
+    )
+
+    /** Papan klip (tombol Tempel). */
+    val Clipboard = lineIcon(
+        "Clipboard",
+        1.9f,
+        "M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z",
+        "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2",
+    )
+
+    /** Bagikan: tiga titik terhubung (penanda URL dari browser). */
+    val Share = lineIcon(
+        "Share",
+        1.9f,
+        circle(18f, 5f, 3f),
+        circle(6f, 12f, 3f),
+        circle(18f, 19f, 3f),
+        "m8.6 13.5 6.8 4",
+        "m15.4 6.5-6.8 4",
+    )
+
     /** Checkpoint (jangkar): tiang, lengkung, dan cincin; garis saja, beri warna lewat `Icon(tint = ...)`. */
     val Anchor = anchorIcon("Anchor", 1.7f)
 
@@ -52,6 +98,24 @@ object QlIcons {
         "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20",
         "M12 7v6",
         "M9 10h6",
+    )
+
+    /** Kategori (label tag). */
+    val Tag = lineIcon(
+        "Tag",
+        1.7f,
+        "M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6" +
+            "a2.4 2.4 0 0 0 0-3.4z",
+        circle(7.5f, 7.5f, 1f),
+    )
+
+    /** Game Binder: buku bergaris. */
+    val Binder = lineIcon(
+        "Binder",
+        1.6f,
+        "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20",
+        "M8 7h8",
+        "M8 11h6",
     )
     val Trash = lineIcon(
         "Trash",
@@ -116,6 +180,28 @@ object QlIcons {
         "M12 17h.01",
     )
 
+    /** Bintang berwarna tetap (emas) untuk label "Artikel utama"; tampilkan dengan `Image`, bukan `Icon`. */
+    val StarGold = ImageVector.Builder("StarGold", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            pathData = PathParser().parsePathString(STAR_PATH).toNodes(),
+            fill = SolidColor(Color(0xFFE1AD66)),
+            stroke = SolidColor(Color(0xFFA06F24)),
+            strokeLineWidth = 1.6f,
+            strokeLineJoin = StrokeJoin.Round,
+        )
+    }.build()
+
+    /** Bookmark berwarna tetap (emas) untuk baris di Bookmark Panel; tampilkan dengan `Image`, bukan `Icon`. */
+    val BookmarkGold = ImageVector.Builder("BookmarkGold", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            pathData = PathParser().parsePathString("m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z").toNodes(),
+            fill = SolidColor(Color(0xFFE1AD66)),
+            stroke = SolidColor(Color(0xFFA06F24)),
+            strokeLineWidth = 1.6f,
+            strokeLineJoin = StrokeJoin.Round,
+        )
+    }.build()
+
     /** Tiga titik vertikal (terisi). */
     val MoreVert = ImageVector.Builder("MoreVert", 24.dp, 24.dp, 24f, 24f).apply {
         listOf(5f, 12f, 19f).forEach { cy ->
@@ -141,3 +227,9 @@ private fun lineIcon(name: String, strokeWidth: Float, vararg paths: String): Im
             )
         }
     }.build()
+
+private const val STAR_PATH =
+    "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 " +
+        ".294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 " +
+        "2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 " +
+        "9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"

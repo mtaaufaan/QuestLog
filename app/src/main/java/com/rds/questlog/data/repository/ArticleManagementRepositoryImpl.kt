@@ -22,6 +22,7 @@ class ArticleManagementRepositoryImpl @Inject constructor(
     private val pageDao get() = db.pageLayoutDao()
     private val nodeDao get() = db.contentNodeDao()
     private val checkpointDao get() = db.checkpointDao()
+    private val bookmarkDao get() = db.bookmarkDao()
 
     override suspend fun updateDetails(articleId: Long, title: String, target: GameTarget) = db.withTransaction {
         val origin = checkNotNull(articleDao.gameIdOf(articleId)) { "Artikel $articleId tidak ada" }
@@ -34,6 +35,8 @@ class ArticleManagementRepositoryImpl @Inject constructor(
         }
         if (targetId != origin) {
             articleDao.setGame(articleId, targetId)
+            gameDao.clearMainArticle(origin, articleId)
+            gameDao.clearForeignCategories(articleId, targetId)
             gameDao.deleteIfEmpty(origin)
         }
     }
@@ -50,6 +53,16 @@ class ArticleManagementRepositoryImpl @Inject constructor(
         val nearest = nodeDao.lastBefore(articleId, pageId, start) ?: nodeDao.firstAfter(articleId, pageId, start)
         checkpointDao.moveAnchor(articleId, pageId, nearest?.id, nearest?.displayOrder)
         checkpointDao.moveLastVisited(articleId, pageId, nearest?.id)
+        // Bookmark ikut pindah ke node terdekat; tanpa node lain mereka dihapus (node_id wajib terisi).
+        if (nearest != null) {
+            bookmarkDao.moveFromPage(
+                pageId,
+                nearest.id,
+                nearest.displayOrder,
+            )
+        } else {
+            bookmarkDao.deleteInPage(pageId)
+        }
         nodeDao.deleteByPage(pageId)
         pageDao.delete(pageId)
         renumber(articleId, pages.filter { it.id != pageId })
@@ -82,6 +95,7 @@ class ArticleManagementRepositoryImpl @Inject constructor(
             pageDao.setPosition(page.id, index + 1, start, (index + 1) * slot)
         }
         checkpointDao.refreshFallback(articleId)
+        bookmarkDao.refreshFallback(articleId)
     }
 
     /** Awal slot; artikel lama tanpa slot tercatat memakai slot baku (nomor halaman × slot). */

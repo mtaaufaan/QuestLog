@@ -51,6 +51,19 @@ internal fun ArticleWithDetails.toDomain() = Article(
     createdAt = article.createdAt,
     checkpointFallbackOrder = checkpoint?.fallbackOrder,
     readMode = article.readMode?.let { name -> ReadMode.entries.firstOrNull { it.name == name } },
+    bookmarkCount = bookmarks.size,
+    hasNote = note?.content?.isNotEmpty() == true,
+    gameMainArticleId = gameProgress?.articleId,
+    categoryNames = categories.sortedWith(compareBy({ it.position }, { it.id })).map { it.name },
 )
 
-internal fun GameWithCount.toDomain() = Game(id = id, name = name, createdAt = createdAt, articleCount = articleCount)
+internal fun GameWithCount.toDomain() = Game(
+    id = id,
+    name = name,
+    createdAt = createdAt,
+    articleCount = articleCount,
+    lastArticleTitle = lastTitle,
+    lastReadAt = lastReadAt,
+    mainArticleId = mainArticleId,
+    mainArticleTitle = mainArticleTitle,
+)

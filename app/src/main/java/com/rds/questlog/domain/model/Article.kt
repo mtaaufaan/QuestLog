@@ -18,8 +18,19 @@ data class Article(
     val checkpointFallbackOrder: Int? = null,
     /** Mode baca terakhir artikel ini; null = belum pernah dipilih (anggap SEAMLESS). */
     val readMode: ReadMode? = null,
+    /** Jumlah bookmark artikel ini (indikator di daftar artikel). */
+    val bookmarkCount: Int = 0,
+    /** Artikel punya catatan umum yang tidak kosong. */
+    val hasNote: Boolean = false,
+    /** Artikel utama game ini ("Lanjutkan Game"); null bila belum ada. */
+    val gameMainArticleId: Long? = null,
+    /** Nama kategori Binder artikel ini (urutan tampil). */
+    val categoryNames: List<String> = emptyList(),
 ) {
     val status: ScrapingStatus get() = pages.toScrapingStatus()
+
+    /** Artikel ini adalah artikel utama game-nya. */
+    val isMainArticle: Boolean get() = gameMainArticleId == id
 }
 
 private val UNFINISHED = setOf(SourcePageStatus.PENDING, SourcePageStatus.IN_PROGRESS)

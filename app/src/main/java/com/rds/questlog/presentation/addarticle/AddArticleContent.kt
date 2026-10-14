@@ -34,6 +34,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,8 +61,10 @@ import com.rds.questlog.presentation.preview.PreviewData
 import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.QuestLogTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val SAVE_DELAY_MS = 650L
+private const val PASTE_MESSAGE_MS = 2_600L
 
 /**
  * Form "Simpan Walkthrough" (S2) dengan dua tab. Props dan callback mengikuti component-contract.md §2; state form
@@ -78,10 +82,38 @@ fun AddArticleContent(
     onOpenUnlock: () -> Unit,
     modifier: Modifier = Modifier,
     submitError: String? = null,
+    sharedUrl: String? = null,
+    initialGameId: Long? = null,
+    readClipboard: suspend () -> String? = { null },
+    detectSource: suspend (DetectRequest) -> DetectOutcome = ::dummyDetect,
+    incomingSharedUrl: String? = null,
+    onIncomingHandled: () -> Unit = {},
 ) {
     var form by rememberSaveable(stateSaver = AddArticleFormSaver) {
-        mutableStateOf(AddArticleForm(mode = mode, targetId = targetArticleId))
+        mutableStateOf(
+            AddArticleForm(
+                mode = mode,
+                targetId = targetArticleId,
+                urls = listOfNotNull(sharedUrl).ifEmpty { listOf("") },
+            ),
+        )
     }
+    PrefillGame(initialGameId, games, canPrefill = form.gameInput.isBlank() && mode == ScrapeMode.NEW) {
+        form = form.withPickedGame(it.id, it.name)
+    }
+    var pasteOutcome by remember { mutableStateOf<PasteOutcome?>(null) }
+    // URL dari "Bagikan" yang jadi penanda Hal. 1, dan URL yang menunggu konfirmasi karena daftar sudah berisi.
+    var sharedMarker by rememberSaveable { mutableStateOf(sharedUrl) }
+    var confirmShared by rememberSaveable { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val detector = rememberDetector(detectSource, onOpenUnlock)
+    LaunchedEffect(pasteOutcome) {
+        if (pasteOutcome != null) {
+            delay(PASTE_MESSAGE_MS)
+            pasteOutcome = null
+        }
+    }
+
     val target = targetArticle(form, articles)
     val errors = if (form.showErrors) validate(form, articles) else FormErrors()
     val urlErrors = urlErrors(form.urls, urlScope(form, articles), form.showErrors)
@@ -90,6 +122,17 @@ fun AddArticleContent(
         gameLimitReached(form, games, isPremium) -> R.string.add_article_limit_game
         else -> null
     }
+
+    IncomingSharedUrl(
+        url = incomingSharedUrl,
+        hasFilledUrls = form.filledUrlCount > 0,
+        onApply = {
+            form = form.withSharedUrl(it)
+            sharedMarker = it
+        },
+        onNeedsConfirm = { confirmShared = it },
+        onHandled = onIncomingHandled,
+    )
 
     LaunchedEffect(form.saving) {
         if (form.saving) {
@@ -134,6 +177,26 @@ fun AddArticleContent(
                 onAdd = { form = form.withUrlAdded() },
                 onRemove = { form = form.withUrlRemoved(it) },
                 onMove = { index, delta -> form = form.withUrlMoved(index, delta) },
+                showSharedBanner = sharedMarker != null && form.urls.firstOrNull() == sharedMarker,
+                pasteOutcome = pasteOutcome,
+                onPaste = {
+                    scope.launch {
+                        val (next, outcome) = form.withPasted(readClipboard())
+                        form = next
+                        pasteOutcome = outcome
+                    }
+                },
+                trailing = { DetectBlock(form, articles, isPremium, detector, { form = it }, onOpenUnlock) },
+            )
+        }
+        confirmShared?.let { url ->
+            ReplaceUrlsDialog(
+                onConfirm = {
+                    form = form.withSharedUrl(url)
+                    sharedMarker = url
+                    confirmShared = null
+                },
+                onDismiss = { confirmShared = null },
             )
         }
         AddArticleFooter(
@@ -367,8 +430,19 @@ private fun AddArticleAppendPreview() {
     PreviewContent(ScrapeMode.APPEND, 1L, PreviewData.articles)
 }
 
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun PreviewContent(mode: ScrapeMode, target: Long?, articles: List<ArticleUiModel>) {
+private fun AddArticleSharedPreview() {
+    PreviewContent(ScrapeMode.NEW, null, PreviewData.articles, sharedUrl = PreviewData.SHARED_URL)
+}
+
+@Composable
+private fun PreviewContent(
+    mode: ScrapeMode,
+    target: Long?,
+    articles: List<ArticleUiModel>,
+    sharedUrl: String? = null,
+) {
     QuestLogTheme {
         AddArticleContent(
             mode = mode,
@@ -379,6 +453,63 @@ private fun PreviewContent(mode: ScrapeMode, target: Long?, articles: List<Artic
             onBack = {},
             onSave = {},
             onOpenUnlock = {},
+            sharedUrl = sharedUrl,
         )
     }
+}
+
+/** Dari Halaman Game, game-nya terisi otomatis sekali saat daftar game sudah termuat (bila isian masih kosong). */
+@Composable
+private fun PrefillGame(
+    initialGameId: Long?,
+    games: List<GameUiModel>,
+    canPrefill: Boolean,
+    onPick: (GameUiModel) -> Unit,
+) {
+    var done by rememberSaveable { mutableStateOf(initialGameId == null) }
+    val prefill by rememberUpdatedState(canPrefill)
+    LaunchedEffect(games) {
+        val game = games.firstOrNull { it.id == initialGameId }
+        if (!done && game != null) {
+            if (prefill) onPick(game)
+            done = true
+        }
+    }
+}
+
+/** Bagian "Halaman lanjutan" yang terhubung ke form: sumber, slot, dan penambahan hasil ke daftar URL. */
+@Composable
+private fun DetectBlock(
+    form: AddArticleForm,
+    articles: List<ArticleUiModel>,
+    isPremium: Boolean,
+    detector: Detector,
+    onForm: (AddArticleForm) -> Unit,
+    onOpenUnlock: () -> Unit,
+) {
+    DetectSection(
+        premium = isPremium,
+        state = detector.state,
+        base = detectBaseUrl(form.urls),
+        slots = detectSlots(form),
+        filled = form.filledUrlCount,
+        actions = DetectActions(
+            onDetect = {
+                detector.search(
+                    base = checkNotNull(detectBaseUrl(form.urls)),
+                    slots = detectSlots(form),
+                    known = urlScope(form, articles).let { it.stored + it.existing + form.urls },
+                )
+            },
+            onToggle = { detector.toggle(it, detectSlots(form)) },
+            onApply = {
+                (detector.state as? DetectState.Found)?.let {
+                    onForm(applyDetected(form, it))
+                    detector.applied(it.selected.size)
+                }
+            },
+            onDismiss = detector::dismiss,
+            onOpenUnlock = onOpenUnlock,
+        ),
+    )
 }

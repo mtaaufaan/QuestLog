@@ -14,8 +14,41 @@ object PreviewData {
 
     /** [GameUiModel.articleCount] sama dengan jumlah artikel di [articles] (dijaga `PreviewDataTest`). */
     val games = listOf(
-        GameUiModel(id = 1, name = "Dragon Quest VII", articleCount = 3),
-        GameUiModel(id = 2, name = "Breath Of Fire III", articleCount = 2),
+        GameUiModel(
+            id = 1,
+            name = "Dragon Quest VII",
+            articleCount = 3,
+            scrapingCount = 1,
+            lastTitle = "Walkthrough Lengkap — Disc 1",
+            lastWhen = "2 jam lalu",
+            mainArticleTitle = "Walkthrough Lengkap — Disc 1",
+        ),
+        GameUiModel(
+            id = 2,
+            name = "Breath Of Fire III",
+            articleCount = 2,
+            lastTitle = "Walkthrough Utama",
+            lastWhen = "3 hari lalu",
+        ),
+    )
+
+    /** Banyak game (daftar S0 panjang, nama panjang terpotong). */
+    val manyGames = games + listOf(
+        GameUiModel(
+            id = 3,
+            name = "Final Fantasy Tactics: The War of the Lions",
+            articleCount = 4,
+            lastTitle = "Panduan Job",
+            lastWhen = "kemarin",
+        ),
+        GameUiModel(id = 4, name = "Chrono Cross", articleCount = 1),
+        GameUiModel(
+            id = 5,
+            name = "Xenogears",
+            articleCount = 6,
+            lastTitle = "Walkthrough Disc 2",
+            lastWhen = "1 minggu lalu",
+        ),
     )
 
     /** Urutan sama dengan prototipe: SCRAPING, READY (checkpoint), READY (partial), READY, ERROR. */
@@ -38,6 +71,9 @@ object PreviewData {
             checkpointNodeId = 302,
             lastNodeId = 204,
             lastRead = "dibaca 2 jam lalu",
+            bookmarkCount = 3,
+            hasNote = true,
+            isMainArticle = true,
         ),
         article(
             id = 2,
@@ -50,6 +86,7 @@ object PreviewData {
                 if (i == 2) page.copy(reason = "Timeout — server tidak merespons") else page
             },
             lastRead = "dibaca kemarin",
+            bookmarkCount = 1,
         ),
         article(
             id = 4,
@@ -80,6 +117,23 @@ object PreviewData {
         ),
     )
 
+    /** Artikel game 1 dengan kategori Binder (premium): dua kategori dan satu tanpa kategori. */
+    val categorizedArticles: List<ArticleUiModel> = articles.filter { it.gameId == 1L }.map {
+        when (it.id) {
+            1L -> it.copy(categories = listOf("Walkthrough Utama"))
+            2L -> it.copy(categories = listOf("Koleksi", "Walkthrough Utama"))
+            else -> it
+        }
+    }
+
+    /** URL dari "Bagikan" di browser (S2 mode baru, banner prefill). */
+    const val SHARED_URL = "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough-disc2?page=1"
+
+    /** Isi clipboard contoh untuk tombol Tempel sebelum akses clipboard nyata tersedia (Sprint 6 Tahap 2). */
+    const val CLIPBOARD_TEXT = "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=1\n" +
+        "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=2\n" +
+        "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=3"
+
     private var nextPageId = 1L
 
     private fun pages(base: String, count: Int, status: (Int) -> PageStatus = { PageStatus.DONE }) =
@@ -94,6 +148,9 @@ object PreviewData {
         checkpointNodeId: Long? = null,
         lastNodeId: Long? = null,
         lastRead: String? = null,
+        bookmarkCount: Int = 0,
+        hasNote: Boolean = false,
+        isMainArticle: Boolean = false,
     ) = ArticleUiModel(
         id = id,
         gameId = gameId,
@@ -104,5 +161,8 @@ object PreviewData {
         checkpointNodeId = checkpointNodeId,
         lastNodeId = lastNodeId,
         lastRead = lastRead,
+        bookmarkCount = bookmarkCount,
+        hasNote = hasNote,
+        isMainArticle = isMainArticle,
     )
 }

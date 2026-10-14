@@ -21,7 +21,7 @@ class TestEnvironment(timeoutSeconds: Long = 3) {
     val context: Context = ApplicationProvider.getApplicationContext()
     val db: QuestLogDatabase = Room.inMemoryDatabaseBuilder(context, QuestLogDatabase::class.java).build()
     val imageStore = ImageStore(context)
-    val games = GameRepositoryImpl(db.gameDao())
+    val games = GameRepositoryImpl(db, db.gameDao(), db.imageDao(), imageStore)
     val articles =
         ArticleRepositoryImpl(db, db.articleDao(), db.sourcePageDao(), db.imageDao(), imageStore, db.contentNodeDao())
     val management = ArticleManagementRepositoryImpl(db, db.articleDao(), db.gameDao())

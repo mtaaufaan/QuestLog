@@ -10,15 +10,16 @@ enum class ReadMode { SEAMLESS, PAGED }
 data class GameUiModel(
     val id: Long,
     val name: String,
-    /** Jumlah artikel game ini; jumlahnya dipakai untuk total "walkthrough" dan opsi Game Filter Sheet. */
+    /** Jumlah artikel game ini; dipakai untuk total "walkthrough" dan konfirmasi hapus game. */
     val articleCount: Int = 0,
-)
-
-/** Opsi di Game Filter Sheet; [count] = jumlah artikel game itu (component-contract.md §10). */
-data class GameFilterOption(
-    val id: Long,
-    val name: String,
-    val count: Int,
+    /** Artikel game ini yang sedang diunduh (baris game: "· n sedang diunduh"). */
+    val scrapingCount: Int = 0,
+    /** Artikel yang terakhir dibaca beserta label waktunya ("Terakhir: … · 2 jam lalu"); null = belum pernah. */
+    val lastTitle: String? = null,
+    val lastWhen: String? = null,
+    /** Judul artikel utama game (tombol "Lanjutkan Game · …"); null = belum ada artikel utama. */
+    val mainArticleTitle: String? = null,
+    val mainArticleId: Long? = null,
 )
 
 data class PageUiModel(
@@ -46,6 +47,16 @@ data class ArticleUiModel(
     /** Label relatif, mis. "dibaca 2 jam lalu". */
     val lastRead: String? = null,
     val readMode: ReadMode? = null,
+    /** Jumlah bookmark artikel ini (indikator di baris artikel); 0 = tidak tampil. */
+    val bookmarkCount: Int = 0,
+    /** Artikel punya catatan umum (indikator "Catatan" di baris artikel). */
+    val hasNote: Boolean = false,
+    /** Artikel utama game (label "Artikel utama"; satu per game). */
+    val isMainArticle: Boolean = false,
+    /** Artikel utama game ini (mungkin artikel lain); null = belum ada. */
+    val gameMainArticleId: Long? = null,
+    /** Nama kategori Binder (premium) tempat artikel berada; kosong = tanpa kategori. */
+    val categories: List<String> = emptyList(),
 ) {
     val totalPageCount: Int get() = pages.size
     val failedPageCount: Int get() = pages.count { it.status == PageStatus.FAILED }

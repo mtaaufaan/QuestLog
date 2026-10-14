@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -105,15 +106,19 @@ fun ArticleRow(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(
-                text = article.gameName.uppercase(),
-                color = c.accentText,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.26.sp,
-                ),
-            )
+            if (article.isMainArticle) {
+                MainArticleLabel()
+            } else {
+                Text(
+                    text = article.gameName.uppercase(),
+                    color = c.accentText,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.26.sp,
+                    ),
+                )
+            }
             Text(
                 text = article.title,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -149,6 +154,7 @@ fun ArticleRow(
                     textColor = c.danger,
                 )
             }
+            if (isReady && (article.bookmarkCount > 0 || article.hasNote)) ArticleExtras(article)
             if (isReady && article.checkpointNodeId != null) {
                 ResumeButton(onResume, Modifier.padding(top = 5.dp).align(Alignment.Start))
             }
@@ -168,6 +174,41 @@ fun ArticleRow(
                 )
             }
         }
+    }
+}
+
+/** Label "Artikel utama" (bintang emas) menggantikan nama game pada artikel utama game. */
+@Composable
+private fun MainArticleLabel() {
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+        Image(QlIcons.StarGold, contentDescription = null, modifier = Modifier.size(11.dp))
+        Text(
+            text = stringResource(R.string.article_list_main).uppercase(),
+            color = QuestLogTheme.colors.accentText,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.26.sp,
+            ),
+        )
+    }
+}
+
+/** Indikator kecil di bawah meta: jumlah bookmark dan penanda "Catatan"; tampil hanya bila ada. */
+@Composable
+private fun ArticleExtras(article: ArticleUiModel) {
+    val c = QuestLogTheme.colors
+    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (article.bookmarkCount > 0) ExtraItem(QlIcons.Bookmark, article.bookmarkCount.toString(), c.textSecondary)
+        if (article.hasNote) ExtraItem(QlIcons.Note, stringResource(R.string.article_row_note), c.textSecondary)
+    }
+}
+
+@Composable
+private fun ExtraItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String, color: Color) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(13.dp))
+        Text(text, color = color, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp))
     }
 }
 

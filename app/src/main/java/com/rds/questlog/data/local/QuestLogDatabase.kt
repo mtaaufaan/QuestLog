@@ -6,17 +6,27 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rds.questlog.data.local.dao.AppConfigDao
 import com.rds.questlog.data.local.dao.ArticleDao
+import com.rds.questlog.data.local.dao.ArticleNoteDao
+import com.rds.questlog.data.local.dao.BinderDao
+import com.rds.questlog.data.local.dao.BinderMemberDao
+import com.rds.questlog.data.local.dao.BookmarkDao
 import com.rds.questlog.data.local.dao.CheckpointDao
 import com.rds.questlog.data.local.dao.ContentNodeDao
 import com.rds.questlog.data.local.dao.GameDao
+import com.rds.questlog.data.local.dao.GameProgressDao
 import com.rds.questlog.data.local.dao.ImageDao
 import com.rds.questlog.data.local.dao.PageLayoutDao
 import com.rds.questlog.data.local.dao.SourcePageDao
 import com.rds.questlog.data.local.entity.AppConfigEntity
+import com.rds.questlog.data.local.entity.ArticleBinderEntity
 import com.rds.questlog.data.local.entity.ArticleEntity
+import com.rds.questlog.data.local.entity.ArticleNoteEntity
+import com.rds.questlog.data.local.entity.BinderCategoryEntity
+import com.rds.questlog.data.local.entity.BookmarkEntity
 import com.rds.questlog.data.local.entity.CheckpointEntity
 import com.rds.questlog.data.local.entity.ContentNodeEntity
 import com.rds.questlog.data.local.entity.GameEntity
+import com.rds.questlog.data.local.entity.GameProgressEntity
 import com.rds.questlog.data.local.entity.ImageEntity
 import com.rds.questlog.data.local.entity.SourcePageEntity
 
@@ -30,8 +40,13 @@ import com.rds.questlog.data.local.entity.SourcePageEntity
         CheckpointEntity::class,
         ImageEntity::class,
         AppConfigEntity::class,
+        BookmarkEntity::class,
+        ArticleNoteEntity::class,
+        GameProgressEntity::class,
+        BinderCategoryEntity::class,
+        ArticleBinderEntity::class,
     ],
-    version = 3,
+    version = 5,
     exportSchema = true,
 )
 abstract class QuestLogDatabase : RoomDatabase() {
@@ -44,6 +59,11 @@ abstract class QuestLogDatabase : RoomDatabase() {
     abstract fun imageDao(): ImageDao
     abstract fun checkpointDao(): CheckpointDao
     abstract fun appConfigDao(): AppConfigDao
+    abstract fun bookmarkDao(): BookmarkDao
+    abstract fun articleNoteDao(): ArticleNoteDao
+    abstract fun gameProgressDao(): GameProgressDao
+    abstract fun binderDao(): BinderDao
+    abstract fun binderMemberDao(): BinderMemberDao
 }
 
 /** v1 → v2: alasan gagal per halaman sumber (ditampilkan di Scrape Error Dialog). */
@@ -77,5 +97,66 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
         db.execSQL("DROP TABLE checkpoints")
         db.execSQL("ALTER TABLE checkpoints_new RENAME TO checkpoints")
+    }
+}
+
+/**
+ * v3 -> v4 (v1.0): HANYA menambah tabel `bookmarks` (banyak per artikel) dan `article_notes` (satu per artikel).
+ * Tidak ada tabel atau kolom MVP yang diubah atau dihapus, jadi seluruh data lama utuh. `bookmarks.node_id` tanpa
+ * CASCADE: dipindahkan manual saat halaman dihapus atau diunduh ulang. Checklist ditunda dari v1 (tidak dibuat).
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS bookmarks (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, article_id INTEGER NOT NULL, " +
+                "node_id INTEGER NOT NULL, fallback_order INTEGER NOT NULL, label TEXT NOT NULL, " +
+                "snippet TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(node_id) REFERENCES content_nodes(id) ON UPDATE NO ACTION ON DELETE NO ACTION)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_bookmarks_article ON bookmarks (article_id)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_bookmarks_node ON bookmarks (node_id)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS article_notes (" +
+                "article_id INTEGER NOT NULL, content TEXT NOT NULL DEFAULT '', updated_at INTEGER NOT NULL, " +
+                "PRIMARY KEY(article_id), " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+    }
+}
+
+/**
+ * v4 -> v5 (v1.1): HANYA menambah tabel `game_progress` (artikel utama per game, tanpa anchor), `binder_categories`
+ * (kategori per game; nama unik tanpa peduli huruf besar-kecil) dan `article_binder` (relasi M:N). Tidak ada tabel atau
+ * kolom lama yang diubah atau dihapus, jadi seluruh data v1.0 utuh. Semua kunci asing CASCADE: hapus game menghapus
+ * penanda artikel utama dan kategorinya, hapus artikel utama menghapus barisnya, hapus kategori hanya mencabut relasi.
+ */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS game_progress (" +
+                "game_id INTEGER NOT NULL, article_id INTEGER NOT NULL, PRIMARY KEY(game_id), " +
+                "FOREIGN KEY(game_id) REFERENCES games(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_game_progress_article ON game_progress (article_id)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS binder_categories (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, game_id INTEGER NOT NULL, " +
+                "name TEXT NOT NULL COLLATE NOCASE, position INTEGER NOT NULL, created_at INTEGER NOT NULL, " +
+                "FOREIGN KEY(game_id) REFERENCES games(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_binder_categories_game ON binder_categories (game_id)")
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_binder_categories_game_name ON binder_categories (game_id, name)",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS article_binder (" +
+                "article_id INTEGER NOT NULL, category_id INTEGER NOT NULL, PRIMARY KEY(article_id, category_id), " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(category_id) REFERENCES binder_categories(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_article_binder_category ON article_binder (category_id)")
     }
 }

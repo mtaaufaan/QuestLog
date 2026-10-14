@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ data class AddArticleUiState(
 @HiltViewModel
 class AddArticleViewModel @Inject constructor(
     getGames: GetGamesUseCase,
-    getArticles: GetArticlesUseCase,
+    private val getArticles: GetArticlesUseCase,
     observePremiumStatus: ObservePremiumStatusUseCase,
     private val saveArticle: SaveArticleUseCase,
     private val appendPages: AppendPagesUseCase,
@@ -61,17 +62,24 @@ class AddArticleViewModel @Inject constructor(
     /** Pesan gagal simpan dari domain (duplikat/limit/database); null bila belum ada. */
     val submitError: StateFlow<Int?> = _submitError
 
-    /** Menyimpan [payload]; [onSaved] dipanggil hanya bila sukses dan scraping sudah dijadwalkan. */
-    fun save(payload: AddArticlePayload, onSaved: (ScrapeJob) -> Unit) {
+    /**
+     * Menyimpan [payload]; [onSaved] dipanggil hanya bila sukses dan scraping sudah dijadwalkan, bersama id game
+     * artikel itu (tujuan Halaman Game).
+     */
+    fun save(payload: AddArticlePayload, onSaved: (ScrapeJob, Long) -> Unit) {
         _submitError.value = null
         viewModelScope.launch {
             val job = when (payload.mode) {
                 ScrapeMode.NEW -> saveNew(payload)
                 ScrapeMode.APPEND -> saveAppend(payload)
             }
-            job.onSuccess(onSaved).onFailure { _submitError.value = it.toMessage() }
+            job.onSuccess { onSaved(it, gameIdOf(it.articleId)) }.onFailure { _submitError.value = it.toMessage() }
         }
     }
+
+    /** Game artikel [articleId] menurut database (artikel baru tersimpan sebelum fungsi ini dipanggil). */
+    private suspend fun gameIdOf(articleId: Long): Long =
+        getArticles("", null).first().firstOrNull { it.id == articleId }?.gameId ?: 0L
 
     private suspend fun saveNew(payload: AddArticlePayload): Result<ScrapeJob> {
         val name = payload.newGameName

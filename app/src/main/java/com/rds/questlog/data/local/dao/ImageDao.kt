@@ -14,6 +14,10 @@ interface ImageDao {
     @Query("SELECT DISTINCT filename FROM images WHERE article_id = :articleId")
     suspend fun filenamesOf(articleId: Long): List<String>
 
+    /** Nama file gambar semua artikel di [gameId] (dibersihkan saat game dihapus). */
+    @Query("SELECT DISTINCT filename FROM images WHERE article_id IN (SELECT id FROM articles WHERE game_id = :gameId)")
+    suspend fun filenamesOfGame(gameId: Long): List<String>
+
     /** File fisik hanya boleh dihapus bila tidak ada lagi baris yang merujuk filename ini (dedup antar artikel). */
     @Query("SELECT COUNT(*) FROM images WHERE filename = :filename")
     suspend fun countByFilename(filename: String): Int
