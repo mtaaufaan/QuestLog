@@ -12,4 +12,6 @@ data class Game(
     /** Artikel utama game (tombol Lanjutkan Game) dan judulnya; null bila belum ada. */
     val mainArticleId: Long? = null,
     val mainArticleTitle: String? = null,
+    /** Path logo kustom relatif ke `filesDir`; null = belum ada (UI menampilkan inisial). */
+    val logoPath: String? = null,
 )

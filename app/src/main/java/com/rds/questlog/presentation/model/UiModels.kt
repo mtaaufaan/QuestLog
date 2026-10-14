@@ -20,6 +20,8 @@ data class GameUiModel(
     /** Judul artikel utama game (tombol "Lanjutkan Game · …"); null = belum ada artikel utama. */
     val mainArticleTitle: String? = null,
     val mainArticleId: Long? = null,
+    /** Path logo kustom relatif ke `filesDir`; null = tampil inisial. */
+    val logoPath: String? = null,
 )
 
 data class PageUiModel(

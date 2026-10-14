@@ -66,4 +66,5 @@ internal fun GameWithCount.toDomain() = Game(
     lastReadAt = lastReadAt,
     mainArticleId = mainArticleId,
     mainArticleTitle = mainArticleTitle,
+    logoPath = logoPath,
 )

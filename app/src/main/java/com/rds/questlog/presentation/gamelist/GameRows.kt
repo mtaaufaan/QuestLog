@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -42,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.presentation.components.GameLogo
 import com.rds.questlog.presentation.components.QlIcons
+import com.rds.questlog.presentation.gamelogo.GameLogoControls
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.GameUiModel
@@ -53,7 +57,7 @@ import com.rds.questlog.presentation.theme.QuestLogTheme
 /** Baris game: tap = Halaman Game, tekan-tahan = Delete Game Dialog. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun GameRow(game: GameUiModel, premium: PremiumUiState, actions: GameListActions) {
+internal fun GameRow(game: GameUiModel, premium: PremiumUiState, actions: GameListActions, logo: GameLogoControls) {
     val c = QuestLogTheme.colors
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
@@ -76,18 +80,31 @@ internal fun GameRow(game: GameUiModel, premium: PremiumUiState, actions: GameLi
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = game.name,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = TextStyle(
-                    fontFamily = CormorantGaramond,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 26.sp,
-                    lineHeight = 29.sp,
-                    letterSpacing = (-0.01).em,
-                ),
-            )
-            Text(text = gameMeta(game), color = c.textSecondary, style = metaStyle())
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                GameLogo(
+                    name = game.name,
+                    logoPath = game.logoPath,
+                    size = 52.dp,
+                    cornerRadius = 6.dp,
+                    onClick = { logo.onTap(game.id, game.logoPath != null) },
+                    busy = logo.busyGameId == game.id,
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = game.name,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = TextStyle(
+                            fontFamily = CormorantGaramond,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 26.sp,
+                            lineHeight = 29.sp,
+                            letterSpacing = (-0.01).em,
+                        ),
+                    )
+                    Text(text = gameMeta(game), color = c.textSecondary, style = metaStyle())
+                }
+            }
             if (game.lastTitle != null && game.lastWhen != null) {
                 Text(
                     text = stringResource(R.string.game_list_last, game.lastTitle, game.lastWhen),

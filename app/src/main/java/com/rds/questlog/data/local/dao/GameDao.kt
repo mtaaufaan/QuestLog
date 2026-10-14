@@ -23,7 +23,7 @@ interface GameDao {
             "WHERE a3.game_id = g.id) AS lastReadAt, " +
             "(SELECT gp.article_id FROM game_progress gp WHERE gp.game_id = g.id) AS mainArticleId, " +
             "(SELECT a4.title FROM game_progress gp2 JOIN articles a4 ON a4.id = gp2.article_id " +
-            "WHERE gp2.game_id = g.id) AS mainArticleTitle " +
+            "WHERE gp2.game_id = g.id) AS mainArticleTitle, g.logo_path AS logoPath " +
             "FROM games g JOIN articles a ON a.game_id = g.id " +
             "GROUP BY g.id ORDER BY g.created_at ASC, g.id ASC",
     )
@@ -54,7 +54,14 @@ interface GameDao {
     @Insert
     suspend fun insert(game: GameEntity): Long
 
-    /** Menghapus game hanya bila tidak ada artikel yang memakainya; game berisi tidak disentuh. */
+    /** Memasang ([path]) atau mencabut (null) logo kustom game [gameId]. */
+    @Query("UPDATE games SET logo_path = :path WHERE id = :gameId")
+    suspend fun setLogo(gameId: Long, path: String?)
+
+    /**
+     * Menghapus game hanya bila tidak ada artikel yang memakainya; game berisi tidak disentuh. Mengembalikan jumlah
+     * baris terhapus (1 = terhapus, pemanggil membersihkan file logonya).
+     */
     @Query("DELETE FROM games WHERE id = :gameId AND NOT EXISTS (SELECT 1 FROM articles WHERE game_id = :gameId)")
-    suspend fun deleteIfEmpty(gameId: Long)
+    suspend fun deleteIfEmpty(gameId: Long): Int
 }

@@ -6,6 +6,7 @@ import com.rds.questlog.data.local.dao.ArticleDao
 import com.rds.questlog.data.local.dao.GameDao
 import com.rds.questlog.data.local.entity.GameEntity
 import com.rds.questlog.data.local.entity.SourcePageEntity
+import com.rds.questlog.data.scraper.ImageStore
 import com.rds.questlog.domain.error.QuestLogError.ArticleError
 import com.rds.questlog.domain.model.GameTarget
 import com.rds.questlog.domain.model.ScrapeLimits
@@ -17,6 +18,7 @@ class ArticleManagementRepositoryImpl @Inject constructor(
     private val db: QuestLogDatabase,
     private val articleDao: ArticleDao,
     private val gameDao: GameDao,
+    private val imageStore: ImageStore,
 ) : ArticleManagementRepository {
 
     private val pageDao get() = db.pageLayoutDao()
@@ -24,7 +26,13 @@ class ArticleManagementRepositoryImpl @Inject constructor(
     private val checkpointDao get() = db.checkpointDao()
     private val bookmarkDao get() = db.bookmarkDao()
 
-    override suspend fun updateDetails(articleId: Long, title: String, target: GameTarget) = db.withTransaction {
+    override suspend fun updateDetails(articleId: Long, title: String, target: GameTarget) {
+        val emptiedGameId = db.withTransaction { applyDetails(articleId, title, target) }
+        emptiedGameId?.let(imageStore::deleteLogos)
+    }
+
+    /** Menyimpan perubahan; mengembalikan id game asal bila ikut terhapus karena kosong (untuk bersihkan logonya). */
+    private suspend fun applyDetails(articleId: Long, title: String, target: GameTarget): Long? {
         val origin = checkNotNull(articleDao.gameIdOf(articleId)) { "Artikel $articleId tidak ada" }
         articleDao.setTitle(articleId, title)
         val targetId = when (target) {
@@ -37,8 +45,9 @@ class ArticleManagementRepositoryImpl @Inject constructor(
             articleDao.setGame(articleId, targetId)
             gameDao.clearMainArticle(origin, articleId)
             gameDao.clearForeignCategories(articleId, targetId)
-            gameDao.deleteIfEmpty(origin)
+            return origin.takeIf { gameDao.deleteIfEmpty(origin) > 0 }
         }
+        return null
     }
 
     override suspend fun deletePage(articleId: Long, pageId: Long) = db.withTransaction {
