@@ -19,6 +19,7 @@ import com.rds.questlog.domain.usecase.bookmark.UpdateBookmarkLabelUseCase
 import com.rds.questlog.domain.usecase.note.DeleteNoteUseCase
 import com.rds.questlog.domain.usecase.note.ObserveNoteUseCase
 import com.rds.questlog.domain.usecase.note.SaveNoteUseCase
+import com.rds.questlog.domain.usecase.prefs.ConsumeReaderTipUseCase
 import com.rds.questlog.domain.usecase.prefs.ObserveDisplayPreferencesUseCase
 import com.rds.questlog.domain.usecase.prefs.SetDarkModeUseCase
 import com.rds.questlog.domain.usecase.prefs.SetFontSizeUseCase
@@ -86,6 +87,7 @@ class ReaderToolsActions @Inject constructor(
     val notes: NoteActions,
     val premium: PremiumGuard,
     val mainArticle: SetMainArticleUseCase,
+    val readerTip: ConsumeReaderTipUseCase,
 )
 
 data class ReaderUiState(
@@ -174,6 +176,13 @@ class ReaderViewModel @Inject constructor(
     /** Pengguna gratis menulis lewat UseCase: UI membuka Unlock Sheet (data tidak berubah). */
     val unlockRequests: Flow<Unit> = unlockEvents.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            delay(TIP_DELAY_MS)
+            if (tools.readerTip()) showSnackbar(R.string.reader_tip_bookmark)
+        }
+    }
+
     /** Memuat ulang data (tombol "Coba Lagi" di state db_error). */
     fun reload() {
         reloads.value++
@@ -248,6 +257,7 @@ class ReaderViewModel @Inject constructor(
 
     private companion object {
         const val SNACKBAR_MS = 2_600L
+        const val TIP_DELAY_MS = 1_800L
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }

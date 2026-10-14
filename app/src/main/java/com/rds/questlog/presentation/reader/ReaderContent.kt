@@ -68,6 +68,15 @@ private class BookmarkBar(
     val count: Int,
     val onOpen: () -> Unit,
     val onQuickAdd: () -> Unit,
+    val popover: PopoverTools,
+)
+
+/** Data dan aksi popover bookmark tekan-tahan: label terbaru game, node yang sudah ditandai, simpan, dan Unlock. */
+private class PopoverTools(
+    val recentLabels: List<String>,
+    val markedNodeIds: Set<Long>,
+    val onSaveAt: (nodeId: Long, label: String, snippet: String) -> Unit,
+    val onUnlock: () -> Unit,
 )
 
 private const val SNIPPET_LENGTH = 80
@@ -100,6 +109,10 @@ fun ReaderContent(
     jumpRequest: ReaderJump? = null,
     onOpenBookmarks: () -> Unit = {},
     onQuickAddBookmark: () -> Unit = {},
+    recentLabels: List<String> = emptyList(),
+    bookmarkedNodeIds: Set<Long> = emptySet(),
+    onAddBookmarkAt: (nodeId: Long, label: String, snippet: String) -> Unit = { _, _, _ -> },
+    onUnlock: () -> Unit = {},
     onPositionChange: (ReaderPosition) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -132,7 +145,13 @@ fun ReaderContent(
                         state,
                         fontSize,
                         article,
-                        BookmarkBar(premium, bookmarkCount, onOpenBookmarks, onQuickAddBookmark),
+                        BookmarkBar(
+                            premium,
+                            bookmarkCount,
+                            onOpenBookmarks,
+                            onQuickAddBookmark,
+                            PopoverTools(recentLabels, bookmarkedNodeIds, onAddBookmarkAt, onUnlock),
+                        ),
                         onModeChange,
                         onRetryFailed,
                     )
@@ -197,6 +216,7 @@ private fun ColumnScope.SuccessBody(
                 fontSize,
                 article.title,
                 isCheckpoint = row.nodeId != null && row.nodeId == state.checkpoint,
+                bookmark = row.nodeId?.let { id -> nodeBookmark(state, bookmarks, id) },
             )
         }
         if (!state.paged || state.pageIndex >= state.okCount - 1) {
@@ -226,6 +246,30 @@ private fun ColumnScope.SuccessBody(
     }
 }
 
+/** Interaksi bookmark untuk node [id]: popover aktif hanya di node yang ditahan. */
+private fun nodeBookmark(state: ReaderState, bookmarks: BookmarkBar, id: Long) = NodeBookmark(
+    marked = id in bookmarks.popover.markedNodeIds,
+    active = state.popoverNodeId == id,
+    onLongPress = { state.popoverNodeId = id },
+    popover = { width ->
+        BookmarkPopover(
+            premium = bookmarks.premium,
+            nodeWidth = width,
+            recent = bookmarks.popover.recentLabels,
+            onSave = { label ->
+                bookmarks.popover.onSaveAt(id, label, state.snippetOf(id))
+                state.popoverNodeId = null
+                state.showToast(R.string.reader_snackbar_bookmark_saved, label)
+            },
+            onUnlock = {
+                state.popoverNodeId = null
+                bookmarks.popover.onUnlock()
+            },
+            onDismiss = { state.popoverNodeId = null },
+        )
+    },
+)
+
 /** State dan perilaku scroll Reader; dipisah dari tampilan agar [ReaderContent] tetap ringkas. */
 @Stable
 private class ReaderState(
@@ -242,6 +286,9 @@ private class ReaderState(
     var toast by mutableStateOf<Toast?>(null)
     var lastNodeId by mutableStateOf<Long?>(null)
     var jump by mutableStateOf<Jump?>(null)
+
+    /** Node yang popover bookmark-nya terbuka (tekan-tahan); null = tidak ada. */
+    var popoverNodeId by mutableStateOf<Long?>(null)
     private var toastSerial = 0
 
     val mode get() = modeOverride ?: article.readMode ?: ReadMode.SEAMLESS

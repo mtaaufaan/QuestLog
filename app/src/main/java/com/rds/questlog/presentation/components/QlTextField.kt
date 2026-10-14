@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,6 +42,7 @@ fun QlTextField(
     enabled: Boolean = true,
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     height: Dp = 48.dp,
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
 ) {
@@ -58,6 +60,7 @@ fun QlTextField(
             enabled = enabled,
             singleLine = singleLine,
             keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
             textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onBackground),
             cursorBrush = SolidColor(c.accentLine),
             modifier = Modifier.fillMaxWidth().heightIn(min = height).onFocusChanged { focused = it.isFocused },

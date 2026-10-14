@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -145,6 +146,18 @@ class ReaderDataTest {
         assertEquals(20, prefs.fontSizeSp)
         assertTrue(prefs.darkMode)
         secondScope.cancel()
+        file.delete()
+    }
+
+    @Test(timeout = 30_000)
+    fun tipBookmarkHanyaTampilSekaliPerInstalasi() = runBlocking<Unit> {
+        val file = File(env.context.cacheDir, "tip-test-${System.nanoTime()}.preferences_pb")
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        val repo = DataStoreUserPreferencesRepository(PreferenceDataStoreFactory.create(scope = scope) { file })
+
+        assertTrue(repo.consumeReaderTip())
+        assertFalse(repo.consumeReaderTip())
+        scope.cancel()
         file.delete()
     }
 }

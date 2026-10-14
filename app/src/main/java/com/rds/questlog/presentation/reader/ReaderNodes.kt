@@ -1,9 +1,11 @@
 package com.rds.questlog.presentation.reader
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -30,10 +36,16 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -56,20 +68,93 @@ import java.io.File
 import kotlin.math.roundToInt
 
 private const val MARK_MS = 300
+private const val TINT_MS = 200
 private const val MARK_SHIFT = -6f
 private const val STRIPE_PERIOD_DP = 22.6f
 private const val STRIPE_WIDTH_DP = 11.3f
 
+/**
+ * Interaksi bookmark pada satu node: [marked] = sudah ada bookmark (penanda di atas blok), tekan-tahan memanggil
+ * [onLongPress], dan [popover] dirender menempel di node bila [active] (menerima lebar node).
+ */
+class NodeBookmark(
+    val marked: Boolean,
+    val active: Boolean,
+    val onLongPress: () -> Unit,
+    val popover: @Composable (Dp) -> Unit,
+)
+
 /** Satu baris Reader sesuai jenisnya. [fontSize] dalam sp; [isCheckpoint] menampilkan penanda qlMark di atas blok. */
 @Composable
-fun ReaderRowItem(row: ReaderRow, fontSize: Int, articleTitle: String, isCheckpoint: Boolean) {
+fun ReaderRowItem(
+    row: ReaderRow,
+    fontSize: Int,
+    articleTitle: String,
+    isCheckpoint: Boolean,
+    bookmark: NodeBookmark? = null,
+) {
     when (row) {
         is ReaderRow.Node -> Column {
             if (isCheckpoint) CheckpointMarker()
-            NodeBlock(row.node, fontSize, articleTitle)
+            if (bookmark?.marked == true) BookmarkMarker()
+            PressableNode(bookmark) { NodeBlock(row.node, fontSize, articleTitle) }
         }
         is ReaderRow.Break -> PageBreak(stringResource(R.string.reader_page_break, row.page, row.host))
         is ReaderRow.Missing -> MissingPage(stringResource(R.string.reader_page_missing_label, row.page))
+    }
+}
+
+/** Membungkus node: tekan-tahan memicu [bookmark] (getar + tint, popover menempel); scroll/drag membatalkan. */
+@Composable
+private fun PressableNode(bookmark: NodeBookmark?, content: @Composable () -> Unit) {
+    if (bookmark == null) return content()
+    val tint by animateColorAsState(
+        if (bookmark.active) QuestLogTheme.colors.accentTint else Color.Transparent,
+        tween(TINT_MS),
+        label = "nodeTint",
+    )
+    val haptic = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    var width by remember { mutableStateOf(0.dp) }
+    val onLongPress by rememberUpdatedState(bookmark.onLongPress)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .onSizeChanged { width = with(density) { it.width.toDp() } }
+            .background(tint)
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onLongPress()
+                })
+            },
+    ) {
+        content()
+        if (bookmark.active) bookmark.popover(width)
+    }
+}
+
+/** Penanda bookmark inline di atas node yang sudah ditandai. */
+@Composable
+private fun BookmarkMarker() {
+    val c = QuestLogTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(QlIcons.Bookmark, null, tint = c.accentLine, modifier = Modifier.size(12.dp))
+        Text(
+            stringResource(R.string.reader_bookmark_marker).uppercase(),
+            color = c.accentText,
+            style = TextStyle(
+                fontFamily = Lora,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 10.sp,
+                letterSpacing = 1.4.sp,
+            ),
+        )
+        Box(Modifier.weight(1f).height(1.dp).alpha(0.6f).background(c.accentLine))
     }
 }
 
