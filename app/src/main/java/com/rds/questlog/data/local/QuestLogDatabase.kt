@@ -7,10 +7,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rds.questlog.data.local.dao.AppConfigDao
 import com.rds.questlog.data.local.dao.ArticleDao
 import com.rds.questlog.data.local.dao.ArticleNoteDao
+import com.rds.questlog.data.local.dao.BinderDao
+import com.rds.questlog.data.local.dao.BinderMemberDao
 import com.rds.questlog.data.local.dao.BookmarkDao
 import com.rds.questlog.data.local.dao.CheckpointDao
 import com.rds.questlog.data.local.dao.ContentNodeDao
 import com.rds.questlog.data.local.dao.GameDao
+import com.rds.questlog.data.local.dao.GameProgressDao
 import com.rds.questlog.data.local.dao.ImageDao
 import com.rds.questlog.data.local.dao.PageLayoutDao
 import com.rds.questlog.data.local.dao.SourcePageDao
@@ -58,6 +61,9 @@ abstract class QuestLogDatabase : RoomDatabase() {
     abstract fun appConfigDao(): AppConfigDao
     abstract fun bookmarkDao(): BookmarkDao
     abstract fun articleNoteDao(): ArticleNoteDao
+    abstract fun gameProgressDao(): GameProgressDao
+    abstract fun binderDao(): BinderDao
+    abstract fun binderMemberDao(): BinderMemberDao
 }
 
 /** v1 → v2: alasan gagal per halaman sumber (ditampilkan di Scrape Error Dialog). */

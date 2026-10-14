@@ -28,6 +28,18 @@ sealed class QuestLogError(message: String? = null, cause: Throwable? = null) : 
         /** Label bookmark lebih dari 60 karakter. */
         data object BookmarkLabelTooLong : ValidationError()
 
+        /** Nama kategori Binder kosong (wajib diisi). */
+        data object EmptyCategoryName : ValidationError()
+
+        /** Nama kategori Binder lebih dari 100 karakter. */
+        data object CategoryNameTooLong : ValidationError()
+
+        /** Kategori [name] sudah ada di game ini (tanpa peduli huruf besar-kecil). */
+        data class DuplicateCategory(val name: String) : ValidationError()
+
+        /** Kategori tidak ditemukan (mis. sudah terhapus). */
+        data object CategoryNotFound : ValidationError()
+
         /** [url] muncul lebih dari sekali dalam input yang sama. */
         data class DuplicateUrl(val url: String) : ValidationError()
 

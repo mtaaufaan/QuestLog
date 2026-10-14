@@ -9,4 +9,7 @@ data class GameWithCount(
     /** Judul artikel yang terakhir dibaca di game ini; null bila belum ada yang dibaca. */
     val lastTitle: String? = null,
     val lastReadAt: Long? = null,
+    /** Artikel utama game ini dan judulnya; null bila belum ada. */
+    val mainArticleId: Long? = null,
+    val mainArticleTitle: String? = null,
 )

@@ -16,8 +16,8 @@ import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
 
 /**
- * S4 Game Binder. Category Name Sheet dirender di sini; [activePopup] tetap satu state bersama di NavHost. Kategori
- * dan penetapan artikel masih memakai [BinderDummy] (belum Room). Premium hilang = hanya-baca.
+ * S4 Game Binder. Category Name Sheet dirender di sini; [activePopup] tetap satu state bersama di NavHost. Premium
+ * hilang (atau gratis) = hanya-baca; data kategori tidak dihapus dan kembali bisa diubah saat premium kembali.
  */
 @Composable
 fun BinderScreen(
@@ -28,32 +28,29 @@ fun BinderScreen(
     viewModel: BinderViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val gameId = viewModel.gameId
-    val categories = BinderDummy.categoriesOf(gameId)
+    val categories = state.categories
     val articles = state.articles.map { article ->
-        val own = BinderDummy.assignments[article.id].orEmpty()
+        val own = state.assignments[article.id].orEmpty()
         BinderArticleUi(article.id, article.title, categories.filter { it.id in own }.map { it.id }.toSet())
     }
     var pickerCategoryId by rememberSaveable { mutableStateOf<Long?>(null) }
-    val scrapingMessage = R.string.article_list_snackbar_scraping
 
     val actions = BinderActions(
         onBack = { navController.popBackStack() },
         onCreate = { onShowPopup(Popup.CategoryName(null)) },
         onRename = { onShowPopup(Popup.CategoryName(it)) },
         onDelete = {
-            BinderDummy.delete(it)
+            viewModel.deleteCategory(it)
             if (pickerCategoryId == it) pickerCategoryId = null
-            viewModel.showMessage(R.string.binder_deleted)
         },
         onTogglePicker = { pickerCategoryId = if (pickerCategoryId == it) null else it },
-        onSetMember = BinderDummy::setMembership,
+        onSetMember = viewModel::setMember,
         onArticleTap = { id ->
             val article = state.articles.firstOrNull { it.id == id }
             if (article?.status == ArticleStatus.READY) {
                 navController.navigate(Reader(articleId = id, resumeFrom = "last"))
             } else {
-                viewModel.showMessage(scrapingMessage)
+                viewModel.showMessage(R.string.article_list_snackbar_scraping)
             }
         },
     )
@@ -64,7 +61,9 @@ fun BinderScreen(
         articles = articles,
         readOnly = state.premium != PremiumUiState.PREMIUM,
         pickerCategoryId = pickerCategoryId,
-        snackbar = state.snackbar?.let { stringResource(it) },
+        snackbar = state.message?.let { message ->
+            message.arg?.let { stringResource(message.res, it) } ?: stringResource(message.res)
+        },
         actions = actions,
     )
 
@@ -76,7 +75,7 @@ fun BinderScreen(
             initialName = editing?.name.orEmpty(),
             existingNames = categories.map { it.name },
             onConfirm = { name ->
-                if (editing == null) BinderDummy.create(gameId, name) else BinderDummy.rename(editing.id, name)
+                if (editing == null) viewModel.createCategory(name) else viewModel.renameCategory(editing.id, name)
                 onDismissPopup()
             },
             onClose = onDismissPopup,

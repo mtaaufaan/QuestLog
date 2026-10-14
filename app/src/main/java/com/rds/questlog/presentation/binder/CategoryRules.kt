@@ -1,14 +1,6 @@
 package com.rds.questlog.presentation.binder
 
-/** Panjang maksimum nama kategori Binder. */
-const val MAX_CATEGORY_NAME = 100
-
-private val WORD_START = Regex("(^|\\s)(\\S)")
-private val SPACES = Regex("\\s+")
-
-/** Nama kategori dinormalisasi: spasi di ujung dibuang, spasi ganda dirapikan, huruf awal tiap kata kapital. */
-fun normalizeCategoryName(input: String): String =
-    input.trim().replace(SPACES, " ").replace(WORD_START) { it.groupValues[1] + it.groupValues[2].uppercase() }
+import com.rds.questlog.domain.model.normalizeCategoryName
 
 /** Apakah [name] (sudah dinormalisasi) sama dengan salah satu [others] tanpa peduli huruf besar-kecil. */
 fun isDuplicateCategory(name: String, others: List<String>): Boolean =

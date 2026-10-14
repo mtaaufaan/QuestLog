@@ -4,8 +4,10 @@ import com.rds.questlog.data.prefs.DataStoreUserPreferencesRepository
 import com.rds.questlog.data.repository.AppConfigRepositoryImpl
 import com.rds.questlog.data.repository.ArticleManagementRepositoryImpl
 import com.rds.questlog.data.repository.ArticleRepositoryImpl
+import com.rds.questlog.data.repository.BinderRepositoryImpl
 import com.rds.questlog.data.repository.BookmarkRepositoryImpl
 import com.rds.questlog.data.repository.CheckpointRepositoryImpl
+import com.rds.questlog.data.repository.GameProgressRepositoryImpl
 import com.rds.questlog.data.repository.GameRepositoryImpl
 import com.rds.questlog.data.repository.NoteRepositoryImpl
 import com.rds.questlog.data.repository.SourcePageRepositoryImpl
@@ -14,8 +16,10 @@ import com.rds.questlog.data.worker.WorkManagerScrapeScheduler
 import com.rds.questlog.domain.repository.AppConfigRepository
 import com.rds.questlog.domain.repository.ArticleManagementRepository
 import com.rds.questlog.domain.repository.ArticleRepository
+import com.rds.questlog.domain.repository.BinderRepository
 import com.rds.questlog.domain.repository.BookmarkRepository
 import com.rds.questlog.domain.repository.CheckpointRepository
+import com.rds.questlog.domain.repository.GameProgressRepository
 import com.rds.questlog.domain.repository.GameRepository
 import com.rds.questlog.domain.repository.NoteRepository
 import com.rds.questlog.domain.repository.SourcePageRepository
@@ -61,6 +65,12 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindNoteRepository(impl: NoteRepositoryImpl): NoteRepository
+
+    @Binds
+    abstract fun bindGameProgressRepository(impl: GameProgressRepositoryImpl): GameProgressRepository
+
+    @Binds
+    abstract fun bindBinderRepository(impl: BinderRepositoryImpl): BinderRepository
 
     @Binds
     @Singleton

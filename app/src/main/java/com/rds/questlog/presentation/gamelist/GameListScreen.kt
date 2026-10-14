@@ -1,12 +1,12 @@
 package com.rds.questlog.presentation.gamelist
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.rds.questlog.presentation.binder.BinderDummy
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.navigation.AddArticle
@@ -30,16 +30,14 @@ fun GameListScreen(
     viewModel: GameListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.articleToOpen.collect { navController.navigate(Reader(articleId = it, resumeFrom = "checkpoint")) }
+    }
     val actions = GameListActions(
         onQuery = viewModel::onQueryChange,
         onGameTap = { navController.navigate(ArticleList(it.id)) },
         onGameLongPress = { onShowPopup(Popup.DeleteGame(it.id)) },
-        // Artikel utama masih dari penyimpanan sementara Binder; aturan lengkap (snackbar, checkpoint) di tahap wiring.
-        onResume = { game ->
-            BinderDummy.mainArticles[game.id]?.let {
-                navController.navigate(Reader(articleId = it.articleId, resumeFrom = "checkpoint"))
-            }
-        },
+        onResume = { viewModel.continueGame(it.id) },
         onOpenBinder = {
             if (state.premium == PremiumUiState.FREE) {
                 onShowPopup(
@@ -61,7 +59,7 @@ fun GameListScreen(
     )
 
     GameListContent(
-        games = state.games.map { it.copy(mainArticleTitle = BinderDummy.mainArticles[it.id]?.title) },
+        games = state.games,
         results = state.results,
         totalArticles = state.totalArticles,
         premium = state.premium,

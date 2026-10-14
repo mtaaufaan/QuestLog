@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.rds.questlog.R
 import com.rds.questlog.domain.error.QuestLogError.ArticleError
+import com.rds.questlog.domain.error.QuestLogError.PremiumError
+import com.rds.questlog.domain.model.Binder
 import com.rds.questlog.domain.usecase.article.DeleteArticleUseCase
 import com.rds.questlog.domain.usecase.article.DeletePageUseCase
 import com.rds.questlog.domain.usecase.article.GetArticlesUseCase
@@ -15,8 +17,12 @@ import com.rds.questlog.domain.usecase.article.RefreshPageUseCase
 import com.rds.questlog.domain.usecase.article.ReorderPagesUseCase
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.article.UpdateArticleUseCase
+import com.rds.questlog.domain.usecase.binder.AssignCategoriesUseCase
+import com.rds.questlog.domain.usecase.binder.ObserveBinderUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
 import com.rds.questlog.domain.usecase.premium.PremiumGuard
+import com.rds.questlog.presentation.binder.BinderCategoryUi
+import com.rds.questlog.presentation.binder.CategoryAssignment
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ScrapeJob
@@ -49,6 +55,8 @@ class ArticleListViewModel @Inject constructor(
     getArticles: GetArticlesUseCase,
     getGames: GetGamesUseCase,
     premiumGuard: PremiumGuard,
+    observeBinder: ObserveBinderUseCase,
+    private val assignCategoriesUseCase: AssignCategoriesUseCase,
     private val deleteArticleUseCase: DeleteArticleUseCase,
     private val retryFailedPagesUseCase: RetryFailedPagesUseCase,
     private val updateArticleUseCase: UpdateArticleUseCase,
@@ -89,6 +97,13 @@ class ArticleListViewModel @Inject constructor(
             query = q,
             premium = premium,
         )
+    }.combine(
+        observeBinder(savedStateHandle.toRoute<ArticleList>().gameId).catch { emit(Binder(emptyList(), emptyMap())) },
+    ) { state, binder ->
+        state.copy(
+            categories = binder.categories.map { BinderCategoryUi(it.id, it.gameId, it.name) },
+            assignments = binder.assignments,
+        )
     }.combine(snackbar) { state, message -> state.copy(snackbar = message?.res, snackbarArg = message?.arg) }
         .combine(edit) { state, e -> state.copy(isSavingEdit = e.saving, editSaveError = e.error) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ArticleListUiState(isLoading = true))
@@ -98,6 +113,21 @@ class ArticleListViewModel @Inject constructor(
     }
 
     fun onScrapingArticleTapped() = showSnackbar(R.string.article_list_snackbar_scraping)
+
+    /** Menetapkan kategori Binder artikel (Assign Category Sheet); lewat PremiumGuard di domain. */
+    fun assignCategories(articleId: Long, assignment: CategoryAssignment) {
+        viewModelScope.launch {
+            assignCategoriesUseCase(articleId, assignment.categoryIds, assignment.newNames).onFailure {
+                showSnackbar(
+                    if (it is PremiumError) {
+                        R.string.reader_snackbar_read_only
+                    } else {
+                        R.string.reader_snackbar_save_failed
+                    },
+                )
+            }
+        }
+    }
 
     /**
      * Menyimpan hasil Edit Article Sheet. [onSaved] dipanggil hanya bila sukses (pemanggil menutup popup);
