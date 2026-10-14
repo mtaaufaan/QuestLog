@@ -35,6 +35,25 @@ object QlIcons {
         "M7 11V7a5 5 0 0 1 10 0v4",
     )
 
+    /** Papan klip (tombol Tempel). */
+    val Clipboard = lineIcon(
+        "Clipboard",
+        1.9f,
+        "M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z",
+        "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2",
+    )
+
+    /** Bagikan: tiga titik terhubung (penanda URL dari browser). */
+    val Share = lineIcon(
+        "Share",
+        1.9f,
+        circle(18f, 5f, 3f),
+        circle(6f, 12f, 3f),
+        circle(18f, 19f, 3f),
+        "m8.6 13.5 6.8 4",
+        "m15.4 6.5-6.8 4",
+    )
+
     /** Checkpoint (jangkar): tiang, lengkung, dan cincin; garis saja, beri warna lewat `Icon(tint = ...)`. */
     val Anchor = anchorIcon("Anchor", 1.7f)
 

@@ -80,6 +80,14 @@ object PreviewData {
         ),
     )
 
+    /** URL dari "Bagikan" di browser (S2 mode baru, banner prefill). */
+    const val SHARED_URL = "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough-disc2?page=1"
+
+    /** Isi clipboard contoh untuk tombol Tempel sebelum akses clipboard nyata tersedia (Sprint 6 Tahap 2). */
+    const val CLIPBOARD_TEXT = "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=1\n" +
+        "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=2\n" +
+        "https://gamefaqs.gamespot.com/ps/dq7/faqs/walkthrough?page=3"
+
     private var nextPageId = 1L
 
     private fun pages(base: String, count: Int, status: (Int) -> PageStatus = { PageStatus.DONE }) =

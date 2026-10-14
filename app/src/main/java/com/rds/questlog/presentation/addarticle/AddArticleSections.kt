@@ -242,21 +242,33 @@ internal fun UrlSection(
     onAdd: () -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (Int, Int) -> Unit,
+    showSharedBanner: Boolean = false,
+    pasteOutcome: PasteOutcome? = null,
+    onPaste: () -> Unit = {},
 ) {
     val c = QuestLogTheme.colors
     val isAppend = form.mode == com.rds.questlog.presentation.model.ScrapeMode.APPEND
     val offset = urlPageOffset(target)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             FieldLabel(
                 stringResource(if (isAppend) R.string.add_article_urls_append else R.string.add_article_urls_new),
             )
-            Text(
-                stringResource(R.string.add_article_url_count, form.urls.size),
-                color = c.textTertiary,
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.add_article_url_count, form.urls.size),
+                    color = c.textTertiary,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                )
+                PasteButton(onPaste)
+            }
         }
+        if (showSharedBanner) SharedUrlBanner()
+        if (pasteOutcome != null) PasteMessage(pasteOutcome)
         if (isAppend) {
             Text(
                 text = if (target != null) {
