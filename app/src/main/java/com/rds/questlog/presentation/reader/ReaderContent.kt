@@ -46,6 +46,7 @@ import com.rds.questlog.presentation.displaysettings.DEFAULT_FONT_SIZE
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PageStatus
+import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ReadMode
 import com.rds.questlog.presentation.model.ReaderViewState
 import com.rds.questlog.presentation.preview.ReaderPreviewData
@@ -60,6 +61,16 @@ private const val FULL = 100
 private data class Jump(val nodeId: Long, val messageRes: Int?)
 
 private data class Toast(val text: String, val serial: Int)
+
+/** Data dan aksi chip bookmark di baris mode baca. */
+private class BookmarkBar(
+    val premium: PremiumUiState,
+    val count: Int,
+    val onOpen: () -> Unit,
+    val onQuickAdd: () -> Unit,
+)
+
+private const val SNIPPET_LENGTH = 80
 
 /**
  * Layar baca (component-contract.md §3) dengan 5 [viewState]. State baca (mode, halaman, posisi scroll) dipegang di
@@ -79,16 +90,23 @@ fun ReaderContent(
     snackbar: String?,
     onBack: (Long?) -> Unit,
     onLeave: (Long?) -> Unit,
-    onOpenSettings: () -> Unit,
+    onOpenTools: () -> Unit,
     onSetCheckpoint: (Long) -> Unit,
     onModeChange: (ReadMode) -> Unit,
     onRetryFailed: () -> Unit,
     onRetryLoad: () -> Unit,
+    premium: PremiumUiState = PremiumUiState.FREE,
+    bookmarkCount: Int = 0,
+    jumpRequest: ReaderJump? = null,
+    onOpenBookmarks: () -> Unit = {},
+    onQuickAddBookmark: () -> Unit = {},
+    onPositionChange: (ReaderPosition) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     QuestLogTheme(darkTheme = darkMode) {
         val success = viewState == ReaderViewState.SUCCESS
-        val state = rememberReaderState(article, content, resumeNodeId, resumeFrom, success)
+        val state =
+            rememberReaderState(article, content, resumeNodeId, resumeFrom, success, jumpRequest, onPositionChange)
         val currentOnLeave by rememberUpdatedState(onLeave)
         DisposableEffect(Unit) { onDispose { state.lastNodeId?.let { currentOnLeave(it) } } }
         val goBack = { onBack(state.currentNodeId() ?: state.lastNodeId) }
@@ -103,11 +121,21 @@ fun ReaderContent(
                     actionsEnabled = success,
                     onBack = goBack,
                     onCheckpoint = { state.setCheckpoint(onSetCheckpoint) },
-                    onSettings = onOpenSettings,
+                    onJumpCheckpoint = {
+                        state.checkpoint?.let { state.jump = Jump(it, R.string.reader_snackbar_resume_checkpoint) }
+                    },
+                    onTools = onOpenTools,
                 )
                 ReaderProgress(if (success) state.percent else 0)
                 when (viewState) {
-                    ReaderViewState.SUCCESS -> SuccessBody(state, fontSize, article, onModeChange, onRetryFailed)
+                    ReaderViewState.SUCCESS -> SuccessBody(
+                        state,
+                        fontSize,
+                        article,
+                        BookmarkBar(premium, bookmarkCount, onOpenBookmarks, onQuickAddBookmark),
+                        onModeChange,
+                        onRetryFailed,
+                    )
                     ReaderViewState.LOADING -> ReaderLoading()
                     ReaderViewState.DB_ERROR -> ReaderMessage(viewState, onRetryLoad)
                     else -> ReaderMessage(viewState, goBack)
@@ -132,6 +160,7 @@ private fun ColumnScope.SuccessBody(
     state: ReaderState,
     fontSize: Int,
     article: ArticleUiModel,
+    bookmarks: BookmarkBar,
     onModeChange: (ReadMode) -> Unit,
     onRetryFailed: () -> Unit,
 ) {
@@ -145,7 +174,11 @@ private fun ColumnScope.SuccessBody(
         } else {
             stringResource(R.string.reader_position_percent, state.percent)
         },
+        premium = bookmarks.premium,
+        bookmarkCount = bookmarks.count,
         onModeChange = { state.changeMode(it, onModeChange) },
+        onOpenBookmarks = bookmarks.onOpen,
+        onQuickAddBookmark = bookmarks.onQuickAdd,
     )
     if (unfinished > 0) PartialBanner(unfinished, retrying, onRetryFailed)
     LazyColumn(
@@ -231,6 +264,10 @@ private class ReaderState(
         return (listState.firstVisibleItemIndex until rows.size).firstNotNullOfOrNull { rows[it].nodeId }
     }
 
+    /** Cuplikan teks node [id] (untuk label bookmark dan Reader Tools); kosong bila node bukan teks. */
+    fun snippetOf(id: Long): String =
+        content.asSequence().flatten().firstOrNull { it.id == id }?.text.orEmpty().take(SNIPPET_LENGTH)
+
     fun showToast(@StringRes id: Int, vararg args: Any) {
         toast = Toast(res.getString(id, *args), ++toastSerial)
     }
@@ -291,6 +328,8 @@ private fun rememberReaderState(
     resumeNodeId: Long?,
     resumeFrom: String,
     active: Boolean,
+    jumpRequest: ReaderJump?,
+    onPositionChange: (ReaderPosition) -> Unit,
 ): ReaderState {
     val listState = rememberLazyListState()
     val res = LocalContext.current.resources
@@ -306,9 +345,16 @@ private fun rememberReaderState(
             state.toast = null
         }
     }
+    val currentOnPosition by rememberUpdatedState(onPositionChange)
     LaunchedEffect(state) {
-        snapshotFlow { state.currentNodeId() }.collect { id -> if (id != null) state.lastNodeId = id }
+        snapshotFlow { state.currentNodeId() }.collect { id ->
+            if (id != null) {
+                state.lastNodeId = id
+                currentOnPosition(ReaderPosition(id, state.snippetOf(id)))
+            }
+        }
     }
+    LaunchedEffect(jumpRequest) { jumpRequest?.let { state.jump = Jump(it.nodeId, null) } }
     LaunchedEffect(state, active) {
         val target = resumeNodeId ?: article.lastNodeId
         if (active && target != null) {
@@ -361,7 +407,7 @@ private fun ReaderPreview(viewState: ReaderViewState, dark: Boolean, fontSize: I
         snackbar = null,
         onBack = {},
         onLeave = {},
-        onOpenSettings = {},
+        onOpenTools = {},
         onSetCheckpoint = {},
         onModeChange = {},
         onRetryFailed = {},

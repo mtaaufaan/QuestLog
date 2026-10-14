@@ -35,6 +35,38 @@ object QlIcons {
         "M7 11V7a5 5 0 0 1 10 0v4",
     )
 
+    /** Bookmark (pita): fitur premium, TERPISAH dari checkpoint (jangkar). Beri warna lewat `Icon(tint = ...)`. */
+    val Bookmark = lineIcon("Bookmark", 1.9f, "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z")
+
+    /** Ke checkpoint: jangkar dengan panah kecil (menggulir ke checkpoint). */
+    val AnchorJump = lineIcon(
+        "AnchorJump",
+        1.7f,
+        "M10 21V9",
+        "M4 13H2a8 8 0 0 0 16 0h-2",
+        circle(10f, 5.5f, 2.5f),
+        "M17 3l4 3.5-4 3.5",
+        "M21 6.5h-6",
+    )
+
+    /** Artikel utama game (bintang). */
+    val Star = lineIcon(
+        "Star",
+        1.7f,
+        "M11.5 2.3a.6.6 0 0 1 1 0l2.6 5.3 5.8.8a.6.6 0 0 1 .3 1l-4.2 4.1 1 5.8",
+        "a.6.6 0 0 1-.8.6L12 17.2l-5.2 2.7a.6.6 0 0 1-.8-.6l1-5.8-4.2-4.1a.6.6 0 0 1 .3-1l5.8-.8z",
+    )
+
+    /** Catatan (berkas bergaris). */
+    val Note = lineIcon(
+        "Note",
+        1.7f,
+        "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z",
+        "M14 2v4a2 2 0 0 0 2 2h4",
+        "M8 13h8",
+        "M8 17h5",
+    )
+
     /** Papan klip (tombol Tempel). */
     val Clipboard = lineIcon(
         "Clipboard",
@@ -134,6 +166,17 @@ object QlIcons {
         "M12 9v4",
         "M12 17h.01",
     )
+
+    /** Bookmark berwarna tetap (emas) untuk baris di Bookmark Panel; tampilkan dengan `Image`, bukan `Icon`. */
+    val BookmarkGold = ImageVector.Builder("BookmarkGold", 24.dp, 24.dp, 24f, 24f).apply {
+        addPath(
+            pathData = PathParser().parsePathString("m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z").toNodes(),
+            fill = SolidColor(Color(0xFFE1AD66)),
+            stroke = SolidColor(Color(0xFFA06F24)),
+            strokeLineWidth = 1.6f,
+            strokeLineJoin = StrokeJoin.Round,
+        )
+    }.build()
 
     /** Tiga titik vertikal (terisi). */
     val MoreVert = ImageVector.Builder("MoreVert", 24.dp, 24.dp, 24f, 24f).apply {

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
 import com.rds.questlog.presentation.components.QlIcons
+import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ReadMode
 import com.rds.questlog.presentation.model.ReaderViewState
 import com.rds.questlog.presentation.theme.CormorantGaramond
@@ -60,7 +61,8 @@ fun ReaderHeader(
     actionsEnabled: Boolean,
     onBack: () -> Unit,
     onCheckpoint: () -> Unit,
-    onSettings: () -> Unit,
+    onJumpCheckpoint: () -> Unit,
+    onTools: () -> Unit,
 ) {
     val c = QuestLogTheme.colors
     Row(
@@ -106,11 +108,20 @@ fun ReaderHeader(
             onClick = onCheckpoint,
         )
         IconAction(
-            QlIcons.Sliders,
-            stringResource(R.string.reader_settings),
-            MaterialTheme.colorScheme.onBackground,
-            20,
-            onClick = onSettings,
+            icon = QlIcons.AnchorJump,
+            description = stringResource(R.string.reader_jump_checkpoint),
+            tint = c.accentLine,
+            size = 24,
+            enabled = actionsEnabled && hasCheckpoint,
+            onClick = onJumpCheckpoint,
+        )
+        IconAction(
+            icon = QlIcons.MoreVert,
+            description = stringResource(R.string.reader_tools),
+            tint = MaterialTheme.colorScheme.onBackground,
+            size = 22,
+            enabled = actionsEnabled,
+            onClick = onTools,
         )
     }
 }
@@ -168,15 +179,26 @@ fun ReaderProgress(percent: Int) {
     }
 }
 
-/** Toggle Seamless / Per Halaman beserta label posisi di kanannya. */
+/**
+ * Baris mode baca (kiri → kanan): toggle Seamless / Per Halaman · chip "Daftar bookmark" (ikon + jumlah, gembok
+ * bila gratis) dengan tombol ＋ tambah cepat · label posisi. ＋ nonaktif saat premium tidak aktif (hanya-baca).
+ */
 @Composable
-fun ReaderModeBar(mode: ReadMode, positionLabel: String, onModeChange: (ReadMode) -> Unit) {
+fun ReaderModeBar(
+    mode: ReadMode,
+    positionLabel: String,
+    premium: PremiumUiState,
+    bookmarkCount: Int,
+    onModeChange: (ReadMode) -> Unit,
+    onOpenBookmarks: () -> Unit,
+    onQuickAddBookmark: () -> Unit,
+) {
     val c = QuestLogTheme.colors
     val shape = RoundedCornerShape(4.dp)
     Column {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(Modifier.clip(shape).border(1.dp, c.accentLine, shape)) {
@@ -190,13 +212,67 @@ fun ReaderModeBar(mode: ReadMode, positionLabel: String, onModeChange: (ReadMode
                     mode == ReadMode.PAGED,
                 ) { onModeChange(ReadMode.PAGED) }
             }
+            BookmarkChip(premium, bookmarkCount, onOpenBookmarks, onQuickAddBookmark)
             Text(
                 text = positionLabel,
                 color = c.textSecondary,
+                maxLines = 1,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f),
                 style = TextStyle(fontFamily = Lora, fontSize = 12.5.sp, fontFeatureSettings = "tnum"),
             )
         }
         Divider()
+    }
+}
+
+@Composable
+private fun BookmarkChip(premium: PremiumUiState, count: Int, onOpen: () -> Unit, onQuickAdd: () -> Unit) {
+    val c = QuestLogTheme.colors
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = Modifier.height(32.dp).clip(shape).border(1.dp, c.divider, shape),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxHeight()
+                .clickable(role = Role.Button, onClick = onOpen)
+                .padding(start = 10.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                QlIcons.Bookmark,
+                contentDescription = stringResource(R.string.reader_bookmark_list),
+                tint = c.accentText,
+                modifier = Modifier.size(14.dp),
+            )
+            Text(
+                count.toString(),
+                color = c.accentText,
+                style = TextStyle(fontFamily = Lora, fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+            )
+            if (premium == PremiumUiState.FREE) {
+                Icon(QlIcons.Lock, contentDescription = null, tint = c.accentText, modifier = Modifier.size(11.dp))
+            }
+        }
+        Box(Modifier.width(1.dp).fillMaxHeight().background(c.divider))
+        val addEnabled = premium != PremiumUiState.LOST
+        Box(
+            modifier = Modifier
+                .size(width = 32.dp, height = 32.dp)
+                .alpha(if (addEnabled) 1f else 0.35f)
+                .clickable(enabled = addEnabled, role = Role.Button, onClick = onQuickAdd),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                QlIcons.Plus,
+                contentDescription = stringResource(R.string.reader_bookmark_add),
+                tint = c.accentText,
+                modifier = Modifier.size(15.dp),
+            )
+        }
     }
 }
 

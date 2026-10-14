@@ -12,6 +12,7 @@ import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.prefs.ObserveDisplayPreferencesUseCase
 import com.rds.questlog.domain.usecase.prefs.SetDarkModeUseCase
 import com.rds.questlog.domain.usecase.prefs.SetFontSizeUseCase
+import com.rds.questlog.domain.usecase.premium.PremiumGuard
 import com.rds.questlog.domain.usecase.reader.GetArticleDetailUseCase
 import com.rds.questlog.domain.usecase.reader.SaveLastPositionUseCase
 import com.rds.questlog.domain.usecase.reader.SetCheckpointUseCase
@@ -19,6 +20,7 @@ import com.rds.questlog.domain.usecase.reader.SetReadModeUseCase
 import com.rds.questlog.presentation.articlelist.ArticleUiMapper
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.ContentNodeUi
+import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ReadMode
 import com.rds.questlog.presentation.model.ReaderViewState
 import com.rds.questlog.presentation.navigation.Reader
@@ -57,6 +59,7 @@ data class ReaderUiState(
     val fontSize: Int = DisplayPreferences.DEFAULT_FONT_SIZE_SP,
     val darkMode: Boolean = false,
     @StringRes val snackbar: Int? = null,
+    val premium: PremiumUiState = PremiumUiState.FREE,
 )
 
 /**
@@ -69,6 +72,7 @@ class ReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getArticleDetail: GetArticleDetailUseCase,
     observeDisplayPreferences: ObserveDisplayPreferencesUseCase,
+    premiumGuard: PremiumGuard,
     private val actions: ReaderActions,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
@@ -97,12 +101,17 @@ class ReaderViewModel @Inject constructor(
             .catch { emit(ReaderUiState(viewState = ReaderViewState.DB_ERROR)) }
     }
 
+    private val premium: Flow<PremiumUiState> = premiumGuard.state()
+        .map { PremiumUiState.valueOf(it.name) }
+        .catch { emit(PremiumUiState.FREE) }
+
     val uiState: StateFlow<ReaderUiState> = combine(
         screen,
         observeDisplayPreferences().catch { emit(DisplayPreferences()) },
         snackbar,
-    ) { state, prefs, message ->
-        state.copy(fontSize = prefs.fontSizeSp, darkMode = prefs.darkMode, snackbar = message)
+        premium,
+    ) { state, prefs, message, premiumState ->
+        state.copy(fontSize = prefs.fontSizeSp, darkMode = prefs.darkMode, snackbar = message, premium = premiumState)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ReaderUiState())
 
     /** Memuat ulang data (tombol "Coba Lagi" di state db_error). */
