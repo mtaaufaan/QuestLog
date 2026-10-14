@@ -83,6 +83,8 @@ fun AddArticleContent(
     submitError: String? = null,
     sharedUrl: String? = null,
     readClipboard: suspend () -> String? = { null },
+    incomingSharedUrl: String? = null,
+    onIncomingHandled: () -> Unit = {},
 ) {
     var form by rememberSaveable(stateSaver = AddArticleFormSaver) {
         mutableStateOf(
@@ -94,6 +96,9 @@ fun AddArticleContent(
         )
     }
     var pasteOutcome by remember { mutableStateOf<PasteOutcome?>(null) }
+    // URL dari "Bagikan" yang jadi penanda Hal. 1, dan URL yang menunggu konfirmasi karena daftar sudah berisi.
+    var sharedMarker by rememberSaveable { mutableStateOf(sharedUrl) }
+    var confirmShared by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(pasteOutcome) {
         if (pasteOutcome != null) {
@@ -110,6 +115,17 @@ fun AddArticleContent(
         gameLimitReached(form, games, isPremium) -> R.string.add_article_limit_game
         else -> null
     }
+
+    IncomingSharedUrl(
+        url = incomingSharedUrl,
+        hasFilledUrls = form.filledUrlCount > 0,
+        onApply = {
+            form = form.withSharedUrl(it)
+            sharedMarker = it
+        },
+        onNeedsConfirm = { confirmShared = it },
+        onHandled = onIncomingHandled,
+    )
 
     LaunchedEffect(form.saving) {
         if (form.saving) {
@@ -154,7 +170,7 @@ fun AddArticleContent(
                 onAdd = { form = form.withUrlAdded() },
                 onRemove = { form = form.withUrlRemoved(it) },
                 onMove = { index, delta -> form = form.withUrlMoved(index, delta) },
-                showSharedBanner = sharedUrl != null && form.urls.firstOrNull() == sharedUrl,
+                showSharedBanner = sharedMarker != null && form.urls.firstOrNull() == sharedMarker,
                 pasteOutcome = pasteOutcome,
                 onPaste = {
                     scope.launch {
@@ -163,6 +179,16 @@ fun AddArticleContent(
                         pasteOutcome = outcome
                     }
                 },
+            )
+        }
+        confirmShared?.let { url ->
+            ReplaceUrlsDialog(
+                onConfirm = {
+                    form = form.withSharedUrl(url)
+                    sharedMarker = url
+                    confirmShared = null
+                },
+                onDismiss = { confirmShared = null },
             )
         }
         AddArticleFooter(

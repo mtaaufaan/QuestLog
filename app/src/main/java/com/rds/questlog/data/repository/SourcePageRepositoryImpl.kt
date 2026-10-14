@@ -29,6 +29,8 @@ class SourcePageRepositoryImpl @Inject constructor(
     private val checkpointDao: CheckpointDao,
 ) : SourcePageRepository {
 
+    private val bookmarkDao get() = db.bookmarkDao()
+
     override suspend fun recoverInterrupted(articleId: Long) {
         pageDao.resetInterrupted(articleId)
     }
@@ -47,14 +49,7 @@ class SourcePageRepositoryImpl @Inject constructor(
     ) = db.withTransaction {
         val page = pageDao.getById(pageId) ?: return@withTransaction
         val start = page.orderStart ?: ((page.pageOrder - 1) * ScrapeLimits.MAX_NODES_PER_PAGE + 1)
-        // Unduh ulang: lepas dulu rujukan checkpoint ke node lama (FK tanpa cascade), ganti isi, lalu pulihkan.
         val old = nodeDao.getByPage(pageId)
-        val checkpoint = if (old.isEmpty()) null else checkpointDao.get(articleId)
-        val oldAnchor = old.firstOrNull { it.id == checkpoint?.anchorNodeId }
-        val oldLast = old.firstOrNull { it.id == checkpoint?.lastVisitedNodeId }
-        if (oldAnchor != null) checkpointDao.moveAnchor(articleId, pageId, null, null)
-        if (oldLast != null) checkpointDao.moveLastVisited(articleId, pageId, null)
-        nodeDao.deleteByPage(pageId)
         nodeDao.insertAll(
             nodes.mapIndexed { index, node ->
                 ContentNodeEntity(
@@ -67,7 +62,7 @@ class SourcePageRepositoryImpl @Inject constructor(
                 )
             },
         )
-        restoreCheckpoint(articleId, pageId, oldAnchor, oldLast)
+        if (old.isNotEmpty()) replaceOldNodes(articleId, pageId, old)
         val now = System.currentTimeMillis()
         val known = imageDao.filenamesOf(articleId).toSet()
         imageDao.insertAll(
@@ -85,18 +80,46 @@ class SourcePageRepositoryImpl @Inject constructor(
         pageDao.setStatus(pageId, SourcePageStatus.COMPLETED.name, null)
     }
 
-    /** Mengarahkan checkpoint yang tadi dilepas ke node baru yang paling cocok (lihat [pickReplacement]). */
-    private suspend fun restoreCheckpoint(
-        articleId: Long,
-        pageId: Long,
-        oldAnchor: ContentNodeEntity?,
-        oldLast: ContentNodeEntity?,
-    ) {
-        if (oldAnchor == null && oldLast == null) return
-        val fresh = nodeDao.getByPage(pageId)
-        oldAnchor?.let { pickReplacement(it, fresh) }
-            ?.let { checkpointDao.setAnchor(articleId, it.id, it.displayOrder) }
-        oldLast?.let { pickReplacement(it, fresh) }?.let { checkpointDao.setLastVisited(articleId, it.id) }
+    /**
+     * Unduh ulang: node baru sudah tersimpan di samping node lama. Checkpoint (anchor dan posisi baca) serta bookmark
+     * yang menunjuk node lama diarahkan ke node baru yang paling cocok ([pickReplacement]) SEBELUM node lama dihapus,
+     * karena FK tanpa cascade menolak menghapus node yang masih dirujuk. Tanpa node baru, checkpoint dilepas dan
+     * bookmark dihapus.
+     */
+    private suspend fun replaceOldNodes(articleId: Long, pageId: Long, old: List<ContentNodeEntity>) {
+        val maxOldId = old.maxOf { it.id }
+        val fresh = nodeDao.getByPage(pageId).filter { it.id > maxOldId }
+        val oldById = old.associateBy { it.id }
+        val checkpoint = checkpointDao.get(articleId)
+        checkpoint?.anchorNodeId?.let(oldById::get)?.let { anchor ->
+            val next = pickReplacement(anchor, fresh)
+            if (next != null) {
+                checkpointDao.setAnchor(articleId, next.id, next.displayOrder)
+            } else {
+                checkpointDao.moveAnchor(articleId, pageId, null, null)
+            }
+        }
+        checkpoint?.lastVisitedNodeId?.let(oldById::get)?.let { last ->
+            val next = pickReplacement(last, fresh)
+            if (next != null) {
+                checkpointDao.setLastVisited(articleId, next.id)
+            } else {
+                checkpointDao.moveLastVisited(articleId, pageId, null)
+            }
+        }
+        bookmarkDao.getByPage(pageId).forEach { bookmark ->
+            val next = oldById[bookmark.nodeId]?.let { pickReplacement(it, fresh) }
+            if (next != null) {
+                bookmarkDao.repoint(
+                    bookmark.id,
+                    next.id,
+                    next.displayOrder,
+                )
+            } else {
+                bookmarkDao.delete(bookmark.id)
+            }
+        }
+        nodeDao.deleteByPageUpTo(pageId, maxOldId)
     }
 
     override suspend fun markFailed(pageId: Long, failure: PageFailure) =

@@ -2,6 +2,7 @@ package com.rds.questlog.presentation.addarticle
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -9,12 +10,12 @@ import androidx.navigation.NavController
 import com.rds.questlog.presentation.model.ScrapeJob
 import com.rds.questlog.presentation.model.ScrapeMode
 import com.rds.questlog.presentation.popup.Popup
-import com.rds.questlog.presentation.preview.PreviewData
 
 /**
  * S2. Data dan penyimpanan dari [AddArticleViewModel]; [onSaved] menerima pekerjaan scraping yang baru dijadwalkan
  * (untuk Scrape Notification) setelah layar kembali ke daftar. [sharedUrl] = URL dari "Bagikan" di browser
- * (QL-21): mengisi Hal. 1 dan menampilkan penanda; belum dihubungkan ke Intent (Sprint 6 Tahap 2).
+ * (QL-21): mengisi Hal. 1 dan menampilkan penanda. [incomingSharedUrl] = URL yang dibagikan saat layar ini sudah
+ * terbuka; isian yang ada tidak ditimpa tanpa konfirmasi, dan [onIncomingHandled] dipanggil setelah diproses.
  */
 @Composable
 fun AddArticleScreen(
@@ -24,10 +25,13 @@ fun AddArticleScreen(
     onShowPopup: (Popup) -> Unit,
     onSaved: (ScrapeJob) -> Unit,
     sharedUrl: String? = null,
+    incomingSharedUrl: String? = null,
+    onIncomingHandled: () -> Unit = {},
     viewModel: AddArticleViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val submitError by viewModel.submitError.collectAsStateWithLifecycle()
+    val clipboard = LocalClipboardManager.current
 
     AddArticleContent(
         mode = ScrapeMode.fromRoute(mode),
@@ -45,7 +49,9 @@ fun AddArticleScreen(
         onOpenUnlock = { onShowPopup(Popup.Unlock) },
         submitError = submitError?.let { stringResource(it) },
         sharedUrl = sharedUrl,
-        // Tahap 1: isi clipboard contoh; Tahap 2 membaca ClipboardManager hanya saat Tempel diketuk.
-        readClipboard = { PreviewData.CLIPBOARD_TEXT },
+        incomingSharedUrl = incomingSharedUrl,
+        onIncomingHandled = onIncomingHandled,
+        // Clipboard dibaca HANYA saat Tempel diketuk (QL-22); tidak pernah otomatis saat layar dibuka.
+        readClipboard = { clipboard.getText()?.text },
     )
 }

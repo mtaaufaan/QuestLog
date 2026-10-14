@@ -9,6 +9,18 @@ class AddArticlePasteTest {
     private fun urls(count: Int, from: Int = 1) = List(count) { "https://a.com/${it + from}" }
 
     @Test
+    fun `URL dari bagikan menggantikan seluruh daftar dan tidak menyentuh game atau judul`() {
+        val start = AddArticleForm(gameInput = "Zelda", title = "Judul", urls = urls(3), showErrors = true)
+
+        val form = start.withSharedUrl("https://share.com/x")
+
+        assertEquals(listOf("https://share.com/x"), form.urls)
+        assertEquals("Zelda", form.gameInput)
+        assertEquals("Judul", form.title)
+        assertEquals(false, form.showErrors)
+    }
+
+    @Test
     fun `multi URL dari clipboard terpecah per baris`() {
         val (form, outcome) = AddArticleForm().withPasted("https://a.com/1\nhttps://a.com/2\r\nhttps://a.com/3")
 

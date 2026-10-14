@@ -27,6 +27,10 @@ interface ContentNodeDao {
     @Query("SELECT COUNT(*) FROM content_nodes WHERE article_id = :articleId")
     suspend fun countByArticle(articleId: Long): Int
 
+    /** Menghapus node lama satu halaman: id sampai [maxId] (id node baru selalu lebih besar; AUTOINCREMENT). */
+    @Query("DELETE FROM content_nodes WHERE source_page_id = :pageId AND id <= :maxId")
+    suspend fun deleteByPageUpTo(pageId: Long, maxId: Long)
+
     /** Seluruh node satu halaman berurutan; dipakai mencocokkan ulang checkpoint saat halaman diunduh ulang. */
     @Query("SELECT * FROM content_nodes WHERE source_page_id = :pageId ORDER BY display_order")
     suspend fun getByPage(pageId: Long): List<ContentNodeEntity>

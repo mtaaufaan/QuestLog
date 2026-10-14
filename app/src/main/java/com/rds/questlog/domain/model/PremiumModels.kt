@@ -1,5 +1,23 @@
 package com.rds.questlog.domain.model
 
+/**
+ * Keadaan premium yang dipakai guard fitur (SRS-FR-16): [PREMIUM] = is_premium; [LOST] = bukan premium sekarang tetapi
+ * pernah premium (Billing mengonfirmasi tidak ada pembelian aktif, mis. refund); [FREE] = belum pernah premium.
+ * "Tidak terverifikasi" (offline) bukan keadaan sendiri: status terakhir dipertahankan.
+ */
+enum class PremiumState { FREE, PREMIUM, LOST }
+
+/** Fitur premium v1 (SRS-FR-16); [hasUserData] = menyimpan data pengguna yang tetap terbaca bila premium hilang. */
+enum class PremiumFeature(val hasUserData: Boolean) {
+    BOOKMARK(hasUserData = true),
+    NOTE(hasUserData = true),
+    GAME_BINDER(hasUserData = true),
+    AUTO_DETECT(hasUserData = false),
+}
+
+/** Akses ke fitur premium: lengkap, hanya-baca (data lama terbaca, ubah dikunci), atau terkunci (ajakan upgrade). */
+enum class FeatureAccess { FULL, READ_ONLY, LOCKED }
+
 /** Hasil memeriksa pembelian "QuestLog Unlimited" di toko (BillingClient.queryPurchasesAsync). */
 sealed interface PurchaseQuery {
     /** Ada pembelian aktif; [purchaseToken] disimpan sebagai cache verifikasi. */

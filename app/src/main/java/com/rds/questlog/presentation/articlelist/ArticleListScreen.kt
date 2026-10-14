@@ -27,6 +27,7 @@ fun ArticleListScreen(
     onShowPopup: (Popup) -> Unit,
     onDismissPopup: () -> Unit,
     onScrapeStarted: (ScrapeJob) -> Unit,
+    pendingSharedUrl: String? = null,
     viewModel: ArticleListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,7 +56,16 @@ fun ArticleListScreen(
         onOpenUnlock = { onShowPopup(Popup.Unlock) },
     )
 
-    ArticleListPopups(activePopup, uiState, viewModel, navController, onShowPopup, onDismissPopup, onScrapeStarted)
+    ArticleListPopups(
+        activePopup,
+        uiState,
+        viewModel,
+        navController,
+        onShowPopup,
+        onDismissPopup,
+        onScrapeStarted,
+        pendingSharedUrl,
+    )
 }
 
 @Composable
@@ -67,6 +77,7 @@ private fun ArticleListPopups(
     onShowPopup: (Popup) -> Unit,
     onDismissPopup: () -> Unit,
     onScrapeStarted: (ScrapeJob) -> Unit,
+    pendingSharedUrl: String?,
 ) {
     when (activePopup) {
         Popup.GameFilter -> {
@@ -87,7 +98,7 @@ private fun ArticleListPopups(
             hasArticles = uiState.games.sumOf { it.articleCount } > 0,
             onPick = {
                 onDismissPopup()
-                navController.navigate(AddArticle(mode = it.route))
+                navController.navigate(AddArticle(mode = it.route, sharedUrl = pendingSharedUrl))
             },
             onClose = onDismissPopup,
         )

@@ -192,6 +192,10 @@
     <string name="add_article_paste_invalid">Clipboard kosong atau tidak berisi URL https:// yang valid</string>
     <string name="add_article_paste_nothing_new">Tidak ada URL baru: sudah ada di daftar atau daftar sudah penuh</string>
     <string name="add_article_shared_banner">URL dari browser sudah terisi di Hal. 1</string>
+    <string name="add_article_replace_title">Ganti URL yang sudah diisi?</string>
+    <string name="add_article_replace_body">URL dari browser akan menggantikan semua URL di daftar. Game dan judul tidak berubah.</string>
+    <string name="add_article_replace_cancel">Batal</string>
+    <string name="add_article_replace_confirm">Ganti</string>
     <string name="share_no_url">Tidak ada URL https:// yang valid di teks yang dibagikan</string>
     <string name="add_article_limit_article">Limit gratis tercapai (maks. 5 artikel per game).</string>
     <string name="add_article_limit_game">Limit gratis tercapai (maks. 2 game).</string>

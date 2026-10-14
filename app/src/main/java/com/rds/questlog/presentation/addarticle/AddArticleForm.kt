@@ -71,6 +71,9 @@ data class AddArticleForm(
 
     val filledUrlCount: Int get() = urls.count { it.isNotBlank() }
 
+    /** URL dari "Bagikan" menggantikan seluruh daftar URL (Hal. 1); game dan judul tidak berubah. */
+    fun withSharedUrl(url: String) = copy(urls = listOf(url), showErrors = false)
+
     /**
      * Menambahkan URL `https://` dari [clipboard] ke akhir daftar (QL-22): URL yang sudah ada dilewati, hasilnya
      * maksimal [MAX_URLS], dan baris kosong diganti. Mengembalikan form baru beserta hasilnya; form tidak berubah

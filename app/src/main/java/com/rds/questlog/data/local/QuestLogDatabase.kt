@@ -6,6 +6,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.rds.questlog.data.local.dao.AppConfigDao
 import com.rds.questlog.data.local.dao.ArticleDao
+import com.rds.questlog.data.local.dao.ArticleNoteDao
+import com.rds.questlog.data.local.dao.BookmarkDao
 import com.rds.questlog.data.local.dao.CheckpointDao
 import com.rds.questlog.data.local.dao.ContentNodeDao
 import com.rds.questlog.data.local.dao.GameDao
@@ -14,6 +16,8 @@ import com.rds.questlog.data.local.dao.PageLayoutDao
 import com.rds.questlog.data.local.dao.SourcePageDao
 import com.rds.questlog.data.local.entity.AppConfigEntity
 import com.rds.questlog.data.local.entity.ArticleEntity
+import com.rds.questlog.data.local.entity.ArticleNoteEntity
+import com.rds.questlog.data.local.entity.BookmarkEntity
 import com.rds.questlog.data.local.entity.CheckpointEntity
 import com.rds.questlog.data.local.entity.ContentNodeEntity
 import com.rds.questlog.data.local.entity.GameEntity
@@ -30,8 +34,10 @@ import com.rds.questlog.data.local.entity.SourcePageEntity
         CheckpointEntity::class,
         ImageEntity::class,
         AppConfigEntity::class,
+        BookmarkEntity::class,
+        ArticleNoteEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class QuestLogDatabase : RoomDatabase() {
@@ -44,6 +50,8 @@ abstract class QuestLogDatabase : RoomDatabase() {
     abstract fun imageDao(): ImageDao
     abstract fun checkpointDao(): CheckpointDao
     abstract fun appConfigDao(): AppConfigDao
+    abstract fun bookmarkDao(): BookmarkDao
+    abstract fun articleNoteDao(): ArticleNoteDao
 }
 
 /** v1 → v2: alasan gagal per halaman sumber (ditampilkan di Scrape Error Dialog). */
@@ -77,5 +85,31 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
         db.execSQL("DROP TABLE checkpoints")
         db.execSQL("ALTER TABLE checkpoints_new RENAME TO checkpoints")
+    }
+}
+
+/**
+ * v3 -> v4 (v1.0): HANYA menambah tabel `bookmarks` (banyak per artikel) dan `article_notes` (satu per artikel).
+ * Tidak ada tabel atau kolom MVP yang diubah atau dihapus, jadi seluruh data lama utuh. `bookmarks.node_id` tanpa
+ * CASCADE: dipindahkan manual saat halaman dihapus atau diunduh ulang. Checklist ditunda dari v1 (tidak dibuat).
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS bookmarks (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, article_id INTEGER NOT NULL, " +
+                "node_id INTEGER NOT NULL, fallback_order INTEGER NOT NULL, label TEXT NOT NULL, " +
+                "snippet TEXT NOT NULL DEFAULT '', created_at INTEGER NOT NULL, " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(node_id) REFERENCES content_nodes(id) ON UPDATE NO ACTION ON DELETE NO ACTION)",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_bookmarks_article ON bookmarks (article_id)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_bookmarks_node ON bookmarks (node_id)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS article_notes (" +
+                "article_id INTEGER NOT NULL, content TEXT NOT NULL DEFAULT '', updated_at INTEGER NOT NULL, " +
+                "PRIMARY KEY(article_id), " +
+                "FOREIGN KEY(article_id) REFERENCES articles(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+        )
     }
 }

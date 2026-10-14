@@ -5,6 +5,7 @@ import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.Game
 import com.rds.questlog.domain.model.GameTarget
 import com.rds.questlog.domain.model.PageFailure
+import com.rds.questlog.domain.model.PremiumState
 import com.rds.questlog.domain.model.PurchaseQuery
 import com.rds.questlog.domain.model.PurchaseResult
 import com.rds.questlog.domain.model.ReadMode
@@ -23,6 +24,7 @@ import com.rds.questlog.domain.scraper.ScraperEngine
 import com.rds.questlog.domain.scraper.ScrapingResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
@@ -162,13 +164,22 @@ class FakeBillingService(
 /** app_config di memori: [premium] bisa diubah dan Flow-nya ikut berubah, seperti tabel Room. */
 class FakeAppConfigRepository(premium: Boolean = false, private val failWith: Throwable? = null) : AppConfigRepository {
     private val state = MutableStateFlow(premium)
+    private val wasPremium = MutableStateFlow(premium)
     var token: String? = null
     var verifiedAt: Long? = null
     var writes = 0
     override fun observeIsPremium(): Flow<Boolean> = state
+    override fun observePremiumState(): Flow<PremiumState> = combine(state, wasPremium) { premium, was ->
+        when {
+            premium -> PremiumState.PREMIUM
+            was -> PremiumState.LOST
+            else -> PremiumState.FREE
+        }
+    }
     override suspend fun setPremium(isPremium: Boolean, purchaseToken: String?, verifiedAt: Long) {
         failWith?.let { throw it }
         writes++
+        if (isPremium || state.value) wasPremium.value = true
         state.value = isPremium
         token = purchaseToken
         this.verifiedAt = verifiedAt
