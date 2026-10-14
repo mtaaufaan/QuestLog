@@ -14,6 +14,10 @@ interface AppConfigDao {
     @Query("SELECT value FROM app_config WHERE key = :key")
     fun observe(key: String): Flow<String?>
 
+    /** Nilai satu key sekali baca; null bila belum pernah ditulis. */
+    @Query("SELECT value FROM app_config WHERE key = :key")
+    suspend fun get(key: String): String?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(rows: List<AppConfigEntity>)
 

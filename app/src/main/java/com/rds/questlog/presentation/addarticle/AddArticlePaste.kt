@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,7 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.presentation.components.QlDialog
+import com.rds.questlog.presentation.components.QlGhostButton
 import com.rds.questlog.presentation.components.QlIcons
+import com.rds.questlog.presentation.components.QlOutlineButton
+import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.QuestLogTheme
 
 /** Tombol "Tempel" di samping hitungan URL (AddArticle.dc.html v1): isi daftar dari clipboard hanya saat diketuk. */
@@ -80,6 +85,50 @@ internal fun SharedUrlBanner() {
             color = c.accentText,
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.5.sp, lineHeight = 17.sp),
         )
+    }
+}
+
+/**
+ * URL dari "Bagikan" yang tiba saat S2 sudah terbuka (QL-21): daftar masih kosong → langsung mengisi Hal. 1;
+ * sudah berisi → [onNeedsConfirm] (tidak menimpa tanpa konfirmasi). [onHandled] dipanggil sekali setelah diproses.
+ */
+@Composable
+internal fun IncomingSharedUrl(
+    url: String?,
+    hasFilledUrls: Boolean,
+    onApply: (String) -> Unit,
+    onNeedsConfirm: (String) -> Unit,
+    onHandled: () -> Unit,
+) {
+    LaunchedEffect(url) {
+        val incoming = url ?: return@LaunchedEffect
+        if (hasFilledUrls) onNeedsConfirm(incoming) else onApply(incoming)
+        onHandled()
+    }
+}
+
+/** Konfirmasi sebelum URL dari "Bagikan" menggantikan URL yang sudah diisi di S2 (QL-21). */
+@Composable
+internal fun ReplaceUrlsDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    QlDialog(onDismiss = onDismiss, maxWidth = 320.dp) {
+        Text(
+            stringResource(R.string.add_article_replace_title),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleLarge.copy(fontFamily = CormorantGaramond, fontSize = 24.sp),
+            modifier = Modifier.padding(bottom = 10.dp),
+        )
+        Text(
+            stringResource(R.string.add_article_replace_body),
+            color = QuestLogTheme.colors.textSecondary,
+            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        ) {
+            QlGhostButton(stringResource(R.string.add_article_replace_cancel), onDismiss)
+            QlOutlineButton(stringResource(R.string.add_article_replace_confirm), onConfirm)
+        }
     }
 }
 

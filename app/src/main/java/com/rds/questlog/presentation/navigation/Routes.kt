@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 object ArticleList
 
 @Serializable
-data class AddArticle(val mode: String = "new", val targetArticleId: Long? = null)
+data class AddArticle(val mode: String = "new", val targetArticleId: Long? = null, val sharedUrl: String? = null)
 
 @Serializable
 data class Reader(val articleId: Long, val resumeFrom: String = "last")
