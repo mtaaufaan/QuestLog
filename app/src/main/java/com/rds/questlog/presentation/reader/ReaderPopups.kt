@@ -37,6 +37,8 @@ class ReaderToolsData(
     val article: ArticleUiModel,
     val darkMode: Boolean,
     val bookmarks: List<BookmarkUi>,
+    /** Artikel utama game ini (dari Binder sementara); null = belum ada. */
+    val mainArticleId: Long?,
     /** null = catatan belum dimuat; panel catatan menunggu agar tidak menimpa isi yang ada. */
     val note: String?,
 )
@@ -54,6 +56,7 @@ class ReaderToolsCallbacks(
     val renameBookmark: (Long, String) -> Unit,
     val deleteBookmark: (Long) -> Unit,
     val openBookmark: (BookmarkUi) -> Unit,
+    val setMainArticle: () -> Unit,
     val note: ReaderNoteCallbacks,
 )
 
@@ -73,12 +76,15 @@ fun ReaderPopups(
             Popup.ReaderTools -> ReaderToolsSheet(
                 premium = data.premium,
                 snippet = state.position.snippet,
-                hasGameProgress = false,
-                isGameProgressHere = false,
+                hasGameProgress = data.mainArticleId != null,
+                isGameProgressHere = data.mainArticleId == data.article.id,
                 hasNote = !data.note.isNullOrEmpty(),
                 onAction = { action ->
                     when (action) {
-                        ReaderToolAction.PROGRESS -> onDismiss()
+                        ReaderToolAction.PROGRESS -> {
+                            callbacks.setMainArticle()
+                            onDismiss()
+                        }
                         ReaderToolAction.NOTE ->
                             onShowPopup(if (data.premium == PremiumUiState.FREE) Popup.Unlock else Popup.NotePanel)
                         ReaderToolAction.DISPLAY -> onShowPopup(Popup.DisplaySettings)

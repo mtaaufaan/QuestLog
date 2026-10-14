@@ -24,6 +24,9 @@ class PopupSaverTest {
         Popup.BookmarkLabel(5, fromPanel = false),
         Popup.NotePanel,
         Popup.DeleteGame(13),
+        Popup.CategoryName(null),
+        Popup.CategoryName(4),
+        Popup.AssignCategory(21),
     )
 
     private fun save(popup: Popup?): Any? = with(PopupSaver) { SaverScope { true }.save(popup) }

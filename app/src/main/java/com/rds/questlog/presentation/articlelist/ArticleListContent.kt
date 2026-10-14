@@ -98,7 +98,7 @@ fun ArticleListContent(
                             SectionHeader(title, section.articles.size, muted = title == uncategorized)
                         }
                     }
-                    items(section.articles, key = { it.id }) { article ->
+                    items(section.articles, key = { "${section.title}-${it.id}" }) { article ->
                         ArticleRow(
                             article = article,
                             onTap = { onArticleTap(article) },

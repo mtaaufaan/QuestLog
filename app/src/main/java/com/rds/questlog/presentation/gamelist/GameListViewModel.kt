@@ -109,9 +109,6 @@ class GameListViewModel @Inject constructor(
         }
     }
 
-    /** Game Binder belum dibangun (Sprint 9); ketukan pengguna premium hanya memberi tahu. */
-    fun onBinderTapped() = showSnackbar(R.string.binder_coming_soon)
-
     private fun showSnackbar(@StringRes message: Int) {
         snackbarJob?.cancel()
         snackbar.value = message

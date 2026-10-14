@@ -205,6 +205,9 @@ class ReaderViewModel @Inject constructor(
         viewModelScope.launch { saveNote(content) }
     }
 
+    /** Umpan balik setelah artikel dijadikan artikel utama game. */
+    fun onMainArticleSet() = showSnackbar(R.string.reader_snackbar_main_set)
+
     fun deleteNote() = launchWrite { tools.notes.delete(articleId) }
 
     fun setFontSize(sizeSp: Int) = launchWrite { actions.setFontSize(sizeSp) }

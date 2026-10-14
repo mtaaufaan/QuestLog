@@ -7,14 +7,14 @@ import org.junit.Test
 
 class ArticleSectionsTest {
 
-    private fun article(id: Long, category: String? = null) = ArticleUiModel(
+    private fun article(id: Long, vararg categories: String) = ArticleUiModel(
         id = id,
         gameId = 1,
         gameName = "G",
         title = "A$id",
         status = ArticleStatus.READY,
         pages = emptyList(),
-        categoryName = category,
+        categories = categories.toList(),
     )
 
     private val articles = listOf(article(1, "Utama"), article(2), article(3, "Koleksi"), article(4, "Utama"))
@@ -39,6 +39,16 @@ class ArticleSectionsTest {
 
         assertEquals(listOf("Utama", "Koleksi", "Tanpa kategori"), result.map { it.title })
         assertEquals(listOf(listOf(1L, 4L), listOf(3L), listOf(2L)), result.map { s -> s.articles.map { it.id } })
+    }
+
+    @Test
+    fun `artikel dalam beberapa kategori tampil di tiap kategorinya`() {
+        val multi = listOf(article(1, "A", "B"), article(2, "B"))
+
+        val result = groupArticles(multi, enabled = true, uncategorized = "Tanpa")
+
+        assertEquals(listOf("A", "B"), result.map { it.title })
+        assertEquals(listOf(listOf(1L), listOf(1L, 2L)), result.map { s -> s.articles.map { it.id } })
     }
 
     @Test

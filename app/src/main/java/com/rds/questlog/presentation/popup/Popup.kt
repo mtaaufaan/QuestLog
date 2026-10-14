@@ -25,4 +25,11 @@ sealed interface Popup {
 
     // Sprint 8 — S0 Game List
     data class DeleteGame(val gameId: Long) : Popup
+
+    // Sprint 9 — Game Binder (v1.1)
+    /** Category Name Sheet: [categoryId] null = kategori baru, selain itu ganti nama. */
+    data class CategoryName(val categoryId: Long?) : Popup
+
+    /** Assign Category Sheet untuk satu artikel. */
+    data class AssignCategory(val articleId: Long) : Popup
 }

@@ -52,8 +52,8 @@ data class ArticleUiModel(
     val hasNote: Boolean = false,
     /** Artikel utama game (label "Artikel utama"; satu per game). */
     val isMainArticle: Boolean = false,
-    /** Nama kategori Binder (premium); null = tanpa kategori. */
-    val categoryName: String? = null,
+    /** Nama kategori Binder (premium) tempat artikel berada; kosong = tanpa kategori. */
+    val categories: List<String> = emptyList(),
 ) {
     val totalPageCount: Int get() = pages.size
     val failedPageCount: Int get() = pages.count { it.status == PageStatus.FAILED }

@@ -6,11 +6,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.rds.questlog.presentation.binder.AssignCategorySheet
+import com.rds.questlog.presentation.binder.BinderDummy
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ScrapeJob
 import com.rds.questlog.presentation.navigation.AddArticle
+import com.rds.questlog.presentation.navigation.Binder
 import com.rds.questlog.presentation.navigation.GameList
 import com.rds.questlog.presentation.navigation.Reader
 import com.rds.questlog.presentation.popup.Popup
@@ -33,9 +36,11 @@ fun ArticleListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val game = uiState.games.firstOrNull { it.id == uiState.selectedGameFilter }
+    // Artikel utama dan kategori masih dari penyimpanan sementara Binder (tahap UI Sprint 9).
+    val articles = withBinderData(uiState.articles)
     ArticleListContent(
         gameName = game?.name.orEmpty(),
-        articles = uiState.articles,
+        articles = articles,
         totalArticles = game?.articleCount ?: 0,
         premium = uiState.premium,
         query = uiState.query,
@@ -45,7 +50,11 @@ fun ArticleListScreen(
         onBack = { navController.popBackStack<GameList>(inclusive = false) },
         onQuery = viewModel::onQueryChange,
         onOpenBinder = {
-            if (uiState.premium == PremiumUiState.FREE) onShowPopup(Popup.Unlock) else viewModel.onBinderTapped()
+            if (uiState.premium == PremiumUiState.FREE) {
+                onShowPopup(Popup.Unlock)
+            } else {
+                game?.let { navController.navigate(Binder(it.id)) }
+            }
         },
         onArticleTap = { article ->
             when (article.status) {
@@ -96,9 +105,24 @@ private fun ArticleListPopups(
         is Popup.ArticleActions -> uiState.articleById(activePopup.articleId)?.let { article ->
             ArticleActionsSheet(
                 article = article,
+                premium = uiState.premium,
+                categoryNames = BinderDummy.categoryNamesOf(article.id, article.gameId),
                 onAction = { action ->
-                    onDismissPopup()
-                    navController.perform(action, article, onShowPopup)
+                    if (action == ArticleAction.CATEGORIES) {
+                        // Gratis: Unlock Sheet (data tidak berubah); premium: Assign Category Sheet.
+                        onShowPopup(
+                            if (uiState.premium == PremiumUiState.FREE) {
+                                Popup.Unlock
+                            } else {
+                                Popup.AssignCategory(
+                                    article.id,
+                                )
+                            },
+                        )
+                    } else {
+                        onDismissPopup()
+                        navController.perform(action, article, onShowPopup)
+                    }
                 },
                 onClose = onDismissPopup,
             )
@@ -160,6 +184,19 @@ private fun ArticleManagementPopups(
         is Popup.ManagePages, is Popup.DeletePage -> uiState.articleById(activePopup.managedArticleId())?.let {
             ManagePagesPopups(it, activePopup.deletingPageId(), viewModel, onShowPopup, onDismissPopup, onScrapeStarted)
         }
+        is Popup.AssignCategory -> uiState.articleById(activePopup.articleId)?.let { article ->
+            AssignCategorySheet(
+                articleTitle = article.title,
+                gameName = article.gameName,
+                categories = BinderDummy.categoriesOf(article.gameId),
+                selectedIds = BinderDummy.assignments[article.id].orEmpty(),
+                onSave = {
+                    BinderDummy.assign(article.id, article.gameId, it)
+                    onDismissPopup()
+                },
+                onClose = onDismissPopup,
+            )
+        }
         is Popup.RefreshArticle -> uiState.articleById(activePopup.articleId)?.let { article ->
             RefreshArticleDialog(
                 articleTitle = article.title,
@@ -193,8 +230,18 @@ private fun NavController.perform(action: ArticleAction, article: ArticleUiModel
         ArticleAction.OPEN -> openReader(article, resumeFrom = "last")
         ArticleAction.APPEND -> navigate(AddArticle(mode = "append", targetArticleId = article.id))
         ArticleAction.EDIT -> onShowPopup(Popup.EditArticle(article.id))
+        ArticleAction.CATEGORIES -> onShowPopup(Popup.AssignCategory(article.id))
         ArticleAction.PAGES -> onShowPopup(Popup.ManagePages(article.id))
         ArticleAction.REFRESH -> onShowPopup(Popup.RefreshArticle(article.id))
         ArticleAction.DELETE -> onShowPopup(Popup.DeleteArticle(article.id))
     }
+}
+
+/** Menempelkan penanda artikel utama dan nama kategori dari penyimpanan sementara Binder ke daftar artikel. */
+@Composable
+private fun withBinderData(articles: List<ArticleUiModel>): List<ArticleUiModel> = articles.map { article ->
+    article.copy(
+        isMainArticle = BinderDummy.mainArticles[article.gameId]?.articleId == article.id,
+        categories = BinderDummy.categoryNamesOf(article.id, article.gameId),
+    )
 }

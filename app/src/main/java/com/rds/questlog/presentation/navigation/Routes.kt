@@ -6,6 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 object GameList
 
+/** S4 Game Binder (premium): kategori artikel satu game. */
+@Serializable
+data class Binder(val gameId: Long)
+
 /** S1 Halaman Game: artikel milik satu game. */
 @Serializable
 data class ArticleList(val gameId: Long)

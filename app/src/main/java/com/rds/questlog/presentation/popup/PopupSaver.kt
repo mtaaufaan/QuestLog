@@ -26,6 +26,8 @@ private const val BOOKMARK_PANEL = 12L
 private const val BOOKMARK_LABEL = 13L
 private const val NOTE_PANEL = 14L
 private const val DELETE_GAME = 15L
+private const val CATEGORY_NAME = 16L
+private const val ASSIGN_CATEGORY = 17L
 private const val NO_BOOKMARK = -1L
 
 private fun encode(popup: Popup): ArrayList<Long> = when (popup) {
@@ -39,8 +41,16 @@ private fun encode(popup: Popup): ArrayList<Long> = when (popup) {
     is Popup.ManagePages -> arrayListOf(MANAGE_PAGES, popup.articleId)
     is Popup.DeletePage -> arrayListOf(DELETE_PAGE, popup.articleId, popup.pageId)
     is Popup.RefreshArticle -> arrayListOf(REFRESH_ARTICLE, popup.articleId)
-    is Popup.DeleteGame -> arrayListOf(DELETE_GAME, popup.gameId)
+    is Popup.DeleteGame, is Popup.CategoryName, is Popup.AssignCategory -> encodeGameAndBinder(popup)
     Popup.ReaderTools, Popup.BookmarkPanel, is Popup.BookmarkLabel, Popup.NotePanel -> encodeReader(popup)
+}
+
+/** Popup S0 dan Game Binder (Sprint 8-9); [Popup.CategoryName] menyimpan id kategori ([NO_BOOKMARK] = baru). */
+private fun encodeGameAndBinder(popup: Popup): ArrayList<Long> = when (popup) {
+    is Popup.DeleteGame -> arrayListOf(DELETE_GAME, popup.gameId)
+    is Popup.CategoryName -> arrayListOf(CATEGORY_NAME, popup.categoryId ?: NO_BOOKMARK)
+    is Popup.AssignCategory -> arrayListOf(ASSIGN_CATEGORY, popup.articleId)
+    else -> error("Bukan popup game/Binder: $popup")
 }
 
 /** Popup Reader (Sprint 7); [Popup.BookmarkLabel] menyimpan id bookmark ([NO_BOOKMARK] = tambah) dan asal panel. */
@@ -86,5 +96,7 @@ private fun withArticle(code: Long, articleId: Long): Popup? = when (code) {
     MANAGE_PAGES -> Popup.ManagePages(articleId)
     REFRESH_ARTICLE -> Popup.RefreshArticle(articleId)
     DELETE_GAME -> Popup.DeleteGame(articleId)
+    CATEGORY_NAME -> Popup.CategoryName(articleId.takeIf { it != NO_BOOKMARK })
+    ASSIGN_CATEGORY -> Popup.AssignCategory(articleId)
     else -> null
 }

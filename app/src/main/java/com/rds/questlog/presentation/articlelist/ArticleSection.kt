@@ -7,13 +7,13 @@ data class ArticleSection(val title: String?, val articles: List<ArticleUiModel>
 
 /**
  * Daftar S1 per kategori Binder: hanya bila [enabled] (premium, tanpa pencarian) dan ada artikel berkategori. Urutan
- * kategori mengikuti kemunculan pertama, "Tanpa kategori" (title null pada [ArticleSection.title] untuk daftar polos
- * saja) selalu terakhir dan memakai [uncategorized] sebagai judul.
+ * kategori mengikuti kemunculan pertama; artikel yang masuk beberapa kategori tampil di tiap kategorinya. Artikel
+ * tanpa kategori masuk kelompok terakhir berjudul [uncategorized].
  */
 fun groupArticles(articles: List<ArticleUiModel>, enabled: Boolean, uncategorized: String): List<ArticleSection> {
-    if (!enabled || articles.none { it.categoryName != null }) return listOf(ArticleSection(null, articles))
-    val byCategory = articles.filter { it.categoryName != null }.groupBy { it.categoryName }
-    val sections = byCategory.map { (name, list) -> ArticleSection(name, list) }
-    val rest = articles.filter { it.categoryName == null }
+    if (!enabled || articles.all { it.categories.isEmpty() }) return listOf(ArticleSection(null, articles))
+    val names = articles.flatMap { it.categories }.distinct()
+    val sections = names.map { name -> ArticleSection(name, articles.filter { name in it.categories }) }
+    val rest = articles.filter { it.categories.isEmpty() }
     return if (rest.isEmpty()) sections else sections + ArticleSection(uncategorized, rest)
 }

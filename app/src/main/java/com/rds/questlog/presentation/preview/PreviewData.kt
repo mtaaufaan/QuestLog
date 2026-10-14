@@ -120,8 +120,8 @@ object PreviewData {
     /** Artikel game 1 dengan kategori Binder (premium): dua kategori dan satu tanpa kategori. */
     val categorizedArticles: List<ArticleUiModel> = articles.filter { it.gameId == 1L }.map {
         when (it.id) {
-            1L -> it.copy(categoryName = "Walkthrough Utama")
-            2L -> it.copy(categoryName = "Koleksi")
+            1L -> it.copy(categories = listOf("Walkthrough Utama"))
+            2L -> it.copy(categories = listOf("Koleksi", "Walkthrough Utama"))
             else -> it
         }
     }
