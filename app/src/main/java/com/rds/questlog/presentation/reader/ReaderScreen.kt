@@ -67,6 +67,10 @@ fun ReaderScreen(
         onQuickAddBookmark = {
             onShowPopup(if (state.premium == PremiumUiState.FREE) Popup.Unlock else Popup.BookmarkLabel(null, false))
         },
+        recentLabels = bookmarks.sortedByDescending { it.id }.map { it.label }.distinct(),
+        bookmarkedNodeIds = bookmarks.filter { it.articleId == articleId }.map { it.nodeId }.toSet(),
+        onAddBookmarkAt = viewModel::addBookmark,
+        onUnlock = { onShowPopup(Popup.Unlock) },
         onPositionChange = { tools.position = it },
     )
 
