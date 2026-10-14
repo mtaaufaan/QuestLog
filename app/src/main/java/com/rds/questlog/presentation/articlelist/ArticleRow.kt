@@ -7,7 +7,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -223,6 +222,9 @@ private fun ScrapingProgress(article: ArticleUiModel) {
     }
 }
 
+// Emas gelap tetap (sama di mode terang dan gelap), seperti ikon checkpoint di Article Actions Sheet.
+private val ResumeIconColor = Color(0xFFA06F24)
+
 @Composable
 private fun ResumeButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = QuestLogTheme.colors
@@ -240,7 +242,7 @@ private fun ResumeButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(QlIcons.BookmarkFilled, contentDescription = null, modifier = Modifier.size(14.dp))
+        Icon(QlIcons.Anchor, contentDescription = null, tint = ResumeIconColor, modifier = Modifier.size(14.dp))
         Text(
             text = stringResource(R.string.article_list_resume),
             color = c.accentText,

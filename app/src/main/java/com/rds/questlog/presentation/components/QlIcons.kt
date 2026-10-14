@@ -34,7 +34,12 @@ object QlIcons {
         "M5,11h14a2,2 0 0 1 2,2v7a2,2 0 0 1 -2,2H5a2,2 0 0 1 -2,-2v-7a2,2 0 0 1 2,-2z",
         "M7 11V7a5 5 0 0 1 10 0v4",
     )
-    val Bookmark = lineIcon("Bookmark", 1.7f, BOOKMARK_PATH)
+
+    /** Checkpoint (jangkar): tiang, lengkung, dan cincin; garis saja, beri warna lewat `Icon(tint = ...)`. */
+    val Anchor = anchorIcon("Anchor", 1.7f)
+
+    /** Jangkar bergaris tebal untuk ukuran kecil (penanda checkpoint inline 12dp). */
+    val AnchorBold = anchorIcon("AnchorBold", 2f)
     val BookOpen = lineIcon(
         "BookOpen",
         1.7f,
@@ -111,37 +116,16 @@ object QlIcons {
         "M12 17h.01",
     )
 
-    /** Bookmark terisi yang bisa diberi warna lewat `Icon(tint = ...)` (checkpoint aktif di Reader). */
-    val BookmarkSolid = ImageVector.Builder("BookmarkSolid", 24.dp, 24.dp, 24f, 24f).apply {
-        addPath(
-            pathData = PathParser().parsePathString(BOOKMARK_PATH).toNodes(),
-            fill = SolidColor(Color.Black),
-            stroke = SolidColor(Color.Black),
-            strokeLineWidth = 1.6f,
-            strokeLineJoin = StrokeJoin.Round,
-        )
-    }.build()
-
     /** Tiga titik vertikal (terisi). */
     val MoreVert = ImageVector.Builder("MoreVert", 24.dp, 24.dp, 24f, 24f).apply {
         listOf(5f, 12f, 19f).forEach { cy ->
             addPath(PathParser().parsePathString(circle(12f, cy, 1.6f)).toNodes(), fill = SolidColor(Color.Black))
         }
     }.build()
-
-    /** Bookmark berwarna tetap (emas) untuk tombol "Lanjutkan Baca"; tampilkan dengan `Image`, bukan `Icon`. */
-    val BookmarkFilled = ImageVector.Builder("BookmarkFilled", 24.dp, 24.dp, 24f, 24f).apply {
-        addPath(
-            pathData = PathParser().parsePathString(BOOKMARK_PATH).toNodes(),
-            fill = SolidColor(Color(0xFFE1AD66)),
-            stroke = SolidColor(Color(0xFFA06F24)),
-            strokeLineWidth = 1.6f,
-            strokeLineJoin = StrokeJoin.Round,
-        )
-    }.build()
 }
 
-private const val BOOKMARK_PATH = "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"
+private fun anchorIcon(name: String, strokeWidth: Float) =
+    lineIcon(name, strokeWidth, "M12 22V8", "M5 12H2a10 10 0 0 0 20 0h-3", circle(12f, 5f, 3f))
 
 private fun circle(cx: Float, cy: Float, r: Float) = "M${cx - r},${cy}a$r,$r 0 1,0 ${2 * r},0a$r,$r 0 1,0 ${-2 * r},0z"
 

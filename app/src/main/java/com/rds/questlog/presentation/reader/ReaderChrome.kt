@@ -1,5 +1,7 @@
 package com.rds.questlog.presentation.reader
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,11 +97,12 @@ fun ReaderHeader(
             )
         }
         IconAction(
-            icon = if (hasCheckpoint) QlIcons.BookmarkSolid else QlIcons.Bookmark,
+            icon = QlIcons.Anchor,
             description = stringResource(R.string.reader_checkpoint),
             tint = c.accentLine,
-            size = 21,
+            size = 24,
             enabled = actionsEnabled,
+            highlighted = hasCheckpoint,
             onClick = onCheckpoint,
         )
         IconAction(
@@ -119,16 +122,28 @@ private fun IconAction(
     tint: Color,
     size: Int,
     enabled: Boolean = true,
+    highlighted: Boolean = false,
     onClick: () -> Unit,
 ) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
+    val c = QuestLogTheme.colors
+    // Latar bertint (accentTint) menandai aksi yang sedang aktif, mis. checkpoint sudah dipasang; berganti 200 ms.
+    val background by animateColorAsState(
+        targetValue = when {
+            pressed -> c.hover
+            highlighted -> c.accentTint
+            else -> Color.Transparent
+        },
+        animationSpec = tween(HIGHLIGHT_MS),
+        label = "iconActionBackground",
+    )
     Box(
         modifier = Modifier
             .size(44.dp)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .clip(CircleShape)
-            .background(if (pressed) QuestLogTheme.colors.hover else Color.Transparent)
+            .background(background)
             .clickable(
                 interactionSource = source,
                 indication = null,
@@ -141,6 +156,8 @@ private fun IconAction(
         Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(size.dp))
     }
 }
+
+private const val HIGHLIGHT_MS = 200
 
 /** Garis progres baca setinggi 2dp di bawah header. [percent] 0–100. */
 @Composable

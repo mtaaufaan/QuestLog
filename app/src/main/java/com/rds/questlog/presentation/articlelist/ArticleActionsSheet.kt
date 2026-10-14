@@ -82,7 +82,7 @@ fun ArticleActionsSheet(article: ArticleUiModel, onAction: (ArticleAction) -> Un
             HorizontalDivider(color = c.divider)
             Column(Modifier.padding(top = 6.dp)) {
                 if (isReady && article.checkpointNodeId != null) {
-                    ActionRow(QlIcons.Bookmark, stringResource(R.string.article_actions_resume), Color(0xFFA06F24)) {
+                    ActionRow(QlIcons.Anchor, stringResource(R.string.article_actions_resume), Color(0xFFA06F24)) {
                         onAction(ArticleAction.RESUME)
                     }
                 }
