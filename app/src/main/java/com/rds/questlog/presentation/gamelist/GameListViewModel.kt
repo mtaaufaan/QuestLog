@@ -4,7 +4,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rds.questlog.R
+import com.rds.questlog.domain.model.ContinueGameResult
 import com.rds.questlog.domain.usecase.article.GetArticlesUseCase
+import com.rds.questlog.domain.usecase.binder.ContinueGameUseCase
 import com.rds.questlog.domain.usecase.game.DeleteGameUseCase
 import com.rds.questlog.domain.usecase.game.GetGamesUseCase
 import com.rds.questlog.domain.usecase.premium.PremiumGuard
@@ -17,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +30,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -51,11 +55,16 @@ class GameListViewModel @Inject constructor(
     getArticles: GetArticlesUseCase,
     premiumGuard: PremiumGuard,
     private val deleteGameUseCase: DeleteGameUseCase,
+    private val continueGameUseCase: ContinueGameUseCase,
     private val mapper: ArticleUiMapper,
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
     private val snackbar = MutableStateFlow<Int?>(null)
+    private val openArticle = Channel<Long>(Channel.BUFFERED)
+
+    /** Artikel utama yang harus dibuka Reader setelah Lanjutkan Game diketuk. */
+    val articleToOpen: Flow<Long> = openArticle.receiveAsFlow()
     private var snackbarJob: Job? = null
 
     private val everything: Flow<List<ArticleUiModel>> = getArticles("", null)
@@ -99,6 +108,17 @@ class GameListViewModel @Inject constructor(
     }
 
     fun onScrapingArticleTapped() = showSnackbar(R.string.article_list_snackbar_scraping)
+
+    /** Lanjutkan Game (QL-31): membuka artikel utama, atau snackbar bila masih diproses / sudah dihapus. */
+    fun continueGame(gameId: Long) {
+        viewModelScope.launch {
+            when (val result = continueGameUseCase(gameId)) {
+                is ContinueGameResult.Open -> openArticle.send(result.articleId)
+                ContinueGameResult.StillScraping -> showSnackbar(R.string.game_list_main_scraping)
+                ContinueGameResult.ArticleGone -> showSnackbar(R.string.game_list_main_gone)
+            }
+        }
+    }
 
     /** Menghapus game beserta seluruh artikel dan data turunannya setelah konfirmasi di Delete Game Dialog. */
     fun deleteGame(gameId: Long) {

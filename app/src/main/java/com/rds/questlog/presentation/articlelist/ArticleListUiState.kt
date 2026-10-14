@@ -1,6 +1,7 @@
 package com.rds.questlog.presentation.articlelist
 
 import androidx.annotation.StringRes
+import com.rds.questlog.presentation.binder.BinderCategoryUi
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.GameUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
@@ -13,6 +14,9 @@ data class ArticleListUiState(
     val selectedGameFilter: Long? = null,
     val query: String = "",
     val premium: PremiumUiState = PremiumUiState.FREE,
+    /** Kategori Binder game ini dan penetapan artikelnya (id artikel -> id kategori). */
+    val categories: List<BinderCategoryUi> = emptyList(),
+    val assignments: Map<Long, Set<Long>> = emptyMap(),
     val isLoading: Boolean = false,
     /** Pesan toast yang sedang tampil; dikosongkan ViewModel setelah ±2,6 detik. */
     @StringRes val snackbar: Int? = null,

@@ -105,6 +105,8 @@
     <string name="relative_weeks">%1$d minggu lalu</string>
     <string name="relative_months">%1$d bulan lalu</string>
     <string name="game_list_snackbar_deleted">Game dihapus</string>
+    <string name="game_list_main_scraping">Artikel utama masih diproses</string>
+    <string name="game_list_main_gone">Artikel utama sudah dihapus</string>
     <string name="game_list_snackbar_delete_failed">Gagal menghapus game. Coba lagi.</string>
     <string name="article_list_partial">%1$d halaman gagal</string>
     <string name="article_list_progress">Memproses… %1$d/%2$d</string>

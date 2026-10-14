@@ -1,5 +1,6 @@
 package com.rds.questlog.presentation.binder
 
+import com.rds.questlog.domain.model.normalizeCategoryName
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

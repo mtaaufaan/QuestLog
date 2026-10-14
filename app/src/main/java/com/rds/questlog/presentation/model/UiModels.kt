@@ -19,6 +19,7 @@ data class GameUiModel(
     val lastWhen: String? = null,
     /** Judul artikel utama game (tombol "Lanjutkan Game · …"); null = belum ada artikel utama. */
     val mainArticleTitle: String? = null,
+    val mainArticleId: Long? = null,
 )
 
 data class PageUiModel(
@@ -52,6 +53,8 @@ data class ArticleUiModel(
     val hasNote: Boolean = false,
     /** Artikel utama game (label "Artikel utama"; satu per game). */
     val isMainArticle: Boolean = false,
+    /** Artikel utama game ini (mungkin artikel lain); null = belum ada. */
+    val gameMainArticleId: Long? = null,
     /** Nama kategori Binder (premium) tempat artikel berada; kosong = tanpa kategori. */
     val categories: List<String> = emptyList(),
 ) {

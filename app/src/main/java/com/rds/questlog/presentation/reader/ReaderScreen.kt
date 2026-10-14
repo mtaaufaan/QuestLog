@@ -4,13 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.rds.questlog.presentation.binder.BinderDummy
-import com.rds.questlog.presentation.binder.MainArticleRef
 import com.rds.questlog.presentation.displaysettings.DisplaySettingsSheet
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
@@ -78,11 +75,9 @@ fun ReaderScreen(
         article = article,
         darkMode = state.darkMode,
         bookmarks = bookmarks,
-        mainArticleId = BinderDummy.mainArticles[article.gameId]?.articleId,
+        mainArticleId = article.gameMainArticleId,
         note = note,
     )
-    // Callback di-remember, jadi artikel dibaca lewat state agar tidak memakai placeholder saat data belum termuat.
-    val latestArticle by rememberUpdatedState(article)
     val callbacks = remember(viewModel, articleId) {
         ReaderToolsCallbacks(
             addBookmark = { label ->
@@ -95,12 +90,7 @@ fun ReaderScreen(
                 }
             },
             renameBookmark = viewModel::renameBookmark,
-            setMainArticle = {
-                // Penyimpanan sementara Binder; menjadi UseCase di tahap wiring.
-                val current = latestArticle
-                BinderDummy.setMainArticle(current.gameId, MainArticleRef(articleId, current.title))
-                viewModel.onMainArticleSet()
-            },
+            setMainArticle = viewModel::setMainArticle,
             deleteBookmark = viewModel::deleteBookmark,
             openBookmark = { bookmark ->
                 onDismissPopup()

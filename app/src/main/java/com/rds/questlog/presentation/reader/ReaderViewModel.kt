@@ -11,6 +11,7 @@ import com.rds.questlog.domain.model.Bookmark
 import com.rds.questlog.domain.model.DisplayPreferences
 import com.rds.questlog.domain.model.ReadMode as DomainReadMode
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
+import com.rds.questlog.domain.usecase.binder.SetMainArticleUseCase
 import com.rds.questlog.domain.usecase.bookmark.AddBookmarkUseCase
 import com.rds.questlog.domain.usecase.bookmark.DeleteBookmarkUseCase
 import com.rds.questlog.domain.usecase.bookmark.ObserveGameBookmarksUseCase
@@ -84,6 +85,7 @@ class ReaderToolsActions @Inject constructor(
     val bookmarks: BookmarkActions,
     val notes: NoteActions,
     val premium: PremiumGuard,
+    val mainArticle: SetMainArticleUseCase,
 )
 
 data class ReaderUiState(
@@ -205,8 +207,14 @@ class ReaderViewModel @Inject constructor(
         viewModelScope.launch { saveNote(content) }
     }
 
-    /** Umpan balik setelah artikel dijadikan artikel utama game. */
-    fun onMainArticleSet() = showSnackbar(R.string.reader_snackbar_main_set)
+    /** Menjadikan artikel ini artikel utama game-nya (gratis); yang lama tertimpa. */
+    fun setMainArticle() {
+        viewModelScope.launch {
+            tools.mainArticle(articleId)
+                .onSuccess { showSnackbar(R.string.reader_snackbar_main_set) }
+                .onFailure(::report)
+        }
+    }
 
     fun deleteNote() = launchWrite { tools.notes.delete(articleId) }
 

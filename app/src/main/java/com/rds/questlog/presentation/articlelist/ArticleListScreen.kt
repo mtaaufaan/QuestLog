@@ -7,7 +7,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rds.questlog.presentation.binder.AssignCategorySheet
-import com.rds.questlog.presentation.binder.BinderDummy
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
@@ -36,11 +35,9 @@ fun ArticleListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val game = uiState.games.firstOrNull { it.id == uiState.selectedGameFilter }
-    // Artikel utama dan kategori masih dari penyimpanan sementara Binder (tahap UI Sprint 9).
-    val articles = withBinderData(uiState.articles)
     ArticleListContent(
         gameName = game?.name.orEmpty(),
-        articles = articles,
+        articles = uiState.articles,
         totalArticles = game?.articleCount ?: 0,
         premium = uiState.premium,
         query = uiState.query,
@@ -106,7 +103,7 @@ private fun ArticleListPopups(
             ArticleActionsSheet(
                 article = article,
                 premium = uiState.premium,
-                categoryNames = BinderDummy.categoryNamesOf(article.id, article.gameId),
+                categoryNames = article.categories,
                 onAction = { action ->
                     if (action == ArticleAction.CATEGORIES) {
                         // Gratis: Unlock Sheet (data tidak berubah); premium: Assign Category Sheet.
@@ -188,10 +185,10 @@ private fun ArticleManagementPopups(
             AssignCategorySheet(
                 articleTitle = article.title,
                 gameName = article.gameName,
-                categories = BinderDummy.categoriesOf(article.gameId),
-                selectedIds = BinderDummy.assignments[article.id].orEmpty(),
+                categories = uiState.categories,
+                selectedIds = uiState.assignments[article.id].orEmpty(),
                 onSave = {
-                    BinderDummy.assign(article.id, article.gameId, it)
+                    viewModel.assignCategories(article.id, it)
                     onDismissPopup()
                 },
                 onClose = onDismissPopup,
@@ -235,13 +232,4 @@ private fun NavController.perform(action: ArticleAction, article: ArticleUiModel
         ArticleAction.REFRESH -> onShowPopup(Popup.RefreshArticle(article.id))
         ArticleAction.DELETE -> onShowPopup(Popup.DeleteArticle(article.id))
     }
-}
-
-/** Menempelkan penanda artikel utama dan nama kategori dari penyimpanan sementara Binder ke daftar artikel. */
-@Composable
-private fun withBinderData(articles: List<ArticleUiModel>): List<ArticleUiModel> = articles.map { article ->
-    article.copy(
-        isMainArticle = BinderDummy.mainArticles[article.gameId]?.articleId == article.id,
-        categories = BinderDummy.categoryNamesOf(article.id, article.gameId),
-    )
 }

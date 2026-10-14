@@ -20,7 +20,10 @@ interface GameDao {
             "WHERE a2.game_id = g.id AND c2.last_read_at IS NOT NULL " +
             "ORDER BY c2.last_read_at DESC, a2.id DESC LIMIT 1) AS lastTitle, " +
             "(SELECT MAX(c3.last_read_at) FROM checkpoints c3 JOIN articles a3 ON a3.id = c3.article_id " +
-            "WHERE a3.game_id = g.id) AS lastReadAt " +
+            "WHERE a3.game_id = g.id) AS lastReadAt, " +
+            "(SELECT gp.article_id FROM game_progress gp WHERE gp.game_id = g.id) AS mainArticleId, " +
+            "(SELECT a4.title FROM game_progress gp2 JOIN articles a4 ON a4.id = gp2.article_id " +
+            "WHERE gp2.game_id = g.id) AS mainArticleTitle " +
             "FROM games g JOIN articles a ON a.game_id = g.id " +
             "GROUP BY g.id ORDER BY g.created_at ASC, g.id ASC",
     )

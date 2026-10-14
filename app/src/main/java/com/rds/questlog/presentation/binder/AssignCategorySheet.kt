@@ -40,6 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.domain.model.MAX_CATEGORY_NAME
+import com.rds.questlog.domain.model.normalizeCategoryName
 import com.rds.questlog.presentation.components.QlBottomSheet
 import com.rds.questlog.presentation.components.QlGhostButton
 import com.rds.questlog.presentation.components.QlIcons

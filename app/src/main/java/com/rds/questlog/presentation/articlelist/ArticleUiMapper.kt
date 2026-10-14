@@ -26,6 +26,8 @@ class ArticleUiMapper @Inject constructor(
         articleCount = game.articleCount,
         lastTitle = game.lastArticleTitle,
         lastWhen = game.lastReadAt?.let(time::format),
+        mainArticleTitle = game.mainArticleTitle,
+        mainArticleId = game.mainArticleId,
     )
 
     fun toUi(article: Article) = ArticleUiModel(
@@ -45,6 +47,9 @@ class ArticleUiMapper @Inject constructor(
         readMode = article.readMode?.let { if (it == DomainReadMode.PAGED) ReadMode.PAGED else ReadMode.SEAMLESS },
         bookmarkCount = article.bookmarkCount,
         hasNote = article.hasNote,
+        isMainArticle = article.isMainArticle,
+        gameMainArticleId = article.gameMainArticleId,
+        categories = article.categoryNames,
     )
 
     private fun toUi(page: SourcePage) = PageUiModel(

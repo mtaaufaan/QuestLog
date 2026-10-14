@@ -9,4 +9,7 @@ data class Game(
     /** Judul artikel yang terakhir dibaca di game ini dan kapan (epoch ms); null bila belum ada yang dibaca. */
     val lastArticleTitle: String? = null,
     val lastReadAt: Long? = null,
+    /** Artikel utama game (tombol Lanjutkan Game) dan judulnya; null bila belum ada. */
+    val mainArticleId: Long? = null,
+    val mainArticleTitle: String? = null,
 )
