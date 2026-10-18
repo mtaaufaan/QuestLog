@@ -16,8 +16,11 @@ import com.rds.questlog.presentation.theme.QuestLogTheme
 /** Posisi baca saat ini: node pertama yang terlihat dan cuplikan teksnya. */
 data class ReaderPosition(val nodeId: Long? = null, val snippet: String = "")
 
-/** Permintaan lompat ke [nodeId]; [serial] membedakan permintaan berturut-turut ke node yang sama. */
-data class ReaderJump(val nodeId: Long, val serial: Int)
+/**
+ * Permintaan lompat ke [nodeId]; [serial] membedakan permintaan berturut-turut ke node yang sama; [messageRes] =
+ * pesan snackbar setelah lompat (null = tanpa pesan).
+ */
+data class ReaderJump(val nodeId: Long, val serial: Int, val messageRes: Int? = null)
 
 /** State UI murni Reader yang tidak disimpan di database: posisi baca saat ini dan permintaan lompat bookmark. */
 @Stable
@@ -26,8 +29,8 @@ class ReaderToolsState {
     var jump by mutableStateOf<ReaderJump?>(null)
     private var jumpSerial = 0
 
-    fun requestJump(nodeId: Long) {
-        jump = ReaderJump(nodeId, ++jumpSerial)
+    fun requestJump(nodeId: Long, messageRes: Int? = null) {
+        jump = ReaderJump(nodeId, ++jumpSerial, messageRes)
     }
 }
 

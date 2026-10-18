@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.rds.questlog.R
 import com.rds.questlog.presentation.components.QlIcons
+import com.rds.questlog.presentation.model.BookmarkUi
 import com.rds.questlog.presentation.model.ContentNodeType
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.theme.CormorantGaramond
@@ -74,12 +75,15 @@ private const val STRIPE_PERIOD_DP = 22.6f
 private const val STRIPE_WIDTH_DP = 11.3f
 
 /**
- * Interaksi bookmark pada satu node: [marked] = sudah ada bookmark (penanda di atas blok), tekan-tahan memanggil
- * [onLongPress], dan [popover] dirender menempel di node bila [active] (menerima lebar node).
+ * Interaksi bookmark pada satu node: [markers] = bookmark di node ini (penanda inline di atas blok, tekan-tahan =
+ * menu Ubah/Hapus lewat [markerTools]), tekan-tahan node memanggil [onLongPress], dan [popover] dirender menempel di
+ * node bila [active] (menerima lebar node). [highlighted] = node disorot tint (node bookmark yang dipratinjau).
  */
 class NodeBookmark(
-    val marked: Boolean,
+    val markers: List<BookmarkUi>,
+    val markerTools: MarkerTools,
     val active: Boolean,
+    val highlighted: Boolean,
     val onLongPress: () -> Unit,
     val popover: @Composable (Dp) -> Unit,
 )
@@ -96,7 +100,7 @@ fun ReaderRowItem(
     when (row) {
         is ReaderRow.Node -> Column {
             if (isCheckpoint) CheckpointMarker()
-            if (bookmark?.marked == true) BookmarkMarker()
+            bookmark?.markers?.forEach { BookmarkMarker(it, bookmark.markerTools) }
             PressableNode(bookmark) { NodeBlock(row.node, fontSize, articleTitle) }
         }
         is ReaderRow.Break -> PageBreak(stringResource(R.string.reader_page_break, row.page, row.host))
@@ -109,7 +113,7 @@ fun ReaderRowItem(
 private fun PressableNode(bookmark: NodeBookmark?, content: @Composable () -> Unit) {
     if (bookmark == null) return content()
     val tint by animateColorAsState(
-        if (bookmark.active) QuestLogTheme.colors.accentTint else Color.Transparent,
+        if (bookmark.active || bookmark.highlighted) QuestLogTheme.colors.accentTint else Color.Transparent,
         tween(TINT_MS),
         label = "nodeTint",
     )
@@ -131,30 +135,6 @@ private fun PressableNode(bookmark: NodeBookmark?, content: @Composable () -> Un
     ) {
         content()
         if (bookmark.active) bookmark.popover(width)
-    }
-}
-
-/** Penanda bookmark inline di atas node yang sudah ditandai. */
-@Composable
-private fun BookmarkMarker() {
-    val c = QuestLogTheme.colors
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(QlIcons.Bookmark, null, tint = c.accentLine, modifier = Modifier.size(12.dp))
-        Text(
-            stringResource(R.string.reader_bookmark_marker).uppercase(),
-            color = c.accentText,
-            style = TextStyle(
-                fontFamily = Lora,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 10.sp,
-                letterSpacing = 1.4.sp,
-            ),
-        )
-        Box(Modifier.weight(1f).height(1.dp).alpha(0.6f).background(c.accentLine))
     }
 }
 
