@@ -62,7 +62,7 @@ fun ArticleDetail.resumeTarget(resumeFrom: String, startNodeId: Long = 0L): Long
     val last = nodes.resolveAnchor(article.lastVisitedNodeId, null)
     return when (resumeFrom) {
         "checkpoint" -> checkpoint ?: last
-        "bookmark" -> nodes.resolveAnchor(startNodeId.takeIf { it > 0 }, null) ?: last
+        "bookmark", "peek" -> nodes.resolveAnchor(startNodeId.takeIf { it > 0 }, null) ?: last
         else -> last
     }
 }

@@ -87,4 +87,15 @@ class ReaderMappingTest {
         assertEquals(11L, detail(listOf(page(1, done)), nodes, last = 11).resumeTarget("checkpoint"))
         assertEquals(null, detail(listOf(page(1, done)), nodes).resumeTarget("last"))
     }
+
+    @Test
+    fun `resume dari pratinjau bookmark menuju node bookmark, bukan posisi terakhir`() {
+        val nodes = listOf(node(10, 1, 1), node(11, 1, 2), node(30, 1, 1001))
+        val d = detail(listOf(page(1, done)), nodes, last = 11)
+
+        assertEquals(30L, d.resumeTarget("peek", startNodeId = 30))
+        assertEquals(11L, d.resumeTarget("peek", startNodeId = 0))
+        // Node bookmark hilang: jatuh ke posisi terakhir seperti "bookmark".
+        assertEquals(30L, d.resumeTarget("bookmark", startNodeId = 30))
+    }
 }
