@@ -3,11 +3,15 @@ package com.rds.questlog.presentation.reader
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.rds.questlog.R
 import com.rds.questlog.presentation.displaysettings.DisplaySettingsSheet
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
@@ -35,6 +39,8 @@ fun ReaderScreen(
     val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
     val note by viewModel.note.collectAsStateWithLifecycle()
     val tools = remember(articleId) { ReaderToolsState() }
+    // Pratinjau Bookmark (P20): lokal di Reader (bukan activePopup) agar dialog dan Unlock Sheet tampil di atasnya.
+    var peek by rememberSaveable(stateSaver = PeekTargetSaver) { mutableStateOf<PeekTarget?>(null) }
     // Pengguna gratis menulis lewat UseCase: guard menolak, Unlock Sheet dibuka dan data tidak berubah.
     LaunchedEffect(viewModel) { viewModel.unlockRequests.collect { onShowPopup(Popup.Unlock) } }
 
@@ -68,9 +74,11 @@ fun ReaderScreen(
             onShowPopup(if (state.premium == PremiumUiState.FREE) Popup.Unlock else Popup.BookmarkLabel(null, false))
         },
         recentLabels = bookmarks.sortedByDescending { it.id }.map { it.label }.distinct(),
-        bookmarkedNodeIds = bookmarks.filter { it.articleId == articleId }.map { it.nodeId }.toSet(),
-        onAddBookmarkAt = viewModel::addBookmark,
+        bookmarksByNode = bookmarks.filter { it.articleId == articleId }.groupBy { it.nodeId },
+        onAddBookmarkAt = { nodeId, label, snippet -> viewModel.addBookmark(nodeId, label, snippet) },
         onUnlock = { onShowPopup(Popup.Unlock) },
+        onRenameBookmark = { onShowPopup(Popup.BookmarkLabel(it.id, fromPanel = false)) },
+        onDeleteBookmark = { viewModel.deleteBookmark(it.id) },
         onPositionChange = { tools.position = it },
     )
 
@@ -96,21 +104,47 @@ fun ReaderScreen(
             renameBookmark = viewModel::renameBookmark,
             setMainArticle = viewModel::setMainArticle,
             deleteBookmark = viewModel::deleteBookmark,
+            // Bookmark dibuka sebagai pratinjau (P20); artikel dan posisi baca Reader tidak berubah.
             openBookmark = { bookmark ->
                 onDismissPopup()
-                if (bookmark.articleId == articleId) {
-                    tools.requestJump(bookmark.nodeId)
-                } else {
-                    // Artikel lain di game yang sama: ganti Reader ini dengan artikel itu pada posisi bookmark.
-                    navController.navigate(Reader(bookmark.articleId, "bookmark", bookmark.nodeId)) {
-                        popUpTo<Reader> { inclusive = true }
-                    }
-                }
+                peek = PeekTarget(bookmark.articleId, bookmark.nodeId)
             },
             note = ReaderNoteCallbacks(viewModel::saveNote, viewModel::flushNote, viewModel::deleteNote),
         )
     }
     ReaderPopups(activePopup, tools, data, callbacks, onShowPopup, onDismissPopup)
+
+    peek?.let { target ->
+        val peekData by remember(target.articleId) { viewModel.observePeek(target.articleId) }
+            .collectAsStateWithLifecycle(initialValue = null)
+        BookmarkPeekSheet(
+            target = target,
+            data = peekData,
+            bookmarks = bookmarks,
+            context = PeekContext(articleId, article.title, state.premium, state.fontSize, state.darkMode),
+            actions = PeekActions(
+                addBookmark = { nodeId, label, snippet ->
+                    viewModel.addBookmark(nodeId, label, snippet, forArticle = target.articleId)
+                },
+                renameBookmark = viewModel::renameBookmark,
+                deleteBookmark = viewModel::deleteBookmark,
+                setCheckpoint = { nodeId -> viewModel.setCheckpoint(nodeId, forArticle = target.articleId) },
+                openFull = {
+                    peek = null
+                    // Artikel di pratinjau menggantikan Reader ini, dibuka di posisi bookmark.
+                    navController.navigate(Reader(target.articleId, "peek", target.nodeId)) {
+                        popUpTo<Reader> { inclusive = true }
+                    }
+                },
+                moveHere = {
+                    peek = null
+                    tools.requestJump(target.nodeId, R.string.reader_snackbar_peek_opened)
+                },
+                onUnlock = { onShowPopup(Popup.Unlock) },
+            ),
+            onClose = { peek = null },
+        )
+    }
 
     if (activePopup == Popup.DisplaySettings) {
         DisplaySettingsSheet(

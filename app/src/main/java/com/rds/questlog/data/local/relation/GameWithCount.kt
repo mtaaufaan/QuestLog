@@ -13,4 +13,8 @@ data class GameWithCount(
     val mainArticleId: Long? = null,
     val mainArticleTitle: String? = null,
     val logoPath: String? = null,
+    val logoSourcePath: String? = null,
+    val logoCropZoom: Float? = null,
+    val logoCropX: Float? = null,
+    val logoCropY: Float? = null,
 )

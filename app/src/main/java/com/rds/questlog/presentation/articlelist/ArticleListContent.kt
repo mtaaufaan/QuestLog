@@ -187,8 +187,8 @@ private fun GamePageHeader(
                 logoPath = logo.path,
                 size = 64.dp,
                 cornerRadius = 8.dp,
-                onClick = { logo.controls.onTap(logo.gameId, logo.path != null) },
-                busy = logo.controls.busyGameId == logo.gameId,
+                onClick = { logo.controls.onTap(logo.gameId) },
+                badge = logo.controls.badge,
             )
             Spacer(Modifier.width(14.dp))
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,10 +37,14 @@ import java.io.File
 
 private const val INITIAL_SCALE = 0.5f
 private val MIN_TOUCH = 48.dp
+private val LARGE_LOGO = 60.dp
+
+/** Badge di pojok kotak logo kosong: ＋ (premium), gembok (gratis), atau tanpa badge (premium hilang). */
+enum class LogoBadge { PLUS, LOCK, NONE }
 
 /**
  * Logo game (S0 [size] 52dp, S1 64dp): gambar kustom bila [logoPath] (relatif ke `filesDir`) terisi, selain itu huruf
- * awal [name] dengan badge ＋. Klik hanya untuk logo ini (tidak diteruskan ke baris game); [busy] = spinner kecil.
+ * awal [name] dengan [badge] sesuai status premium. Klik hanya untuk logo ini (tidak diteruskan ke baris game).
  */
 @Composable
 fun GameLogo(
@@ -51,7 +54,7 @@ fun GameLogo(
     cornerRadius: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    busy: Boolean = false,
+    badge: LogoBadge = LogoBadge.PLUS,
 ) {
     val c = QuestLogTheme.colors
     val shape = RoundedCornerShape(cornerRadius)
@@ -81,43 +84,41 @@ fun GameLogo(
                         modifier = Modifier.size(size),
                     )
                 } else {
-                    Text(
-                        text = name.trim().take(1).uppercase().ifEmpty { "?" },
-                        color = c.accentText,
-                        style = TextStyle(
-                            fontFamily = CormorantGaramond,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = (size.value * INITIAL_SCALE).sp,
-                        ),
-                    )
-                }
-                if (busy) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(size / 2),
-                        strokeWidth = 2.dp,
-                        color = c.accentLine,
-                    )
+                    LogoInitial(name, size)
                 }
             }
-            if (logoPath == null) {
-                val badge = if (size >= LARGE_LOGO) 18.dp else 16.dp
+            if (logoPath == null && badge != LogoBadge.NONE) {
+                val diameter = if (size >= LARGE_LOGO) 18.dp else 16.dp
                 Box(
                     Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = 2.dp, y = 2.dp)
-                        .size(badge)
+                        .size(diameter)
                         .background(c.surface, CircleShape)
                         .border(1.dp, c.divider, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(QlIcons.PlusSmall, null, tint = c.textSecondary, modifier = Modifier.size(badge - 6.dp))
+                    val icon = if (badge == LogoBadge.LOCK) QlIcons.Lock else QlIcons.PlusSmall
+                    Icon(icon, null, tint = c.textSecondary, modifier = Modifier.size(diameter - 6.dp))
                 }
             }
         }
     }
 }
 
-private val LARGE_LOGO = 60.dp
+/** Huruf awal nama game (kapital) untuk logo kosong; ukuran huruf setengah sisi kotak [size]. */
+@Composable
+fun LogoInitial(name: String, size: Dp) {
+    Text(
+        text = name.trim().take(1).uppercase().ifEmpty { "?" },
+        color = QuestLogTheme.colors.accentText,
+        style = TextStyle(
+            fontFamily = CormorantGaramond,
+            fontWeight = FontWeight.Medium,
+            fontSize = (size.value * INITIAL_SCALE).sp,
+        ),
+    )
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -127,6 +128,6 @@ private fun GameLogoEmptyPreview() = QuestLogTheme {
 
 @Preview(showBackground = true)
 @Composable
-private fun GameLogoBusyPreview() = QuestLogTheme {
-    GameLogo("Chrono Cross", null, 64.dp, 8.dp, onClick = {}, busy = true)
+private fun GameLogoLockedPreview() = QuestLogTheme {
+    GameLogo("Chrono Cross", null, 64.dp, 8.dp, onClick = {}, badge = LogoBadge.LOCK)
 }

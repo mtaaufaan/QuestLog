@@ -86,8 +86,8 @@ internal fun GameRow(game: GameUiModel, premium: PremiumUiState, actions: GameLi
                     logoPath = game.logoPath,
                     size = 52.dp,
                     cornerRadius = 6.dp,
-                    onClick = { logo.onTap(game.id, game.logoPath != null) },
-                    busy = logo.busyGameId == game.id,
+                    onClick = { logo.onTap(game.id) },
+                    badge = logo.badge,
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

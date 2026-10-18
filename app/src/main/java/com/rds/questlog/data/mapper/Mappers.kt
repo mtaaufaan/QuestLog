@@ -5,6 +5,7 @@ import com.rds.questlog.data.local.relation.ArticleWithDetails
 import com.rds.questlog.data.local.relation.GameWithCount
 import com.rds.questlog.domain.model.Article
 import com.rds.questlog.domain.model.Game
+import com.rds.questlog.domain.model.LogoCrop
 import com.rds.questlog.domain.model.PageFailure
 import com.rds.questlog.domain.model.ReadMode
 import com.rds.questlog.domain.model.SourcePage
@@ -67,4 +68,10 @@ internal fun GameWithCount.toDomain() = Game(
     mainArticleId = mainArticleId,
     mainArticleTitle = mainArticleTitle,
     logoPath = logoPath,
+    logoSourcePath = logoSourcePath,
+    logoCrop = if (logoCropZoom != null && logoCropX != null && logoCropY != null) {
+        LogoCrop(logoCropZoom, logoCropX, logoCropY)
+    } else {
+        null
+    },
 )

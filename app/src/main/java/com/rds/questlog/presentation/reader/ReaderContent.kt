@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
 import com.rds.questlog.presentation.displaysettings.DEFAULT_FONT_SIZE
 import com.rds.questlog.presentation.model.ArticleUiModel
+import com.rds.questlog.presentation.model.BookmarkUi
 import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PageStatus
 import com.rds.questlog.presentation.model.PremiumUiState
@@ -68,15 +69,7 @@ private class BookmarkBar(
     val count: Int,
     val onOpen: () -> Unit,
     val onQuickAdd: () -> Unit,
-    val popover: PopoverTools,
-)
-
-/** Data dan aksi popover bookmark tekan-tahan: label terbaru game, node yang sudah ditandai, simpan, dan Unlock. */
-private class PopoverTools(
-    val recentLabels: List<String>,
-    val markedNodeIds: Set<Long>,
-    val onSaveAt: (nodeId: Long, label: String, snippet: String) -> Unit,
-    val onUnlock: () -> Unit,
+    val source: NodeBookmarkSource,
 )
 
 private const val SNIPPET_LENGTH = 80
@@ -110,9 +103,11 @@ fun ReaderContent(
     onOpenBookmarks: () -> Unit = {},
     onQuickAddBookmark: () -> Unit = {},
     recentLabels: List<String> = emptyList(),
-    bookmarkedNodeIds: Set<Long> = emptySet(),
+    bookmarksByNode: Map<Long, List<BookmarkUi>> = emptyMap(),
     onAddBookmarkAt: (nodeId: Long, label: String, snippet: String) -> Unit = { _, _, _ -> },
     onUnlock: () -> Unit = {},
+    onRenameBookmark: (BookmarkUi) -> Unit = {},
+    onDeleteBookmark: (BookmarkUi) -> Unit = {},
     onPositionChange: (ReaderPosition) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -150,7 +145,13 @@ fun ReaderContent(
                             bookmarkCount,
                             onOpenBookmarks,
                             onQuickAddBookmark,
-                            PopoverTools(recentLabels, bookmarkedNodeIds, onAddBookmarkAt, onUnlock),
+                            NodeBookmarkSource(
+                                premium,
+                                recentLabels,
+                                bookmarksByNode,
+                                highlightNodeId = null,
+                                NodeBookmarkCallbacks(onAddBookmarkAt, onUnlock, onRenameBookmark, onDeleteBookmark),
+                            ),
                         ),
                         onModeChange,
                         onRetryFailed,
@@ -216,7 +217,7 @@ private fun ColumnScope.SuccessBody(
                 fontSize,
                 article.title,
                 isCheckpoint = row.nodeId != null && row.nodeId == state.checkpoint,
-                bookmark = row.nodeId?.let { id -> nodeBookmark(state, bookmarks, id) },
+                bookmark = row.nodeId?.let { id -> nodeBookmarkFor(id, bookmarks.source, state) },
             )
         }
         if (!state.paged || state.pageIndex >= state.okCount - 1) {
@@ -246,30 +247,6 @@ private fun ColumnScope.SuccessBody(
     }
 }
 
-/** Interaksi bookmark untuk node [id]: popover aktif hanya di node yang ditahan. */
-private fun nodeBookmark(state: ReaderState, bookmarks: BookmarkBar, id: Long) = NodeBookmark(
-    marked = id in bookmarks.popover.markedNodeIds,
-    active = state.popoverNodeId == id,
-    onLongPress = { state.popoverNodeId = id },
-    popover = { width ->
-        BookmarkPopover(
-            premium = bookmarks.premium,
-            nodeWidth = width,
-            recent = bookmarks.popover.recentLabels,
-            onSave = { label ->
-                bookmarks.popover.onSaveAt(id, label, state.snippetOf(id))
-                state.popoverNodeId = null
-                state.showToast(R.string.reader_snackbar_bookmark_saved, label)
-            },
-            onUnlock = {
-                state.popoverNodeId = null
-                bookmarks.popover.onUnlock()
-            },
-            onDismiss = { state.popoverNodeId = null },
-        )
-    },
-)
-
 /** State dan perilaku scroll Reader; dipisah dari tampilan agar [ReaderContent] tetap ringkas. */
 @Stable
 private class ReaderState(
@@ -277,7 +254,7 @@ private class ReaderState(
     initialContent: List<List<ContentNodeUi>>,
     val listState: LazyListState,
     private val res: Resources,
-) {
+) : NodeBookmarkState {
     /** Selalu data terbaru dari database; state baca (mode, halaman, posisi) tetap bertahan saat data berubah. */
     var article by mutableStateOf(initialArticle)
     var content by mutableStateOf(initialContent)
@@ -288,7 +265,7 @@ private class ReaderState(
     var jump by mutableStateOf<Jump?>(null)
 
     /** Node yang popover bookmark-nya terbuka (tekan-tahan); null = tidak ada. */
-    var popoverNodeId by mutableStateOf<Long?>(null)
+    override var popoverNodeId by mutableStateOf<Long?>(null)
     private var toastSerial = 0
 
     val mode get() = modeOverride ?: article.readMode ?: ReadMode.SEAMLESS
@@ -312,10 +289,10 @@ private class ReaderState(
     }
 
     /** Cuplikan teks node [id] (untuk label bookmark dan Reader Tools); kosong bila node bukan teks. */
-    fun snippetOf(id: Long): String =
+    override fun snippetOf(id: Long): String =
         content.asSequence().flatten().firstOrNull { it.id == id }?.text.orEmpty().take(SNIPPET_LENGTH)
 
-    fun showToast(@StringRes id: Int, vararg args: Any) {
+    override fun showToast(@StringRes id: Int, vararg args: Any) {
         toast = Toast(res.getString(id, *args), ++toastSerial)
     }
 
@@ -401,13 +378,14 @@ private fun rememberReaderState(
             }
         }
     }
-    LaunchedEffect(jumpRequest) { jumpRequest?.let { state.jump = Jump(it.nodeId, null) } }
+    LaunchedEffect(jumpRequest) { jumpRequest?.let { state.jump = Jump(it.nodeId, it.messageRes) } }
     LaunchedEffect(state, active) {
         val target = resumeNodeId ?: article.lastNodeId
         if (active && target != null) {
             val message = when (resumeFrom) {
                 "checkpoint" -> R.string.reader_snackbar_resume_checkpoint
                 "bookmark" -> R.string.reader_snackbar_resume_bookmark
+                "peek" -> R.string.reader_snackbar_peek_opened
                 else -> R.string.reader_snackbar_resume_last
             }
             state.jump = Jump(target, message)

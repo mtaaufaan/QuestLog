@@ -56,6 +56,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Isi artikel untuk Pratinjau Bookmark (P20): [article] null = belum ada / tidak ditemukan. */
+data class PeekData(
+    val article: ArticleUiModel?,
+    val content: List<List<ContentNodeUi>>,
+    val viewState: ReaderViewState,
+)
+
 /** Use case aksi tulis Reader dikelompokkan agar konstruktor ViewModel tetap ringkas. */
 class ReaderActions @Inject constructor(
     val setCheckpoint: SetCheckpointUseCase,
@@ -111,7 +118,7 @@ data class ReaderUiState(
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    getArticleDetail: GetArticleDetailUseCase,
+    private val getArticleDetail: GetArticleDetailUseCase,
     observeDisplayPreferences: ObserveDisplayPreferencesUseCase,
     private val actions: ReaderActions,
     private val tools: ReaderToolsActions,
@@ -188,8 +195,9 @@ class ReaderViewModel @Inject constructor(
         reloads.value++
     }
 
-    /** Menjadikan [nodeId] checkpoint manual (menimpa yang lama). */
-    fun setCheckpoint(nodeId: Long) = launchWrite { actions.setCheckpoint(articleId, nodeId) }
+    /** Menjadikan [nodeId] checkpoint manual (menimpa yang lama); [forArticle] = artikel P20 bila beda. */
+    fun setCheckpoint(nodeId: Long, forArticle: Long = articleId) =
+        launchWrite { actions.setCheckpoint(forArticle, nodeId) }
 
     /** Menyimpan posisi baca terakhir saat Reader ditinggalkan; terpisah dari checkpoint manual. */
     fun saveLastPosition(nodeId: Long) = launchWrite { actions.saveLastPosition(articleId, nodeId) }
@@ -201,8 +209,17 @@ class ReaderViewModel @Inject constructor(
     /** Mengulang hanya halaman FAILED artikel ini; halaman yang sudah selesai tidak disentuh. */
     fun retryFailed() = launchWrite { actions.retryFailed(articleId).map { } }
 
-    fun addBookmark(nodeId: Long, label: String, snippet: String) =
-        launchWrite { tools.bookmarks.add(articleId, nodeId, label, snippet).map { } }
+    /** Menambah bookmark di [nodeId]; [forArticle] = artikel Pratinjau Bookmark bila beda dari artikel Reader. */
+    fun addBookmark(nodeId: Long, label: String, snippet: String, forArticle: Long = articleId) =
+        launchWrite { tools.bookmarks.add(forArticle, nodeId, label, snippet).map { } }
+
+    /** Isi artikel [peekArticleId] untuk Pratinjau Bookmark (P20); tidak menyentuh state atau posisi baca Reader. */
+    fun observePeek(peekArticleId: Long): Flow<PeekData> = getArticleDetail(peekArticleId)
+        .map { detail ->
+            val content = detail?.toContentPages().orEmpty()
+            PeekData(detail?.let { mapper.toUi(it.article).withContent(content) }, content, detail.toViewState())
+        }
+        .catch { emit(PeekData(null, emptyList(), ReaderViewState.DB_ERROR)) }
 
     fun renameBookmark(id: Long, label: String) = launchWrite { tools.bookmarks.rename(id, label) }
 

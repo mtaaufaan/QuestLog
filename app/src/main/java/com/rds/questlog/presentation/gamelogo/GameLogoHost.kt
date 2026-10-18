@@ -1,8 +1,9 @@
 package com.rds.questlog.presentation.gamelogo
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,11 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -38,73 +38,46 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rds.questlog.R
-import com.rds.questlog.presentation.articlelist.ActionRow
-import com.rds.questlog.presentation.components.QlBottomSheet
-import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.theme.QuestLogTheme
 
+/** [GameLogoViewModel] milik Activity: sama untuk S0, S1, dan P19 sehingga pesan hasil ikut ke layar asal. */
+@Composable
+fun rememberGameLogoViewModel(): GameLogoViewModel {
+    val context = LocalContext.current
+    val owner = remember(context) { context.findComponentActivity() }
+    return hiltViewModel(viewModelStoreOwner = owner)
+}
+
+private tailrec fun Context.findComponentActivity(): ComponentActivity = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.findComponentActivity()
+    else -> error("Tidak ada Activity di ${(this as? Activity)?.javaClass}")
+}
+
 /**
- * Membungkus layar yang memuat logo game: Photo Picker (tanpa izin storage), sheet Ganti/Hapus logo, dan snackbar
- * hasil (termasuk Urungkan). Logika simpan ada di [GameLogoViewModel]; perubahan tampil lewat data game yang diamati.
+ * Membungkus layar yang memuat logo game (S0, S1): menampilkan snackbar hasil (Logo diperbarui / dihapus + Urungkan)
+ * dan memberi [content] aksi pesan hanya-baca untuk status premium hilang.
  */
 @Composable
-fun GameLogoHost(viewModel: GameLogoViewModel = hiltViewModel(), content: @Composable (GameLogoControls) -> Unit) {
+fun GameLogoHost(content: @Composable (showReadOnly: () -> Unit) -> Unit) {
+    val viewModel = rememberGameLogoViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var sheetFor by rememberSaveable { mutableStateOf<Long?>(null) }
-    var pickFor by rememberSaveable { mutableStateOf<Long?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        val gameId = pickFor
-        pickFor = null
-        if (gameId != null && uri != null) viewModel.set(gameId, uri.toString())
-    }
-    val pick = { gameId: Long ->
-        pickFor = gameId
-        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-    }
-    val controls = remember(state.busyGameId) {
-        GameLogoControls(state.busyGameId) { gameId, hasLogo -> if (hasLogo) sheetFor = gameId else pick(gameId) }
-    }
-
     Box(Modifier.fillMaxSize()) {
-        content(controls)
-        LogoSnackbar(
-            message = state.message?.let { stringResource(it.res) },
-            actionLabel = state.message?.undoGameId?.let { stringResource(R.string.game_logo_undo) },
-            onAction = { state.message?.undoGameId?.let(viewModel::undo) },
-            modifier = Modifier.align(Alignment.BottomStart).navigationBarsPadding(),
-        )
-    }
-
-    sheetFor?.let { gameId ->
-        val c = QuestLogTheme.colors
-        QlBottomSheet(onDismiss = { sheetFor = null }) {
-            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 22.dp)) {
-                ActionRow(QlIcons.Pencil, stringResource(R.string.game_logo_change), c.textSecondary) {
-                    sheetFor = null
-                    pick(gameId)
-                }
-                ActionRow(
-                    icon = QlIcons.Trash,
-                    label = stringResource(R.string.game_logo_remove),
-                    iconColor = c.danger,
-                    textColor = c.danger,
-                    pressedColor = c.dangerTint,
-                ) {
-                    sheetFor = null
-                    viewModel.remove(gameId)
-                }
-            }
-        }
+        content(viewModel::showReadOnly)
+        LogoSnackbar(state, viewModel, Modifier.align(Alignment.BottomStart).navigationBarsPadding())
     }
 }
 
 /** Snackbar bergaya [com.rds.questlog.presentation.components.QlToast] dengan satu aksi teks (Urungkan). */
 @Composable
-private fun LogoSnackbar(message: String?, actionLabel: String?, onAction: () -> Unit, modifier: Modifier) {
+fun LogoSnackbar(state: GameLogoUiState, viewModel: GameLogoViewModel, modifier: Modifier = Modifier) {
     val c = QuestLogTheme.colors
+    val message = state.message
+    val text = message?.let { stringResource(it.res) }
+    val action = message?.undoGameId?.let { stringResource(R.string.game_logo_undo) }
     // Simpan isi terakhir agar tetap terbaca selama animasi keluar.
     var last by remember { mutableStateOf("" to (null as String?)) }
-    if (message != null) last = message to actionLabel
+    if (text != null) last = text to action
     AnimatedVisibility(
         visible = message != null,
         modifier = modifier,
@@ -132,7 +105,7 @@ private fun LogoSnackbar(message: String?, actionLabel: String?, onAction: () ->
                 Box(
                     Modifier
                         .heightIn(min = 48.dp)
-                        .clickable(role = Role.Button, onClick = onAction)
+                        .clickable(role = Role.Button) { message?.undoGameId?.let(viewModel::undo) }
                         .padding(horizontal = 16.dp),
                     contentAlignment = Alignment.Center,
                 ) {

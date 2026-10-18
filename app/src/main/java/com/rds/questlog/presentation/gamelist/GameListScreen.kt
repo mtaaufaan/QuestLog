@@ -8,6 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rds.questlog.presentation.gamelogo.GameLogoHost
+import com.rds.questlog.presentation.gamelogo.gameLogoControls
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.navigation.AddArticle
@@ -59,7 +60,7 @@ fun GameListScreen(
         onOpenUnlock = { onShowPopup(Popup.Unlock) },
     )
 
-    GameLogoHost { logo ->
+    GameLogoHost { showReadOnly ->
         GameListContent(
             games = state.games,
             results = state.results,
@@ -68,7 +69,12 @@ fun GameListScreen(
             query = state.query,
             snackbar = state.snackbar?.let { stringResource(it) },
             actions = actions,
-            logo = logo,
+            logo = gameLogoControls(
+                state.premium,
+                navController,
+                onUnlock = { onShowPopup(Popup.Unlock) },
+                onReadOnly = showReadOnly,
+            ),
         )
     }
 

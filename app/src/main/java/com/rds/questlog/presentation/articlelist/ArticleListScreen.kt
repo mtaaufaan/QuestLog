@@ -8,6 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rds.questlog.presentation.binder.AssignCategorySheet
 import com.rds.questlog.presentation.gamelogo.GameLogoHost
+import com.rds.questlog.presentation.gamelogo.gameLogoControls
 import com.rds.questlog.presentation.model.ArticleStatus
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.PremiumUiState
@@ -36,12 +37,17 @@ fun ArticleListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val game = uiState.games.firstOrNull { it.id == uiState.selectedGameFilter }
-    GameLogoHost { logo ->
+    GameLogoHost { showReadOnly ->
         ArticleListContent(
             gameName = game?.name.orEmpty(),
             gameId = game?.id ?: 0,
             logoPath = game?.logoPath,
-            logo = logo,
+            logo = gameLogoControls(
+                uiState.premium,
+                navController,
+                onUnlock = { onShowPopup(Popup.Unlock) },
+                onReadOnly = showReadOnly,
+            ),
             articles = uiState.articles,
             totalArticles = game?.articleCount ?: 0,
             premium = uiState.premium,
