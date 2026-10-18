@@ -9,6 +9,7 @@ import com.rds.questlog.R
 import com.rds.questlog.domain.error.QuestLogError.PremiumError
 import com.rds.questlog.domain.model.Bookmark
 import com.rds.questlog.domain.model.DisplayPreferences
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.domain.model.ReadMode as DomainReadMode
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.binder.SetMainArticleUseCase
@@ -284,6 +285,6 @@ private fun toUi(bookmark: Bookmark) = BookmarkUi(
     articleId = bookmark.articleId,
     articleTitle = bookmark.articleTitle,
     label = bookmark.label,
-    snippet = bookmark.snippet,
+    snippet = InlineMarkup.strip(bookmark.snippet),
     nodeId = bookmark.nodeId,
 )
