@@ -10,6 +10,10 @@ object GameList
 @Serializable
 data class Binder(val gameId: Long)
 
+/** P19 Logo game (premium): pilih, geser/zoom, dan simpan logo satu game. */
+@Serializable
+data class GameLogoEdit(val gameId: Long)
+
 /** S1 Halaman Game: artikel milik satu game. */
 @Serializable
 data class ArticleList(val gameId: Long)

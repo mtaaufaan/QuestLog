@@ -13,6 +13,7 @@ enum class PremiumFeature(val hasUserData: Boolean) {
     NOTE(hasUserData = true),
     GAME_BINDER(hasUserData = true),
     AUTO_DETECT(hasUserData = false),
+    GAME_LOGO(hasUserData = true),
 }
 
 /** Akses ke fitur premium: lengkap, hanya-baca (data lama terbaca, ubah dikunci), atau terkunci (ajakan upgrade). */

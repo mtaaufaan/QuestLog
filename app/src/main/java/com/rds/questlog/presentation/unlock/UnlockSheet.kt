@@ -173,6 +173,7 @@ private fun ComparisonTable(gamesUsed: Int) {
         TableRow(stringResource(R.string.unlock_row_bookmark), DASH, CHECK)
         TableRow(stringResource(R.string.unlock_row_note), DASH, CHECK)
         TableRow(stringResource(R.string.unlock_row_binder), DASH, CHECK)
+        TableRow(stringResource(R.string.unlock_row_logo), DASH, CHECK)
         TableRow(stringResource(R.string.unlock_row_autodetect), DASH, CHECK)
         TableRow(stringResource(R.string.unlock_row_offline), CHECK, CHECK)
     }

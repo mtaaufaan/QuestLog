@@ -23,7 +23,9 @@ interface GameDao {
             "WHERE a3.game_id = g.id) AS lastReadAt, " +
             "(SELECT gp.article_id FROM game_progress gp WHERE gp.game_id = g.id) AS mainArticleId, " +
             "(SELECT a4.title FROM game_progress gp2 JOIN articles a4 ON a4.id = gp2.article_id " +
-            "WHERE gp2.game_id = g.id) AS mainArticleTitle, g.logo_path AS logoPath " +
+            "WHERE gp2.game_id = g.id) AS mainArticleTitle, g.logo_path AS logoPath, " +
+            "g.logo_source_path AS logoSourcePath, g.logo_crop_zoom AS logoCropZoom, " +
+            "g.logo_crop_x AS logoCropX, g.logo_crop_y AS logoCropY " +
             "FROM games g JOIN articles a ON a.game_id = g.id " +
             "GROUP BY g.id ORDER BY g.created_at ASC, g.id ASC",
     )
@@ -54,9 +56,13 @@ interface GameDao {
     @Insert
     suspend fun insert(game: GameEntity): Long
 
-    /** Memasang ([path]) atau mencabut (null) logo kustom game [gameId]. */
-    @Query("UPDATE games SET logo_path = :path WHERE id = :gameId")
-    suspend fun setLogo(gameId: Long, path: String?)
+    /** Menyimpan posisi crop terakhir logo game [gameId] (satuan bingkai 264). */
+    @Query("UPDATE games SET logo_crop_zoom = :zoom, logo_crop_x = :x, logo_crop_y = :y WHERE id = :gameId")
+    suspend fun setLogoCrop(gameId: Long, zoom: Float, x: Float, y: Float)
+
+    /** Mengganti hanya path berkas logo (null = dicabut); posisi crop dibiarkan agar Urungkan memulihkannya. */
+    @Query("UPDATE games SET logo_path = :path, logo_source_path = :sourcePath WHERE id = :gameId")
+    suspend fun setLogoFiles(gameId: Long, path: String?, sourcePath: String?)
 
     /**
      * Menghapus game hanya bila tidak ada artikel yang memakainya; game berisi tidak disentuh. Mengembalikan jumlah

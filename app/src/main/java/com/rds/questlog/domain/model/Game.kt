@@ -14,4 +14,7 @@ data class Game(
     val mainArticleTitle: String? = null,
     /** Path logo kustom relatif ke `filesDir`; null = belum ada (UI menampilkan inisial). */
     val logoPath: String? = null,
+    /** Gambar asli logo (sisi terpanjang maks. 2048 px) dan posisi crop terakhir; null = belum ada. */
+    val logoSourcePath: String? = null,
+    val logoCrop: LogoCrop? = null,
 )

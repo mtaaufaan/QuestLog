@@ -299,18 +299,45 @@ class MigrationTest {
     }
 
     @Test
-    fun migrasiPenuhDariSkemaPertamaSampaiV6Valid() {
+    fun migrate6To7HanyaMenambahKolomGambarAsliDanPosisiCropDanLogoV6Utuh() {
+        helper.createDatabase(DB_NAME, 6).apply {
+            execSQL(
+                "INSERT INTO games (id, title, created_at, logo_path) " +
+                    "VALUES (1, 'Dragon Quest VII', 0, 'game_logos/1.webp')",
+            )
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(DB_NAME, 7, true, MIGRATION_6_7)
+
+        assertEquals("game_logos/1.webp", migrated.text("SELECT logo_path FROM games WHERE id = 1"))
+        migrated.query(
+            "SELECT logo_source_path, logo_crop_zoom, logo_crop_x, logo_crop_y FROM games WHERE id = 1",
+        ).use {
+            it.moveToFirst()
+            for (column in 0..3) assertTrue(it.isNull(column))
+        }
+        migrated.execSQL(
+            "UPDATE games SET logo_source_path = 'game_logos/1_src.webp', logo_crop_zoom = 2.5, " +
+                "logo_crop_x = -12.5, logo_crop_y = 7 WHERE id = 1",
+        )
+        assertEquals("2.5", migrated.text("SELECT logo_crop_zoom FROM games WHERE id = 1"))
+    }
+
+    @Test
+    fun migrasiPenuhDariSkemaPertamaSampaiV7Valid() {
         helper.createDatabase(DB_NAME, 1).close()
 
         helper.runMigrationsAndValidate(
             DB_NAME,
-            6,
+            7,
             true,
             MIGRATION_1_2,
             MIGRATION_2_3,
             MIGRATION_3_4,
             MIGRATION_4_5,
             MIGRATION_5_6,
+            MIGRATION_6_7,
         )
     }
 

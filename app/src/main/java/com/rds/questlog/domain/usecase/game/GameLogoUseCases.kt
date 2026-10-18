@@ -1,26 +1,49 @@
 package com.rds.questlog.domain.usecase.game
 
+import com.rds.questlog.domain.model.LogoCrop
+import com.rds.questlog.domain.model.PremiumFeature
 import com.rds.questlog.domain.repository.GameLogoRepository
+import com.rds.questlog.domain.usecase.premium.PremiumGuard
 import com.rds.questlog.domain.usecase.writing
 import javax.inject.Inject
 
-class SetGameLogoUseCase @Inject constructor(private val repository: GameLogoRepository) {
+class SaveGameLogoUseCase @Inject constructor(
+    private val guard: PremiumGuard,
+    private val repository: GameLogoRepository,
+) {
 
     /**
-     * Memasang gambar [uri] sebagai logo game [gameId] (persegi, 256x256, WebP). Gagal -> `ImageError.InvalidImage`,
-     * `ImageError.TooLarge` (> 10 MB), atau `ImageError.IoError`; tidak pernah melempar.
+     * Menyimpan logo game [gameId] dari area bingkai [crop] pada gambar [sourceUri] (null = pakai ulang gambar asli
+     * yang tersimpan, hanya mengatur ulang posisi). Guard dulu: gratis -> `PremiumError.Locked`, premium hilang ->
+     * `PremiumError.ReadOnly`. Gagal -> `ImageError.InvalidImage`, `TooLarge` (> 10 MB), atau `IoError`; tidak
+     * pernah melempar.
      */
-    suspend operator fun invoke(gameId: Long, uri: String): Result<Unit> = writing { repository.set(gameId, uri) }
+    suspend operator fun invoke(gameId: Long, sourceUri: String?, crop: LogoCrop): Result<Unit> = writing {
+        guard.requireWrite(PremiumFeature.GAME_LOGO)
+        repository.save(gameId, sourceUri, crop)
+    }
 }
 
-class RemoveGameLogoUseCase @Inject constructor(private val repository: GameLogoRepository) {
+class RemoveGameLogoUseCase @Inject constructor(
+    private val guard: PremiumGuard,
+    private val repository: GameLogoRepository,
+) {
 
-    /** Mencabut logo game [gameId]; masih bisa dipulihkan lewat [RestoreGameLogoUseCase] sampai logo diubah lagi. */
-    suspend operator fun invoke(gameId: Long): Result<Unit> = writing { repository.remove(gameId) }
+    /** Mencabut logo game [gameId] (lewat guard); masih bisa dipulihkan lewat [RestoreGameLogoUseCase]. */
+    suspend operator fun invoke(gameId: Long): Result<Unit> = writing {
+        guard.requireWrite(PremiumFeature.GAME_LOGO)
+        repository.remove(gameId)
+    }
 }
 
-class RestoreGameLogoUseCase @Inject constructor(private val repository: GameLogoRepository) {
+class RestoreGameLogoUseCase @Inject constructor(
+    private val guard: PremiumGuard,
+    private val repository: GameLogoRepository,
+) {
 
-    /** Urungkan hapus logo game [gameId]. */
-    suspend operator fun invoke(gameId: Long): Result<Unit> = writing { repository.restore(gameId) }
+    /** Urungkan hapus logo game [gameId] (lewat guard). */
+    suspend operator fun invoke(gameId: Long): Result<Unit> = writing {
+        guard.requireWrite(PremiumFeature.GAME_LOGO)
+        repository.restore(gameId)
+    }
 }

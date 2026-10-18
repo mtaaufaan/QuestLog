@@ -46,7 +46,7 @@ import com.rds.questlog.data.local.entity.SourcePageEntity
         BinderCategoryEntity::class,
         ArticleBinderEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class QuestLogDatabase : RoomDatabase() {
@@ -168,5 +168,19 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE games ADD COLUMN logo_path TEXT")
+    }
+}
+
+/**
+ * v6 -> v7 (v1.2, QL-38): HANYA menambah kolom `games.logo_source_path` (gambar asli logo) dan
+ * `logo_crop_zoom` / `logo_crop_x` / `logo_crop_y` (posisi crop terakhir), semuanya nullable. Tidak ada tabel atau
+ * kolom lama yang diubah, jadi seluruh data utuh; logo hasil v6 tetap tampil (tanpa gambar asli).
+ */
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE games ADD COLUMN logo_source_path TEXT")
+        db.execSQL("ALTER TABLE games ADD COLUMN logo_crop_zoom REAL")
+        db.execSQL("ALTER TABLE games ADD COLUMN logo_crop_x REAL")
+        db.execSQL("ALTER TABLE games ADD COLUMN logo_crop_y REAL")
     }
 }
