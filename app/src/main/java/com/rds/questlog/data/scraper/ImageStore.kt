@@ -24,21 +24,35 @@ class ImageStore @Inject constructor(@ApplicationContext private val context: Co
         file(filename).delete()
     }
 
-    private val logoDirectory: File get() = File(context.filesDir, LOGO_DIR)
+    private val logoDirectory: File get() = File(context.filesDir, LOGO_DIR).also { it.mkdirs() }
 
-    /** Logo kustom game: `filesDir/game_logos/{gameId}.webp`; folder dibuat bila perlu. */
-    fun logoFile(gameId: Long): File = File(logoDirectory.also { it.mkdirs() }, "$gameId.webp")
+    /** Logo kustom game: `filesDir/game_logos/{gameId}.webp` (256x256); folder dibuat bila perlu. */
+    fun logoFile(gameId: Long): File = File(logoDirectory, "$gameId.webp")
 
-    /** Salinan logo yang baru dicabut (untuk Urungkan) di samping berkas aslinya. */
-    fun removedLogoFile(gameId: Long): File = File(logoDirectory.also { it.mkdirs() }, "$gameId.removed.webp")
+    /** Gambar asli logo (sisi terpanjang maks. 2048 px) agar posisi crop bisa diatur ulang tanpa unggah ulang. */
+    fun logoSourceFile(gameId: Long): File = File(logoDirectory, "${gameId}_src.webp")
 
-    /** Path logo [gameId] yang disimpan di database (relatif ke `filesDir`). */
+    /** Salinan sementara logo yang baru dicabut (untuk Urungkan) di samping berkas aslinya. */
+    fun removedLogoFile(gameId: Long): File = File(logoDirectory, "$gameId.removed.webp")
+
+    fun removedLogoSourceFile(gameId: Long): File = File(logoDirectory, "${gameId}_src.removed.webp")
+
+    /** Path logo / gambar asli [gameId] yang disimpan di database (relatif ke `filesDir`). */
     fun logoPath(gameId: Long): String = "$LOGO_DIR/$gameId.webp"
 
-    /** Menghapus logo game [gameId] beserta salinan Urungkan-nya (game dihapus, atau logo diganti). */
+    fun logoSourcePath(gameId: Long): String = "$LOGO_DIR/${gameId}_src.webp"
+
+    /** Menghapus salinan Urungkan (logo diganti atau dibuat baru). */
+    fun deleteRemovedLogos(gameId: Long) {
+        removedLogoFile(gameId).delete()
+        removedLogoSourceFile(gameId).delete()
+    }
+
+    /** Menghapus semua berkas logo game [gameId] (game dihapus). */
     fun deleteLogos(gameId: Long) {
         logoFile(gameId).delete()
-        removedLogoFile(gameId).delete()
+        logoSourceFile(gameId).delete()
+        deleteRemovedLogos(gameId)
     }
 
     private companion object {

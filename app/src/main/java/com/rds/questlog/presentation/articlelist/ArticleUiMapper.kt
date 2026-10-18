@@ -29,6 +29,8 @@ class ArticleUiMapper @Inject constructor(
         mainArticleTitle = game.mainArticleTitle,
         mainArticleId = game.mainArticleId,
         logoPath = game.logoPath,
+        logoSourcePath = game.logoSourcePath,
+        logoCrop = game.logoCrop,
     )
 
     fun toUi(article: Article) = ArticleUiModel(

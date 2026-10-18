@@ -29,6 +29,7 @@ import com.rds.questlog.presentation.articlelist.ArticleListScreen
 import com.rds.questlog.presentation.binder.BinderScreen
 import com.rds.questlog.presentation.components.QlSnackbarHost
 import com.rds.questlog.presentation.gamelist.GameListScreen
+import com.rds.questlog.presentation.gamelogo.GameLogoScreen
 import com.rds.questlog.presentation.model.ScrapeNotificationUi
 import com.rds.questlog.presentation.notification.ScrapeNotificationHost
 import com.rds.questlog.presentation.notification.ScrapeNotificationViewModel
@@ -116,6 +117,9 @@ fun QuestLogNavHost() {
                     onShowPopup = { activePopup = it },
                     onDismissPopup = { activePopup = null },
                 )
+            }
+            composable<GameLogoEdit> {
+                GameLogoScreen(navController = navController)
             }
             composable<Reader> { entry ->
                 val route = entry.toRoute<Reader>()

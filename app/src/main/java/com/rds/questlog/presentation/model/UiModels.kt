@@ -1,5 +1,7 @@
 package com.rds.questlog.presentation.model
 
+import com.rds.questlog.domain.model.LogoCrop
+
 /** Bentuk data yang mengalir ke layar (component-contract.md §0). */
 enum class PageStatus { PENDING, DONE, FAILED }
 
@@ -22,6 +24,9 @@ data class GameUiModel(
     val mainArticleId: Long? = null,
     /** Path logo kustom relatif ke `filesDir`; null = tampil inisial. */
     val logoPath: String? = null,
+    /** Gambar asli logo dan posisi crop tersimpan (untuk P19); null = belum ada. */
+    val logoSourcePath: String? = null,
+    val logoCrop: LogoCrop? = null,
 )
 
 data class PageUiModel(
