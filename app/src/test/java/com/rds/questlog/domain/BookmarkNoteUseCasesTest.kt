@@ -3,6 +3,7 @@ package com.rds.questlog.domain
 import com.rds.questlog.domain.error.QuestLogError.PremiumError
 import com.rds.questlog.domain.error.QuestLogError.ValidationError
 import com.rds.questlog.domain.model.Bookmark
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.domain.model.MAX_BOOKMARK_LABEL
 import com.rds.questlog.domain.model.MAX_BOOKMARK_SNIPPET
 import com.rds.questlog.domain.model.PremiumFeature
@@ -103,6 +104,19 @@ class BookmarkNoteUseCasesTest {
         assertEquals(listOf("Boss Dharma", "Elemen sama, bookmark kedua", "Peti"), saved.map { it.label })
         assertEquals(MAX_BOOKMARK_SNIPPET, saved.first().snippet.length)
         assertEquals(listOf(10L, 10L, 20L), saved.map { it.nodeId })
+    }
+
+    @Test
+    fun `cuplikan dibersihkan dari penanda gaya sebelum dipotong ke batas`() = runBlocking {
+        goPremium()
+        val styled = "${InlineMarkup.BOLD_ON}Warning!${InlineMarkup.BOLD_OFF} " + "x".repeat(MAX_BOOKMARK_SNIPPET)
+
+        add(1, 10, "Boss", styled).getOrThrow()
+
+        val snippet = list().single().snippet
+        assertEquals(MAX_BOOKMARK_SNIPPET, snippet.length)
+        assertTrue(snippet.startsWith("Warning! x"))
+        assertEquals(snippet, InlineMarkup.strip(snippet))
     }
 
     @Test

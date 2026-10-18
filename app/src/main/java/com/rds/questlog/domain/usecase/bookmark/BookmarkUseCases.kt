@@ -2,6 +2,7 @@ package com.rds.questlog.domain.usecase.bookmark
 
 import com.rds.questlog.domain.error.QuestLogError.ValidationError
 import com.rds.questlog.domain.model.Bookmark
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.domain.model.MAX_BOOKMARK_LABEL
 import com.rds.questlog.domain.model.MAX_BOOKMARK_SNIPPET
 import com.rds.questlog.domain.model.PremiumFeature
@@ -37,7 +38,13 @@ class AddBookmarkUseCase @Inject constructor(
     /** Mengembalikan id bookmark baru, atau kegagalan (guard premium, label tidak valid, node bukan milik artikel). */
     suspend operator fun invoke(articleId: Long, nodeId: Long, label: String, snippet: String): Result<Long> = writing {
         guard.requireWrite(PremiumFeature.BOOKMARK)
-        repository.add(articleId, nodeId, validBookmarkLabel(label), snippet.trim().take(MAX_BOOKMARK_SNIPPET))
+        repository.add(
+            articleId,
+            nodeId,
+            validBookmarkLabel(label),
+            // Penanda gaya inline bukan teks yang terlihat: dibuang sebelum dipotong ke batas cuplikan.
+            InlineMarkup.strip(snippet).trim().take(MAX_BOOKMARK_SNIPPET),
+        )
     }
 }
 

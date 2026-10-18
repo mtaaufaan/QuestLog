@@ -95,7 +95,7 @@
     <string name="peek_kicker">Pratinjau bookmark</string>
     <string name="peek_close">Tutup pratinjau</string>
     <string name="peek_subtitle">%1$s · %2$s</string>
-    <string name="peek_same_article">Artikel yang sama · </string>
+    <string name="peek_subtitle_same">Artikel yang sama · %1$s · %2$s</string>
     <string name="peek_open_full">Buka penuh</string>
     <string name="peek_move_here">Pindah ke sini</string>
     <string name="peek_checkpoint_set">Pasang checkpoint</string>
