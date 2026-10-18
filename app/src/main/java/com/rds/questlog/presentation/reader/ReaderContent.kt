@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.presentation.displaysettings.DEFAULT_FONT_SIZE
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.BookmarkUi
@@ -290,7 +291,8 @@ private class ReaderState(
 
     /** Cuplikan teks node [id] (untuk label bookmark dan Reader Tools); kosong bila node bukan teks. */
     override fun snippetOf(id: Long): String =
-        content.asSequence().flatten().firstOrNull { it.id == id }?.text.orEmpty().take(SNIPPET_LENGTH)
+        InlineMarkup.strip(content.asSequence().flatten().firstOrNull { it.id == id }?.text.orEmpty())
+            .take(SNIPPET_LENGTH)
 
     override fun showToast(@StringRes id: Int, vararg args: Any) {
         toast = Toast(res.getString(id, *args), ++toastSerial)

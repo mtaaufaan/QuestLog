@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.BookmarkLabelMode
@@ -124,7 +125,8 @@ private class PeekState(
     var toast by mutableStateOf<String?>(null)
 
     override fun snippetOf(id: Long): String =
-        content().asSequence().flatten().firstOrNull { it.id == id }?.text.orEmpty().take(SNIPPET_LENGTH)
+        InlineMarkup.strip(content().asSequence().flatten().firstOrNull { it.id == id }?.text.orEmpty())
+            .take(SNIPPET_LENGTH)
 
     override fun showToast(@StringRes id: Int, vararg args: Any) {
         toast = res.getString(id, *args)
@@ -309,7 +311,11 @@ private fun PeekHeader(
     val sameArticle = target.articleId == context.headArticleId
     val bookmark = own.firstOrNull { it.nodeId == target.nodeId }
     val title = article?.title ?: bookmark?.articleTitle.orEmpty()
-    val subtitle = stringResource(R.string.peek_subtitle, title, article?.gameName.orEmpty())
+    val subtitle = stringResource(
+        if (sameArticle) R.string.peek_subtitle_same else R.string.peek_subtitle,
+        title,
+        article?.gameName.orEmpty(),
+    )
     Column(Modifier.fillMaxWidth().background(c.hover)) {
         Box(
             Modifier
@@ -367,7 +373,7 @@ private fun PeekHeader(
                     ),
                 )
                 Text(
-                    (if (sameArticle) stringResource(R.string.peek_same_article) else "") + subtitle,
+                    subtitle,
                     color = c.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
