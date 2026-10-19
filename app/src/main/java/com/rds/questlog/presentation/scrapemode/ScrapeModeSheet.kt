@@ -39,7 +39,7 @@ import com.rds.questlog.presentation.theme.CormorantGaramond
 import com.rds.questlog.presentation.theme.QuestLogTheme
 
 /**
- * Pilihan eksplisit sebelum menyimpan walkthrough (QL-14): "Buat artikel baru" atau "Lengkapi artikel yang ada".
+ * Pilihan eksplisit sebelum menyimpan guide (QL-14): "Buat artikel baru" atau "Lengkapi artikel yang ada".
  * Opsi kedua nonaktif bila [hasArticles] false (belum ada artikel yang bisa dilengkapi).
  */
 @Composable

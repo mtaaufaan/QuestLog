@@ -1,6 +1,6 @@
 package com.rds.questlog.presentation.model
 
-/** Dua cara menyimpan walkthrough (component-contract.md §2 dan §7: `'new' | 'append'`). */
+/** Dua cara menyimpan guide (component-contract.md §2 dan §7: `'new' | 'append'`). */
 enum class ScrapeMode(val route: String) {
     NEW("new"),
     APPEND("append"),
