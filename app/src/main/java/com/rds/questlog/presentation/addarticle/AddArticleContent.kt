@@ -67,7 +67,7 @@ private const val SAVE_DELAY_MS = 650L
 private const val PASTE_MESSAGE_MS = 2_600L
 
 /**
- * Form "Simpan Walkthrough" (S2) dengan dua tab. Props dan callback mengikuti component-contract.md §2; state form
+ * Form "Simpan Guide" (S2) dengan dua tab. Props dan callback mengikuti component-contract.md §2; state form
  * dipegang di sini (seperti prototipe) dan dipulihkan saat rotasi. Penyimpanan nyata menyusul di Tahap 2.
  */
 @Composable

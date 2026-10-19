@@ -1,5 +1,6 @@
 package com.rds.questlog.presentation.gamelist
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -112,23 +117,37 @@ private fun GameListHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = TextStyle(
-                        fontFamily = CormorantGaramond,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 38.sp,
-                        lineHeight = 38.sp,
-                        letterSpacing = (-0.02).em,
-                    ),
+            Row(
+                Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Maskot pixel-art tanpa kotak; filter None menjaga piksel tetap tajam.
+                Image(
+                    bitmap = ImageBitmap.imageResource(R.drawable.questlog_mascot),
+                    contentDescription = stringResource(R.string.app_name),
+                    modifier = Modifier.size(56.dp),
+                    contentScale = ContentScale.Fit,
+                    filterQuality = FilterQuality.None,
                 )
-                Text(
-                    text = stringResource(R.string.game_list_subtitle, totalArticles, gameCount),
-                    color = c.textSecondary,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, fontStyle = FontStyle.Italic),
-                )
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = TextStyle(
+                            fontFamily = CormorantGaramond,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 38.sp,
+                            lineHeight = 38.sp,
+                            letterSpacing = (-0.02).em,
+                        ),
+                    )
+                    Text(
+                        text = stringResource(R.string.game_list_subtitle, totalArticles, gameCount),
+                        color = c.textSecondary,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, fontStyle = FontStyle.Italic),
+                    )
+                }
             }
             TierBadge(premium, gameCount, actions.onOpenUnlock)
         }
