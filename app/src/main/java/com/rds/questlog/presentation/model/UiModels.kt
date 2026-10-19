@@ -12,7 +12,7 @@ enum class ReadMode { SEAMLESS, PAGED }
 data class GameUiModel(
     val id: Long,
     val name: String,
-    /** Jumlah artikel game ini; dipakai untuk total "walkthrough" dan konfirmasi hapus game. */
+    /** Jumlah artikel game ini; dipakai untuk total "guide" dan konfirmasi hapus game. */
     val articleCount: Int = 0,
     /** Artikel game ini yang sedang diunduh (baris game: "· n sedang diunduh"). */
     val scrapingCount: Int = 0,
