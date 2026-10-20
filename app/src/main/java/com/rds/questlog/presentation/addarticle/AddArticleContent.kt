@@ -1,5 +1,6 @@
 package com.rds.questlog.presentation.addarticle
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,6 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -242,7 +247,16 @@ private fun AddArticleHeader(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.add_article_title),
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f, fill = false),
                 style = MaterialTheme.typography.titleLarge.copy(fontFamily = CormorantGaramond, fontSize = 23.sp),
+            )
+            // Maskot "istirahat" dekoratif tepat setelah judul; filter None menjaga pixel-art tetap tajam.
+            Image(
+                bitmap = ImageBitmap.imageResource(R.drawable.questlog_mascot_save),
+                contentDescription = null,
+                modifier = Modifier.size(44.dp),
+                contentScale = ContentScale.Fit,
+                filterQuality = FilterQuality.None,
             )
         }
         HorizontalDivider(color = QuestLogTheme.colors.divider)
