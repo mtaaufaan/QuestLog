@@ -3,10 +3,13 @@ package com.rds.questlog.domain.model
 /** Mode baca per artikel (QL-5/QL-6). */
 enum class ReadMode { SEAMLESS, PAGED }
 
-/** Preferensi tampilan app-wide (bukan per artikel): ukuran teks 12-24sp dan mode gelap Reader. */
+/** Mode Baca Reader, Pratinjau Bookmark, dan Display Settings Sheet: Light, Dark, Sepia, atau Muted. */
+enum class ReaderTheme { LIGHT, DARK, SEPIA, MUTED }
+
+/** Preferensi tampilan app-wide (bukan per artikel): ukuran teks 12-24sp dan [ReaderTheme]. */
 data class DisplayPreferences(
     val fontSizeSp: Int = DEFAULT_FONT_SIZE_SP,
-    val darkMode: Boolean = false,
+    val theme: ReaderTheme = ReaderTheme.LIGHT,
 ) {
     companion object {
         const val MIN_FONT_SIZE_SP = 12

@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
 import com.rds.questlog.domain.model.InlineMarkup
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.presentation.components.QlIcons
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.BookmarkLabelMode
@@ -72,8 +73,10 @@ import com.rds.questlog.presentation.model.ContentNodeUi
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ReaderViewState
 import com.rds.questlog.presentation.theme.CormorantGaramond
+import com.rds.questlog.presentation.theme.LocalReaderColors
 import com.rds.questlog.presentation.theme.Lora
 import com.rds.questlog.presentation.theme.QuestLogTheme
+import com.rds.questlog.presentation.theme.ReaderThemeScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -98,7 +101,7 @@ class PeekContext(
     val headTitle: String,
     val premium: PremiumUiState,
     val fontSize: Int,
-    val darkMode: Boolean,
+    val theme: ReaderTheme,
 )
 
 /** Aksi di P20; semuanya berlaku untuk artikel di P20 (kecuali [openFull] dan [moveHere] yang mengubah head). */
@@ -155,7 +158,7 @@ fun BookmarkPeekSheet(
     actions: PeekActions,
     onClose: () -> Unit,
 ) {
-    QuestLogTheme(darkTheme = context.darkMode) {
+    ReaderThemeScope(context.theme) {
         BackHandler(onBack = onClose)
         val visible = remember { MutableTransitionState(false).apply { targetState = true } }
         Box(Modifier.fillMaxSize()) {
@@ -240,13 +243,17 @@ private fun PeekBody(
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 PeekContent(data, article, rows, source, state, context, onClose)
             }
+            HorizontalDivider(color = QuestLogTheme.colors.divider)
             Text(
                 stringResource(R.string.peek_footer, context.headTitle),
                 color = QuestLogTheme.colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(LocalReaderColors.current.bar)
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
                 style = TextStyle(fontFamily = Lora, fontSize = 12.sp),
             )
         }
@@ -316,13 +323,13 @@ private fun PeekHeader(
         title,
         article?.gameName.orEmpty(),
     )
-    Column(Modifier.fillMaxWidth().background(c.hover)) {
+    Column(Modifier.fillMaxWidth().background(LocalReaderColors.current.bar)) {
         Box(
             Modifier
                 .padding(top = 10.dp)
                 .align(Alignment.CenterHorizontally)
                 .size(width = 36.dp, height = 4.dp)
-                .background(c.textTertiary.copy(alpha = 0.5f), RoundedCornerShape(2.dp)),
+                .background(LocalReaderColors.current.handle, RoundedCornerShape(2.dp)),
         )
         Row(
             Modifier.fillMaxWidth().padding(start = 6.dp, end = 12.dp, top = 4.dp, bottom = 8.dp),

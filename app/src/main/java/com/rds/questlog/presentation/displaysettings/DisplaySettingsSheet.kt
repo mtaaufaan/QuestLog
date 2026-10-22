@@ -1,8 +1,5 @@
 package com.rds.questlog.presentation.displaysettings
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,58 +10,62 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.presentation.components.QlBottomSheet
 import com.rds.questlog.presentation.theme.CormorantGaramond
-import com.rds.questlog.presentation.theme.QuestLogColors
+import com.rds.questlog.presentation.theme.Lora
 import com.rds.questlog.presentation.theme.QuestLogTheme
+import com.rds.questlog.presentation.theme.ReaderColorsScope
+import com.rds.questlog.presentation.theme.readerColorsFor
 
 const val MIN_FONT_SIZE = 12
 const val MAX_FONT_SIZE = 24
 const val FONT_SIZE_STEP = 2
 const val DEFAULT_FONT_SIZE = 16
 
+private val SWATCH_HEIGHT = 56.dp
+private val SWATCH_RADIUS = 6.dp
+
 /**
- * Display Settings Sheet (component-contract.md §11): ukuran teks 12–24sp (step 2) dan mode gelap. Berlaku app-wide;
- * sheet ikut tampil gelap bila [darkMode] aktif. Perubahan langsung dikirim lewat callback.
+ * Display Settings Sheet (component-contract.md §11): ukuran teks 12–24sp (step 2) dan Mode Baca (Light · Dark ·
+ * Sepia · Muted). Berlaku app-wide; sheet langsung berganti warna mengikuti [theme] yang dipilih.
  */
 @Composable
 fun DisplaySettingsSheet(
     fontSize: Int,
-    darkMode: Boolean,
+    theme: ReaderTheme,
     onFontSizeChange: (Int) -> Unit,
-    onDarkModeToggle: (Boolean) -> Unit,
+    onThemeChange: (ReaderTheme) -> Unit,
     onClose: () -> Unit,
 ) {
-    // Sheet berada di window sendiri, jadi tema gelap Reader harus diteruskan secara eksplisit.
-    QuestLogColors(darkTheme = darkMode) {
+    // Sheet berada di window sendiri, jadi Mode Baca Reader harus diteruskan secara eksplisit.
+    ReaderColorsScope(theme) {
         QlBottomSheet(onDismiss = onClose) {
-            SheetBody(fontSize, darkMode, onFontSizeChange, onDarkModeToggle)
+            SheetBody(fontSize, theme, onFontSizeChange, onThemeChange)
         }
     }
 }
@@ -72,9 +73,9 @@ fun DisplaySettingsSheet(
 @Composable
 private fun SheetBody(
     fontSize: Int,
-    darkMode: Boolean,
+    theme: ReaderTheme,
     onFontSizeChange: (Int) -> Unit,
-    onDarkModeToggle: (Boolean) -> Unit,
+    onThemeChange: (ReaderTheme) -> Unit,
 ) {
     val c = QuestLogTheme.colors
     Column(Modifier.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, bottom = 30.dp)) {
@@ -101,7 +102,7 @@ private fun SheetBody(
         HorizontalDivider(color = c.divider)
         FontSizeSection(fontSize, onFontSizeChange)
         HorizontalDivider(color = c.divider)
-        DarkModeRow(darkMode, onDarkModeToggle)
+        ThemeSection(theme, onThemeChange)
     }
 }
 
@@ -156,6 +157,7 @@ private fun FontSizeSection(fontSize: Int, onFontSizeChange: (Int) -> Unit) {
     }
 }
 
+/** Tombol − / ＋ ukuran teks: border garis aksen, teks aksen. */
 @Composable
 private fun StepButton(label: String, description: String, enabled: Boolean, onClick: () -> Unit) {
     val c = QuestLogTheme.colors
@@ -164,7 +166,7 @@ private fun StepButton(label: String, description: String, enabled: Boolean, onC
             .size(44.dp)
             .alpha(if (enabled) 1f else 0.4f)
             .clip(RoundedCornerShape(4.dp))
-            .border(1.dp, c.accentText, RoundedCornerShape(4.dp))
+            .border(1.dp, c.accentLine, RoundedCornerShape(4.dp))
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
@@ -173,71 +175,102 @@ private fun StepButton(label: String, description: String, enabled: Boolean, onC
     }
 }
 
+/** Baris "Mode Baca" dengan nama mode aktif, dan grid 4 swatch (radio group). */
 @Composable
-private fun DarkModeRow(darkMode: Boolean, onToggle: (Boolean) -> Unit) {
+private fun ThemeSection(selected: ReaderTheme, onSelect: (ReaderTheme) -> Unit) {
     val c = QuestLogTheme.colors
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(role = Role.Switch) { onToggle(!darkMode) }
-            .padding(top = 18.dp, bottom = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(Modifier.padding(top = 18.dp, bottom = 4.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
-                stringResource(R.string.display_settings_dark_mode),
+                stringResource(R.string.display_settings_reader_mode),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
             )
             Text(
-                stringResource(if (darkMode) R.string.display_settings_dark_on else R.string.display_settings_dark_off),
+                themeName(selected),
                 color = c.textSecondary,
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
             )
         }
-        Switch(darkMode)
+        Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ReaderTheme.entries.forEach { theme ->
+                ThemeSwatch(theme, theme == selected, Modifier.weight(1f)) { onSelect(theme) }
+            }
+        }
     }
 }
 
-/** Saklar 48×28 gaya desain (bukan Material Switch): track beraksen saat aktif, knob 20dp bergeser 0,2 dtk. */
+/** Swatch "Aa" berlatar dan berteks warna mode [theme]; terpilih = border 2dp garis aksen, selain itu 1dp pembatas. */
 @Composable
-private fun Switch(on: Boolean) {
+private fun ThemeSwatch(theme: ReaderTheme, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val c = QuestLogTheme.colors
-    val track by animateColorAsState(if (on) c.accentLine else Color.Transparent, tween(SWITCH_MS), label = "track")
-    val knob by animateColorAsState(
-        if (on) MaterialTheme.colorScheme.surface else c.iconMuted,
-        tween(SWITCH_MS),
-        label = "knob",
-    )
-    val offset by animateDpAsState(if (on) 23.dp else 3.dp, tween(SWITCH_MS), label = "offset")
-    Box(
-        Modifier
-            .size(width = 48.dp, height = 28.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(track)
-            .border(1.dp, if (on) c.accentLine else c.iconMuted, RoundedCornerShape(14.dp))
-            .semantics { role = Role.Switch },
+    val preview = readerColorsFor(theme)
+    val shape = RoundedCornerShape(SWATCH_RADIUS)
+    Column(
+        modifier = modifier.selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Box(Modifier.offset(x = offset, y = 3.dp).size(20.dp).clip(CircleShape).background(knob))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(SWATCH_HEIGHT)
+                .clip(shape)
+                .background(preview.sheet)
+                .border(if (selected) 2.dp else 1.dp, if (selected) c.accentLine else c.divider, shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "Aa",
+                color = preview.fg,
+                style = TextStyle(fontFamily = CormorantGaramond, fontWeight = FontWeight.SemiBold, fontSize = 20.sp),
+            )
+        }
+        Text(
+            themeName(theme),
+            color = if (selected) MaterialTheme.colorScheme.onSurface else c.textSecondary,
+            style = TextStyle(
+                fontFamily = Lora,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                fontSize = 12.5.sp,
+            ),
+        )
     }
 }
 
-private const val SWITCH_MS = 200
+@Composable
+private fun themeName(theme: ReaderTheme): String = stringResource(
+    when (theme) {
+        ReaderTheme.LIGHT -> R.string.display_settings_theme_light
+        ReaderTheme.DARK -> R.string.display_settings_theme_dark
+        ReaderTheme.SEPIA -> R.string.display_settings_theme_sepia
+        ReaderTheme.MUTED -> R.string.display_settings_theme_muted
+    },
+)
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 560)
 @Composable
-private fun DisplaySettingsLightPreview() {
-    QuestLogColors(darkTheme = false) { SheetPreviewBody(16, false) }
-}
+private fun DisplaySettingsLightPreview() = SheetPreview(ReaderTheme.LIGHT, 16)
 
 @Preview(showBackground = true, backgroundColor = 0xFF22211F, widthDp = 390, heightDp = 560)
 @Composable
-private fun DisplaySettingsDarkPreview() {
-    QuestLogColors(darkTheme = true) { SheetPreviewBody(20, true) }
-}
+private fun DisplaySettingsDarkPreview() = SheetPreview(ReaderTheme.DARK, 20)
+
+@Preview(showBackground = true, backgroundColor = 0xFFFBF0D9, widthDp = 390, heightDp = 560)
+@Composable
+private fun DisplaySettingsSepiaPreview() = SheetPreview(ReaderTheme.SEPIA, 16)
+
+@Preview(showBackground = true, backgroundColor = 0xFFE4E4E6, widthDp = 390, heightDp = 560)
+@Composable
+private fun DisplaySettingsMutedPreview() = SheetPreview(ReaderTheme.MUTED, 18)
 
 @Composable
-private fun SheetPreviewBody(fontSize: Int, dark: Boolean) {
-    Box(Modifier.background(MaterialTheme.colorScheme.surface)) { SheetBody(fontSize, dark, {}, {}) }
+private fun SheetPreview(theme: ReaderTheme, fontSize: Int) {
+    ReaderColorsScope(theme) {
+        Box(Modifier.background(MaterialTheme.colorScheme.surface)) { SheetBody(fontSize, theme, {}, {}) }
+    }
 }

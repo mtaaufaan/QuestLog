@@ -1,6 +1,7 @@
 package com.rds.questlog.domain.repository
 
 import com.rds.questlog.domain.model.DisplayPreferences
+import com.rds.questlog.domain.model.ReaderTheme
 import kotlinx.coroutines.flow.Flow
 
 interface UserPreferencesRepository {
@@ -11,8 +12,8 @@ interface UserPreferencesRepository {
     /** Menyimpan ukuran teks (sp); pemanggil sudah membatasi rentangnya. */
     suspend fun setFontSize(sizeSp: Int)
 
-    /** Menyimpan mode gelap Reader. */
-    suspend fun setDarkMode(enabled: Boolean)
+    /** Menyimpan Mode Baca (Light/Dark/Sepia/Muted). */
+    suspend fun setReaderTheme(theme: ReaderTheme)
 
     /** true tepat sekali per instalasi (tip bookmark Reader); sesudahnya false. */
     suspend fun consumeReaderTip(): Boolean

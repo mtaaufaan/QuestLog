@@ -446,10 +446,12 @@
     <string name="display_settings_font_size_value">%1$d sp</string>
     <string name="display_settings_font_smaller">Perkecil teks</string>
     <string name="display_settings_font_larger">Perbesar teks</string>
+    <string name="display_settings_reader_mode">Mode Baca</string>
+    <string name="display_settings_theme_light">Light</string>
+    <string name="display_settings_theme_dark">Dark</string>
+    <string name="display_settings_theme_sepia">Sepia</string>
+    <string name="display_settings_theme_muted">Muted</string>
     <string name="display_settings_preview">Masuki gua di utara desa dan ambil jalur kiri untuk menemukan peti berisi Mini Medal.</string>
-    <string name="display_settings_dark_mode">Mode Gelap</string>
-    <string name="display_settings_dark_on">Aktif</string>
-    <string name="display_settings_dark_off">Nonaktif</string>
 
     <!-- Unlock Sheet -->
     <string name="unlock_kicker">QuestLog Unlimited</string>
