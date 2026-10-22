@@ -5,13 +5,14 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.BookmarkLabelMode
 import com.rds.questlog.presentation.model.BookmarkUi
 import com.rds.questlog.presentation.model.PremiumUiState
 import com.rds.questlog.presentation.model.ReaderToolAction
 import com.rds.questlog.presentation.popup.Popup
-import com.rds.questlog.presentation.theme.QuestLogTheme
+import com.rds.questlog.presentation.theme.ReaderThemeScope
 
 /** Posisi baca saat ini: node pertama yang terlihat dan cuplikan teksnya. */
 data class ReaderPosition(val nodeId: Long? = null, val snippet: String = "")
@@ -38,7 +39,7 @@ class ReaderToolsState {
 class ReaderToolsData(
     val premium: PremiumUiState,
     val article: ArticleUiModel,
-    val darkMode: Boolean,
+    val theme: ReaderTheme,
     val bookmarks: List<BookmarkUi>,
     /** Artikel utama game ini (dari Binder sementara); null = belum ada. */
     val mainArticleId: Long?,
@@ -74,7 +75,7 @@ fun ReaderPopups(
     onDismiss: () -> Unit,
 ) {
     val readOnly = data.premium == PremiumUiState.LOST
-    QuestLogTheme(darkTheme = data.darkMode) {
+    ReaderThemeScope(data.theme) {
         when (popup) {
             Popup.ReaderTools -> ReaderToolsSheet(
                 premium = data.premium,

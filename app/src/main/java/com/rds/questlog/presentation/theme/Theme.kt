@@ -10,7 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LocalQlColors = staticCompositionLocalOf { LightQlColors }
+internal val LocalQlColors = staticCompositionLocalOf { LightQlColors }
 
 object QuestLogTheme {
     val colors: QlColors
@@ -45,7 +45,7 @@ fun QuestLogColors(darkTheme: Boolean, content: @Composable () -> Unit) {
  * (mis. Reader gelap ditutup, kembali ke layar terang).
  */
 @Composable
-private fun SystemBarIcons(darkTheme: Boolean) {
+internal fun SystemBarIcons(darkTheme: Boolean) {
     val view = LocalView.current
     if (view.isInEditMode) return
     DisposableEffect(view, darkTheme) {

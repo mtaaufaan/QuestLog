@@ -1,11 +1,14 @@
 package com.rds.questlog.data
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.rds.questlog.data.local.entity.ContentNodeEntity
 import com.rds.questlog.data.prefs.DataStoreUserPreferencesRepository
 import com.rds.questlog.domain.model.NodeType
 import com.rds.questlog.domain.model.ReadMode
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.domain.model.TableCell
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -136,7 +139,7 @@ class ReaderDataTest {
         assertEquals(16, repo.observeDisplayPreferences().first().fontSizeSp)
 
         repo.setFontSize(20)
-        repo.setDarkMode(true)
+        repo.setReaderTheme(ReaderTheme.SEPIA)
         // Satu file hanya boleh punya satu DataStore aktif: tutup yang pertama sebelum "membuka ulang aplikasi".
         firstScope.coroutineContext[Job]!!.cancelAndJoin()
 
@@ -144,8 +147,50 @@ class ReaderDataTest {
         val prefs = DataStoreUserPreferencesRepository(PreferenceDataStoreFactory.create(scope = secondScope) { file })
             .observeDisplayPreferences().first()
         assertEquals(20, prefs.fontSizeSp)
-        assertTrue(prefs.darkMode)
+        assertEquals(ReaderTheme.SEPIA, prefs.theme)
         secondScope.cancel()
+        file.delete()
+    }
+
+    @Test(timeout = 30_000)
+    fun semuaModeBacaBertahanAntarPembacaan() = runBlocking<Unit> {
+        val file = File(env.context.cacheDir, "theme-test-${System.nanoTime()}.preferences_pb")
+        for (theme in ReaderTheme.entries) {
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val repo = DataStoreUserPreferencesRepository(PreferenceDataStoreFactory.create(scope = scope) { file })
+            repo.setReaderTheme(theme)
+            scope.coroutineContext[Job]!!.cancelAndJoin()
+
+            val reopenScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val reopened = DataStoreUserPreferencesRepository(
+                PreferenceDataStoreFactory.create(scope = reopenScope) { file },
+            ).observeDisplayPreferences().first().theme
+            assertEquals(theme, reopened)
+            reopenScope.cancel()
+        }
+        file.delete()
+    }
+
+    @Test(timeout = 30_000)
+    fun nilaiLamaModeGelapDimigrasiKeModeBaca() = runBlocking<Unit> {
+        for ((legacy, expected) in listOf(true to ReaderTheme.DARK, false to ReaderTheme.LIGHT)) {
+            val file = File(env.context.cacheDir, "legacy-${System.nanoTime()}.preferences_pb")
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val store = PreferenceDataStoreFactory.create(scope = scope) { file }
+            store.edit { it[booleanPreferencesKey("dark_mode")] = legacy }
+
+            val theme = DataStoreUserPreferencesRepository(store).observeDisplayPreferences().first().theme
+
+            assertEquals(expected, theme)
+            scope.cancel()
+            file.delete()
+        }
+        // Tanpa nilai lama maupun baru: Light.
+        val file = File(env.context.cacheDir, "fresh-${System.nanoTime()}.preferences_pb")
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        val fresh = DataStoreUserPreferencesRepository(PreferenceDataStoreFactory.create(scope = scope) { file })
+        assertEquals(ReaderTheme.LIGHT, fresh.observeDisplayPreferences().first().theme)
+        scope.cancel()
         file.delete()
     }
 

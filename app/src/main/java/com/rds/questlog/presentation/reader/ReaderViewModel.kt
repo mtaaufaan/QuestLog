@@ -11,6 +11,7 @@ import com.rds.questlog.domain.model.Bookmark
 import com.rds.questlog.domain.model.DisplayPreferences
 import com.rds.questlog.domain.model.InlineMarkup
 import com.rds.questlog.domain.model.ReadMode as DomainReadMode
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.domain.usecase.article.RetryFailedPagesUseCase
 import com.rds.questlog.domain.usecase.binder.SetMainArticleUseCase
 import com.rds.questlog.domain.usecase.bookmark.AddBookmarkUseCase
@@ -22,8 +23,8 @@ import com.rds.questlog.domain.usecase.note.ObserveNoteUseCase
 import com.rds.questlog.domain.usecase.note.SaveNoteUseCase
 import com.rds.questlog.domain.usecase.prefs.ConsumeReaderTipUseCase
 import com.rds.questlog.domain.usecase.prefs.ObserveDisplayPreferencesUseCase
-import com.rds.questlog.domain.usecase.prefs.SetDarkModeUseCase
 import com.rds.questlog.domain.usecase.prefs.SetFontSizeUseCase
+import com.rds.questlog.domain.usecase.prefs.SetReaderThemeUseCase
 import com.rds.questlog.domain.usecase.premium.PremiumGuard
 import com.rds.questlog.domain.usecase.reader.GetArticleDetailUseCase
 import com.rds.questlog.domain.usecase.reader.SaveLastPositionUseCase
@@ -71,7 +72,7 @@ class ReaderActions @Inject constructor(
     val setReadMode: SetReadModeUseCase,
     val retryFailed: RetryFailedPagesUseCase,
     val setFontSize: SetFontSizeUseCase,
-    val setDarkMode: SetDarkModeUseCase,
+    val setReaderTheme: SetReaderThemeUseCase,
 )
 
 /** Use case bookmark Reader. */
@@ -105,7 +106,7 @@ data class ReaderUiState(
     /** Node tujuan auto-scroll saat dibuka (posisi terakhir atau checkpoint); null = mulai dari atas. */
     val resumeNodeId: Long? = null,
     val fontSize: Int = DisplayPreferences.DEFAULT_FONT_SIZE_SP,
-    val darkMode: Boolean = false,
+    val theme: ReaderTheme = ReaderTheme.LIGHT,
     @StringRes val snackbar: Int? = null,
     val premium: PremiumUiState = PremiumUiState.FREE,
 )
@@ -160,7 +161,7 @@ class ReaderViewModel @Inject constructor(
         snackbar,
         premium,
     ) { state, prefs, message, premiumState ->
-        state.copy(fontSize = prefs.fontSizeSp, darkMode = prefs.darkMode, snackbar = message, premium = premiumState)
+        state.copy(fontSize = prefs.fontSizeSp, theme = prefs.theme, snackbar = message, premium = premiumState)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ReaderUiState())
 
     /** Bookmark semua artikel di game artikel ini (dikelompokkan per artikel oleh UI); selalu terbaca. */
@@ -247,7 +248,7 @@ class ReaderViewModel @Inject constructor(
 
     fun setFontSize(sizeSp: Int) = launchWrite { actions.setFontSize(sizeSp) }
 
-    fun setDarkMode(enabled: Boolean) = launchWrite { actions.setDarkMode(enabled) }
+    fun setTheme(theme: ReaderTheme) = launchWrite { actions.setReaderTheme(theme) }
 
     private fun launchWrite(block: suspend () -> Result<Unit>) {
         viewModelScope.launch {

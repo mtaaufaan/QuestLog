@@ -47,7 +47,7 @@ fun ReaderScreen(
     ReaderContent(
         viewState = state.viewState,
         fontSize = state.fontSize,
-        darkMode = state.darkMode,
+        theme = state.theme,
         article = article,
         content = state.content,
         resumeNodeId = state.resumeNodeId,
@@ -85,7 +85,7 @@ fun ReaderScreen(
     val data = ReaderToolsData(
         premium = state.premium,
         article = article,
-        darkMode = state.darkMode,
+        theme = state.theme,
         bookmarks = bookmarks,
         mainArticleId = article.gameMainArticleId,
         note = note,
@@ -121,7 +121,7 @@ fun ReaderScreen(
             target = target,
             data = peekData,
             bookmarks = bookmarks,
-            context = PeekContext(articleId, article.title, state.premium, state.fontSize, state.darkMode),
+            context = PeekContext(articleId, article.title, state.premium, state.fontSize, state.theme),
             actions = PeekActions(
                 addBookmark = { nodeId, label, snippet ->
                     viewModel.addBookmark(nodeId, label, snippet, forArticle = target.articleId)
@@ -149,9 +149,9 @@ fun ReaderScreen(
     if (activePopup == Popup.DisplaySettings) {
         DisplaySettingsSheet(
             fontSize = state.fontSize,
-            darkMode = state.darkMode,
+            theme = state.theme,
             onFontSizeChange = viewModel::setFontSize,
-            onDarkModeToggle = viewModel::setDarkMode,
+            onThemeChange = viewModel::setTheme,
             onClose = onDismissPopup,
         )
     }
