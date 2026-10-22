@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rds.questlog.R
 import com.rds.questlog.domain.model.InlineMarkup
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.presentation.displaysettings.DEFAULT_FONT_SIZE
 import com.rds.questlog.presentation.model.ArticleUiModel
 import com.rds.questlog.presentation.model.BookmarkUi
@@ -54,6 +55,7 @@ import com.rds.questlog.presentation.model.ReaderViewState
 import com.rds.questlog.presentation.preview.ReaderPreviewData
 import com.rds.questlog.presentation.theme.Lora
 import com.rds.questlog.presentation.theme.QuestLogTheme
+import com.rds.questlog.presentation.theme.ReaderThemeScope
 import kotlinx.coroutines.delay
 
 private const val TOAST_MS = 2_400L
@@ -85,7 +87,7 @@ private const val SNIPPET_LENGTH = 80
 fun ReaderContent(
     viewState: ReaderViewState,
     fontSize: Int,
-    darkMode: Boolean,
+    theme: ReaderTheme,
     article: ArticleUiModel,
     content: List<List<ContentNodeUi>>,
     resumeNodeId: Long?,
@@ -112,7 +114,7 @@ fun ReaderContent(
     onPositionChange: (ReaderPosition) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    QuestLogTheme(darkTheme = darkMode) {
+    ReaderThemeScope(theme) {
         val success = viewState == ReaderViewState.SUCCESS
         val state =
             rememberReaderState(article, content, resumeNodeId, resumeFrom, success, jumpRequest, onPositionChange)
@@ -399,34 +401,42 @@ private fun rememberReaderState(
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun ReaderSuccessPreview() = ReaderPreview(ReaderViewState.SUCCESS, dark = false)
+private fun ReaderSuccessPreview() = ReaderPreview(ReaderViewState.SUCCESS, ReaderTheme.LIGHT)
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun ReaderSuccessDarkPreview() = ReaderPreview(ReaderViewState.SUCCESS, dark = true, fontSize = 20)
+private fun ReaderSuccessDarkPreview() = ReaderPreview(ReaderViewState.SUCCESS, ReaderTheme.DARK, fontSize = 20)
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun ReaderLoadingPreview() = ReaderPreview(ReaderViewState.LOADING, dark = false)
+private fun ReaderSuccessSepiaPreview() = ReaderPreview(ReaderViewState.SUCCESS, ReaderTheme.SEPIA)
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun ReaderNotFoundPreview() = ReaderPreview(ReaderViewState.NOT_FOUND, dark = false)
+private fun ReaderSuccessMutedPreview() = ReaderPreview(ReaderViewState.SUCCESS, ReaderTheme.MUTED)
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun ReaderEmptyPreview() = ReaderPreview(ReaderViewState.EMPTY, dark = false)
+private fun ReaderLoadingPreview() = ReaderPreview(ReaderViewState.LOADING, ReaderTheme.LIGHT)
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun ReaderDbErrorPreview() = ReaderPreview(ReaderViewState.DB_ERROR, dark = true)
+private fun ReaderNotFoundPreview() = ReaderPreview(ReaderViewState.NOT_FOUND, ReaderTheme.LIGHT)
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun ReaderEmptyPreview() = ReaderPreview(ReaderViewState.EMPTY, ReaderTheme.LIGHT)
+
+@Preview(showBackground = true, widthDp = 390, heightDp = 844)
+@Composable
+private fun ReaderDbErrorPreview() = ReaderPreview(ReaderViewState.DB_ERROR, ReaderTheme.DARK)
 
 @Composable
-private fun ReaderPreview(viewState: ReaderViewState, dark: Boolean, fontSize: Int = DEFAULT_FONT_SIZE) {
+private fun ReaderPreview(viewState: ReaderViewState, theme: ReaderTheme, fontSize: Int = DEFAULT_FONT_SIZE) {
     ReaderContent(
         viewState = viewState,
         fontSize = fontSize,
-        darkMode = dark,
+        theme = theme,
         article = ReaderPreviewData.article,
         content = ReaderPreviewData.content,
         resumeNodeId = null,

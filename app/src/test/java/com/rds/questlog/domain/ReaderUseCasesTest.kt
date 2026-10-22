@@ -5,6 +5,7 @@ import com.rds.questlog.domain.model.ContentNode
 import com.rds.questlog.domain.model.DisplayPreferences
 import com.rds.questlog.domain.model.NodeType
 import com.rds.questlog.domain.model.ReadMode
+import com.rds.questlog.domain.model.ReaderTheme
 import com.rds.questlog.domain.model.resolveAnchor
 import com.rds.questlog.domain.repository.CheckpointRepository
 import com.rds.questlog.domain.repository.UserPreferencesRepository
@@ -40,7 +41,7 @@ private class FakePrefsRepository : UserPreferencesRepository {
     override suspend fun setFontSize(sizeSp: Int) {
         fontSize = sizeSp
     }
-    override suspend fun setDarkMode(enabled: Boolean) = Unit
+    override suspend fun setReaderTheme(theme: ReaderTheme) = Unit
     override suspend fun consumeReaderTip() = true
 }
 

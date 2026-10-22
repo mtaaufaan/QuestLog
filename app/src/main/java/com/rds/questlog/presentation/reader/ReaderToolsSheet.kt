@@ -41,7 +41,6 @@ import com.rds.questlog.presentation.model.ReaderToolAction
 import com.rds.questlog.presentation.theme.QuestLogTheme
 
 // Emas gelap tetap untuk ikon aksi utama, sama dengan ikon checkpoint di Article Actions Sheet.
-private val MainIconColor = Color(0xFFA06F24)
 
 /**
  * Alat baca (P17, component-contract.md §16a): Artikel utama game · Catatan (gembok bila gratis) · Tampilan.
@@ -85,7 +84,7 @@ fun ReaderToolsSheet(
             Column(Modifier.padding(top = 6.dp)) {
                 ToolRow(
                     icon = QlIcons.Star,
-                    iconColor = MainIconColor,
+                    iconColor = QuestLogTheme.colors.accentLine,
                     label = stringResource(
                         if (isGameProgressHere) R.string.reader_tools_main_here else R.string.reader_tools_main_set,
                     ),
